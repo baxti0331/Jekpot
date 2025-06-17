@@ -1,234 +1,118 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Кликер с Offline Earnings</title>
-<style>
-  * {
-    box-sizing: border-box;
-  }
-  body {
-    margin: 0; padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #121212;
-    color: #e0e0e0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
-  }
-  header {
-    padding: 24px 0 16px 0;
-    font-size: 2.5rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    user-select: none;
-    color: #bb86fc;
-  }
-  #score {
-    font-size: 3rem;
-    margin: 12px 0 24px 0;
-    font-weight: 600;
-    color: #ffffff;
-  }
-  #coin-btn {
-    width: 160px;
-    height: 160px;
-    background: linear-gradient(135deg, #ffca28 0%, #fbc02d 100%);
-    border: none;
-    border-radius: 50%;
-    box-shadow:
-      0 8px 20px rgba(251, 192, 45, 0.6),
-      inset 0 4px 12px rgba(255, 255, 255, 0.6),
-      inset 0 -4px 10px rgba(217, 157, 6, 0.8);
-    cursor: pointer;
-    font-size: 5rem;
-    color: #3e2723;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.25);
-    user-select: none;
-    outline: none;
-    transition: box-shadow 0.3s ease;
-  }
-  #coin-btn:hover {
-    box-shadow:
-      0 12px 30px rgba(251, 192, 45, 0.9),
-      inset 0 6px 14px rgba(255, 255, 255, 0.75),
-      inset 0 -6px 14px rgba(217, 157, 6, 1);
-  }
-  #coin-btn:active {
-    box-shadow:
-      0 6px 15px rgba(251, 192, 45, 0.5),
-      inset 0 2px 6px rgba(255, 255, 255, 0.5),
-      inset 0 -2px 6px rgba(217, 157, 6, 0.6);
-  }
-  #controls {
-    margin-top: 36px;
-    width: 360px;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-  }
-  button.upgrade-btn {
-    padding: 16px;
-    font-size: 1.4rem;
-    font-weight: 700;
-    border-radius: 14px;
-    border: none;
-    cursor: pointer;
-    background: #3700b3;
-    color: #fff;
-    box-shadow: 0 6px 15px rgba(55, 0, 179, 0.7);
-    user-select: none;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
-  }
-  button.upgrade-btn:hover:not(:disabled) {
-    background: #6200ee;
-    box-shadow: 0 8px 22px rgba(98, 0, 238, 0.85);
-  }
-  button.upgrade-btn:disabled {
-    background: #555;
-    box-shadow: none;
-    color: #999;
-    cursor: not-allowed;
-  }
-  @media (max-width: 420px) {
-    #coin-btn {
-      width: 130px;
-      height: 130px;
-      font-size: 4rem;
-    }
-    #controls {
-      width: 90vw;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Чат-Бот</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: #121212;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
     }
     header {
-      font-size: 2rem;
+      background: #1f1f1f;
+      padding: 16px;
+      font-size: 1.5rem;
+      text-align: center;
+      font-weight: bold;
+      border-bottom: 1px solid #333;
     }
-    #score {
-      font-size: 2.4rem;
+    #chat {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
-  }
-</style>
+    .message {
+      max-width: 70%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .user {
+      align-self: flex-end;
+      background: #3b82f6;
+    }
+    .bot {
+      align-self: flex-start;
+      background: #444;
+    }
+    #input-container {
+      display: flex;
+      border-top: 1px solid #333;
+      background: #1a1a1a;
+    }
+    input {
+      flex: 1;
+      padding: 12px;
+      font-size: 1rem;
+      border: none;
+      background: #1a1a1a;
+      color: white;
+      outline: none;
+    }
+    button {
+      padding: 12px 18px;
+      font-size: 1rem;
+      background: #3b82f6;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
+  <header>🤖 Чат-Бот</header>
+  <div id="chat"></div>
+  <div id="input-container">
+    <input type="text" id="user-input" placeholder="Напиши сообщение..." />
+    <button onclick="sendMessage()">Отправить</button>
+  </div>
 
-<header>Кликер с Offline Earnings</header>
-<div id="score">Монеты: 0</div>
-<button id="coin-btn" aria-label="Нажми на монету">🪙</button>
+  <script>
+    const chat = document.getElementById("chat");
+    const input = document.getElementById("user-input");
 
-<div id="controls">
-  <button id="upgrade-click" class="upgrade-btn" disabled>
-    Улучшить клик (+1) — стоимость 10
-  </button>
-  <button id="buy-helper" class="upgrade-btn" disabled>
-    Нанять помощника — стоимость 50
-  </button>
-</div>
-
-<script>
-  // Переменные состояния
-  let coins = 0;
-  let clickPower = 1;
-  let clickUpgradeCost = 10;
-  let helperCost = 50;
-  let helpers = 0;
-  const helperIncome = 1; // монеты в секунду на одного помощника
-
-  const scoreEl = document.getElementById('score');
-  const coinBtn = document.getElementById('coin-btn');
-  const upgradeClickBtn = document.getElementById('upgrade-click');
-  const buyHelperBtn = document.getElementById('buy-helper');
-
-  // Загрузка из localStorage
-  function loadGame() {
-    const saved = JSON.parse(localStorage.getItem('clickerSave'));
-    if (saved) {
-      coins = saved.coins || 0;
-      clickPower = saved.clickPower || 1;
-      clickUpgradeCost = saved.clickUpgradeCost || 10;
-      helperCost = saved.helperCost || 50;
-      helpers = saved.helpers || 0;
-
-      // Вычисляем время отсутствия
-      const lastTime = saved.lastTime || Date.now();
-      const now = Date.now();
-      const diffSeconds = Math.floor((now - lastTime) / 1000);
-
-      if (diffSeconds > 0 && helpers > 0) {
-        const offlineEarnings = diffSeconds * helpers * helperIncome;
-        coins += offlineEarnings;
-        alert(`За время отсутствия вы заработали ${offlineEarnings} монет!`);
-      }
-    }
-  }
-
-  // Сохранение в localStorage
-  function saveGame() {
-    const saveData = {
-      coins,
-      clickPower,
-      clickUpgradeCost,
-      helperCost,
-      helpers,
-      lastTime: Date.now()
+    const fakeBotReply = (msg) => {
+      // Пример простой логики бота
+      msg = msg.toLowerCase();
+      if (msg.includes("привет")) return "Привет! Чем могу помочь?";
+      if (msg.includes("как дела")) return "У меня всё отлично 🤖 А у тебя?";
+      if (msg.includes("погода")) return "Погода отличная! Особенно в коде ☀️";
+      return "Я пока не умею это понимать. Но скоро научусь!";
     };
-    localStorage.setItem('clickerSave', JSON.stringify(saveData));
-  }
 
-  function updateUI() {
-    scoreEl.textContent = `Монеты: ${coins}`;
-    upgradeClickBtn.textContent = `Улучшить клик (+1) — стоимость ${clickUpgradeCost}`;
-    buyHelperBtn.textContent = `Нанять помощника — стоимость ${helperCost}`;
-
-    upgradeClickBtn.disabled = coins < clickUpgradeCost;
-    buyHelperBtn.disabled = coins < helperCost;
-  }
-
-  // Клик по монете
-  coinBtn.addEventListener('click', () => {
-    coins += clickPower;
-    updateUI();
-    saveGame();
-  });
-
-  // Улучшение клика
-  upgradeClickBtn.addEventListener('click', () => {
-    if (coins >= clickUpgradeCost) {
-      coins -= clickUpgradeCost;
-      clickPower++;
-      clickUpgradeCost = Math.floor(clickUpgradeCost * 1.6);
-      updateUI();
-      saveGame();
+    function addMessage(text, isUser = false) {
+      const msg = document.createElement("div");
+      msg.className = "message " + (isUser ? "user" : "bot");
+      msg.textContent = text;
+      chat.appendChild(msg);
+      chat.scrollTop = chat.scrollHeight;
     }
-  });
 
-  // Покупка помощника
-  buyHelperBtn.addEventListener('click', () => {
-    if (coins >= helperCost) {
-      coins -= helperCost;
-      helpers++;
-      helperCost = Math.floor(helperCost * 1.7);
-      updateUI();
-      saveGame();
+    function sendMessage() {
+      const text = input.value.trim();
+      if (!text) return;
+      addMessage(text, true);
+      input.value = "";
+
+      setTimeout(() => {
+        const reply = fakeBotReply(text);
+        addMessage(reply, false);
+      }, 500);
     }
-  });
 
-  // Автоматический доход помощников каждую секунду
-  setInterval(() => {
-    if (helpers > 0) {
-      coins += helpers * helperIncome;
-      updateUI();
-      saveGame();
-    }
-  }, 1000);
-
-  // Инициализация игры
-  loadGame();
-  updateUI();
-
-  // Сохраняем прогресс при уходе со страницы
-  window.addEventListener('beforeunload', saveGame);
-</script>
-
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") sendMessage();
+    });
+  </script>
 </body>
 </html>
