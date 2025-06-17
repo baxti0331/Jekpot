@@ -14,8 +14,10 @@ const saveKey = 'asicClickerState';
 const scoreEl = document.getElementById('score');
 const incomeEl = document.getElementById('income');
 const shopEl = document.getElementById('shop');
+const shopItemsContainer = document.getElementById('shop-items');
 const minerSpinner = document.getElementById('miner-spinner');
 const shopToggleBtn = document.getElementById('shop-toggle');
+const shopCloseBtn = document.getElementById('shop-close');
 
 function save() {
   localStorage.setItem(saveKey, JSON.stringify(state));
@@ -40,7 +42,7 @@ function updateUI() {
   scoreEl.textContent = `Очки: ${Math.floor(state.score)}`;
   incomeEl.textContent = `Доход/сек: ${calcIncome()}`;
 
-  shopEl.innerHTML = '';
+  shopItemsContainer.innerHTML = '';
   shopItems.forEach(item => {
     const count = state.owned[item.id] || 0;
     const div = document.createElement('div');
@@ -60,7 +62,7 @@ function updateUI() {
     };
 
     div.appendChild(btn);
-    shopEl.appendChild(div);
+    shopItemsContainer.appendChild(div);
   });
 }
 
@@ -72,7 +74,11 @@ minerSpinner.addEventListener('click', () => {
 });
 
 shopToggleBtn.addEventListener('click', () => {
-  shopEl.classList.toggle('open');
+  shopEl.classList.add('open');
+});
+
+shopCloseBtn.addEventListener('click', () => {
+  shopEl.classList.remove('open');
 });
 
 setInterval(() => {
@@ -82,4 +88,4 @@ setInterval(() => {
 }, 1000);
 
 load();
-updateUI(); 
+updateUI();
