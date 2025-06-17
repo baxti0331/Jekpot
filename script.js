@@ -40,14 +40,12 @@ function drawWheel(angle) {
   ctx.translate(centerX, centerY);
   ctx.rotate(angle);
 
-  // Рисуем тёмный край барабана
   const rimWidth = 18;
   ctx.beginPath();
   ctx.arc(0, 0, wheelRadius + rimWidth, 0, 2 * Math.PI);
   ctx.fillStyle = '#111c';
   ctx.fill();
 
-  // Сегменты с градиентом
   for (let i = 0; i < numSegments; i++) {
     const startAngle = i * anglePerSegment;
     const endAngle = startAngle + anglePerSegment;
@@ -70,7 +68,6 @@ function drawWheel(angle) {
     ctx.fillStyle = grad;
     ctx.fill();
 
-    // Внутреннее свечение
     const shading = ctx.createLinearGradient(
       Math.cos(startAngle) * wheelRadius,
       Math.sin(startAngle) * wheelRadius,
@@ -83,7 +80,6 @@ function drawWheel(angle) {
     ctx.fillStyle = shading;
     ctx.fill();
 
-    // Текст
     ctx.save();
     ctx.fillStyle = '#eee';
     ctx.font = 'bold 16px Verdana';
@@ -95,7 +91,6 @@ function drawWheel(angle) {
     ctx.restore();
   }
 
-  // Центр
   const centerRadius = 40;
   ctx.beginPath();
   ctx.shadowColor = '#0ff';
@@ -150,8 +145,8 @@ function announceResult() {
   let normalizedAngle = currentAngle % (2 * Math.PI);
   if (normalizedAngle < 0) normalizedAngle += 2 * Math.PI;
 
-  // Учитываем, что стрелка смотрит вниз (π), и вращение против часовой
-  let adjustedAngle = (2 * Math.PI - normalizedAngle + Math.PI) % (2 * Math.PI);
+  // Добавляем сдвиг π/2 радиан (90°), чтобы учесть, что стрелка вниз
+  let adjustedAngle = (2 * Math.PI - normalizedAngle + Math.PI / 2) % (2 * Math.PI);
 
   let index = Math.floor(adjustedAngle / anglePerSegment);
 
