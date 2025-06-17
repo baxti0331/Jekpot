@@ -1,76 +1,68 @@
 body {
-  margin: 0;
-  background: linear-gradient(135deg, #111, #222);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: white;
+  background: linear-gradient(135deg, #4a6fa5, #1b2735);
+  background-image: 
+    radial-gradient(circle at top left, rgba(255,255,255,0.15), transparent 60%),
+    radial-gradient(circle at bottom right, rgba(0,0,0,0.25), transparent 60%);
+  color: #eee;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
+  margin: 0;
   flex-direction: column;
+  user-select: none;
 }
 
 .container {
   text-align: center;
+  padding: 20px 30px;
+  border-radius: 20px;
+  background: rgba(255 255 255 / 0.07);
+  box-shadow:
+    0 0 40px rgba(0, 0, 0, 0.6),
+    inset 0 0 30px rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+#wheel {
+  background: #222;
+  border-radius: 50%;
+  box-shadow:
+    inset 0 0 40px #444,
+    0 8px 20px rgba(0,0,0,0.7);
+  margin-bottom: 20px;
+}
+
+#spinBtn {
+  background: linear-gradient(145deg, #444, #222);
+  border: none;
+  color: #eee;
+  padding: 12px 30px;
+  font-size: 18px;
+  border-radius: 30px;
+  cursor: pointer;
+  box-shadow:
+    0 3px 8px rgba(0,0,0,0.8),
+    inset 0 2px 5px #666;
+  transition: background 0.3s ease;
   user-select: none;
 }
 
-.wheel-container {
-  position: relative;
-  margin: 20px auto;
-  width: 320px;
-  height: 320px;
-  perspective: 1400px;
+#spinBtn:hover:not(:disabled) {
+  background: linear-gradient(145deg, #555, #333);
 }
 
-canvas#wheel {
-  width: 320px;
-  height: 320px;
-  border-radius: 50%;
-  box-shadow:
-    inset 0 0 40px #000a,
-    0 0 20px #0ff8;
-  background: radial-gradient(circle at center, #333 0%, #111 80%);
-  transition: transform 4s cubic-bezier(0.33, 1, 0.68, 1);
-  cursor: pointer;
-}
-
-.pointer {
-  position: absolute;
-  bottom: -14px;  /* Стрелка снизу */
-  left: 50%;
-  transform: translateX(-50%) rotate(180deg); /* Поворот стрелки вниз */
-  width: 0; 
-  height: 0; 
-  border-left: 14px solid transparent;
-  border-right: 14px solid transparent;
-  border-top: 28px solid #0ff; /* Используем border-top */
-  filter: drop-shadow(0 0 6px #0ff);
-}
-
-button#spinBtn {
-  margin-top: 18px;
-  background: #0ff;
-  border: none;
-  color: #111;
-  font-weight: 700;
-  padding: 12px 28px;
-  font-size: 1.1rem;
-  border-radius: 28px;
-  cursor: pointer;
-  box-shadow: 0 0 12px #0ffcc;
-  transition: background-color 0.3s ease;
-}
-
-button#spinBtn:hover {
-  background: #0ccd;
+#spinBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 #result {
-  margin-top: 18px;
-  font-size: 1.3rem;
-  min-height: 28px;
-  color: #0ff;
-  text-shadow: 0 0 10px #0ff;
-  font-weight: 600;
+  margin-top: 20px;
+  font-size: 20px;
+  min-height: 30px;
+  font-weight: bold;
+  text-shadow: 0 0 8px #ffa;
 }
