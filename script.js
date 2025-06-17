@@ -40,26 +40,34 @@ function drawWheel(angle) {
   ctx.translate(centerX, centerY);
   ctx.rotate(angle);
 
-  const rimWidth = 18;
+  const rimWidth = 22;
+  // Обод с градиентом и тенью
+  let rimGradient = ctx.createRadialGradient(0, 0, wheelRadius, 0, 0, wheelRadius + rimWidth);
+  rimGradient.addColorStop(0, '#555');
+  rimGradient.addColorStop(1, '#111');
   ctx.beginPath();
   ctx.arc(0, 0, wheelRadius + rimWidth, 0, 2 * Math.PI);
-  ctx.fillStyle = '#111c';
+  ctx.fillStyle = rimGradient;
+  ctx.shadowColor = 'rgba(0,0,0,0.6)';
+  ctx.shadowBlur = 10;
   ctx.fill();
+  ctx.shadowBlur = 0;
 
+  // Сегменты с эффектом гравировки
   for (let i = 0; i < numSegments; i++) {
     const startAngle = i * anglePerSegment;
     const endAngle = startAngle + anglePerSegment;
 
-    const grad = ctx.createRadialGradient(
-      Math.cos(startAngle + anglePerSegment / 2) * wheelRadius * 0.5,
-      Math.sin(startAngle + anglePerSegment / 2) * wheelRadius * 0.5,
-      wheelRadius * 0.1,
-      0,
-      0,
-      wheelRadius
+    const baseColor = colors[i];
+    const grad = ctx.createLinearGradient(
+      Math.cos(startAngle) * wheelRadius,
+      Math.sin(startAngle) * wheelRadius,
+      Math.cos(endAngle) * wheelRadius,
+      Math.sin(endAngle) * wheelRadius
     );
-    grad.addColorStop(0, colors[i]);
-    grad.addColorStop(1, '#222');
+    grad.addColorStop(0, baseColor);
+    grad.addColorStop(0.5, '#222');
+    grad.addColorStop(1, baseColor);
 
     ctx.beginPath();
     ctx.moveTo(0, 0);
@@ -68,18 +76,34 @@ function drawWheel(angle) {
     ctx.fillStyle = grad;
     ctx.fill();
 
-    const shading = ctx.createLinearGradient(
-      Math.cos(startAngle) * wheelRadius,
-      Math.sin(startAngle) * wheelRadius,
-      Math.cos(endAngle) * wheelRadius,
-      Math.sin(endAngle) * wheelRadius
-    );
-    shading.addColorStop(0, 'rgba(255,255,255,0.15)');
-    shading.addColorStop(0.5, 'rgba(0,0,0,0.2)');
-    shading.addColorStop(1, 'rgba(255,255,255,0.15)');
-    ctx.fillStyle = shading;
-    ctx.fill();
+    // Тиснение — тонкие полосы
+    ctx.save();
+    ctx.clip();
+    const linesCount = 15;
+    ctx.lineWidth = 1;
+    for (let j = 0; j < linesCount; j++) {
+      let dist = (j / linesCount) * wheelRadius;
+      ctx.beginPath();
+      ctx.strokeStyle = j % 2 === 0 ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.15)';
+      ctx.moveTo(dist * Math.cos(startAngle), dist * Math.sin(startAngle));
+      ctx.lineTo(dist * Math.cos(endAngle), dist * Math.sin(endAngle));
+      ctx.stroke();
+    }
+    ctx.restore();
 
+    // Контур сегмента — гравировка
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.arc(0, 0, wheelRadius, startAngle, endAngle);
+    ctx.closePath();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur = 1;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Текст с тенью для рельефа
     ctx.save();
     ctx.fillStyle = '#eee';
     ctx.font = 'bold 16px Verdana';
@@ -87,22 +111,53 @@ function drawWheel(angle) {
     ctx.textBaseline = 'middle';
     const textAngle = startAngle + anglePerSegment / 2;
     ctx.rotate(textAngle);
+    ctx.shadowColor = 'rgba(0,0,0,0.7)';
+    ctx.shadowBlur = 3;
     ctx.fillText(segments[i], wheelRadius - 20, 0);
     ctx.restore();
   }
 
+  // Центр — металлический круг с глянцем и гравированной надписью
   const centerRadius = 40;
+  const centerGradient = ctx.createRadialGradient(0, 0, centerRadius * 0.3, 0, 0, centerRadius);
+  centerGradient.addColorStop(0, '#bbb');
+  centerGradient.addColorStop(0.5, '#555');
+  centerGradient.addColorStop(1, '#222');
+
   ctx.beginPath();
-  ctx.shadowColor = '#0ff';
-  ctx.shadowBlur = 12;
-  ctx.fillStyle = '#111';
+  ctx.shadowColor = 'rgba(0,0,0,0.8)';
+  ctx.shadowBlur = 8;
+  ctx.fillStyle = centerGradient;
+  ctx.arc(0, 0, centerRadius, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+
+  // Блик на центре
+  const glossGradient = ctx.createRadialGradient(-centerRadius / 3, -centerRadius / 3, centerRadius / 10, 0, 0, centerRadius / 1.5);
+  glossGradient.addColorStop(0, 'rgba(255,255,255,0.7)');
+  glossGradient.addColorStop(1, 'rgba(255,255,255,0)');
+
+  ctx.beginPath();
+  ctx.fillStyle = glossGradient;
   ctx.arc(0, 0, centerRadius, 0, 2 * Math.PI);
   ctx.fill();
 
+  // Гравированная надпись "СПИН"
+  ctx.save();
+  ctx.fillStyle = '#ddd';
+  ctx.font = 'bold 20px Verdana';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor = 'rgba(0,0,0,0.9)';
+  ctx.shadowBlur = 4;
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = '#444';
+  ctx.strokeText('СПИН', 0, 0);
+  ctx.fillText('СПИН', 0, 0);
+  ctx.restore();
+
   ctx.restore();
 }
-
-drawWheel(currentAngle);
 
 function spin() {
   if (isSpinning) return;
@@ -145,7 +200,7 @@ function announceResult() {
   let normalizedAngle = currentAngle % (2 * Math.PI);
   if (normalizedAngle < 0) normalizedAngle += 2 * Math.PI;
 
-  // Добавляем сдвиг π/2 радиан (90°), чтобы учесть, что стрелка вниз
+  // Учитываем, что стрелка смотрит вниз (π/2 сдвиг)
   let adjustedAngle = (2 * Math.PI - normalizedAngle + Math.PI / 2) % (2 * Math.PI);
 
   let index = Math.floor(adjustedAngle / anglePerSegment);
@@ -154,3 +209,5 @@ function announceResult() {
 }
 
 spinBtn.addEventListener('click', spin);
+
+drawWheel(currentAngle);
