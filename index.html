@@ -1,177 +1,194 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>🎰 Джекпот 777</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: radial-gradient(circle at center, #f0e4ff 0%, #cbb6f3 100%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      color: #381d57;
-    }
-
-    h1 {
-      font-size: 42px;
-      margin: 20px 0;
-      text-shadow: 1px 1px 2px #bfa2ff;
-    }
-
-    .balance {
-      font-size: 20px;
-      font-weight: bold;
-      margin-bottom: 20px;
-    }
-
-    .jackpot {
-      display: flex;
-      gap: 25px;
-      margin-bottom: 30px;
-    }
-
-    .slot {
-      width: 120px;
-      height: 120px;
-      background: #fff;
-      border: 5px solid #9340ff;
-      border-radius: 15px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 64px;
-      box-shadow: 0 0 15px rgba(80, 0, 200, 0.3);
-    }
-
-    button {
-      background-color: #9340ff;
-      color: #fff;
-      font-size: 20px;
-      padding: 12px 24px;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: background-color 0.3s, transform 0.2s;
-    }
-
-    button:hover {
-      background-color: #7022c3;
-    }
-
-    button:active {
-      transform: scale(0.97);
-    }
-
-    .result {
-      margin-top: 20px;
-      font-size: 24px;
-      font-weight: bold;
-      min-height: 32px;
-    }
-
-    .win {
-      color: green;
-      animation: flash 0.5s ease-in-out 4 alternate;
-    }
-
-    .lose {
-      color: red;
-    }
-
-    @keyframes flash {
-      from { opacity: 1; }
-      to { opacity: 0.3; }
-    }
-  </style>
+<meta charset="UTF-8" />
+<title>Колесо фортуны 🎡</title>
+<style>
+  body {
+    background: linear-gradient(135deg, #6b42f4, #b07cff);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    height: 100vh;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    user-select: none;
+  }
+  h1 {
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(0,0,0,0.6);
+  }
+  #wheel-container {
+    position: relative;
+    width: 360px;
+    height: 360px;
+  }
+  #wheel {
+    width: 360px;
+    height: 360px;
+    border-radius: 50%;
+    border: 8px solid #fff;
+    box-shadow: 0 0 30px rgba(255,255,255,0.6);
+    transition: transform 4s cubic-bezier(0.33, 1, 0.68, 1);
+  }
+  /* Стрелка сверху */
+  #pointer {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; 
+    height: 0; 
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-bottom: 30px solid #fff;
+    filter: drop-shadow(0 0 4px rgba(0,0,0,0.3));
+  }
+  button {
+    margin-top: 30px;
+    background: #fff;
+    color: #6b42f4;
+    font-weight: 700;
+    font-size: 20px;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    transition: background 0.3s ease;
+  }
+  button:hover:not(:disabled) {
+    background: #dcd6ff;
+  }
+  button:disabled {
+    background: #bbb;
+    cursor: not-allowed;
+  }
+  #result {
+    margin-top: 25px;
+    font-size: 22px;
+    font-weight: 700;
+    text-shadow: 0 0 8px rgba(0,0,0,0.4);
+  }
+</style>
 </head>
 <body>
 
-  <h1>🎰 Джекпот 777</h1>
-  <div class="balance" id="balance">Баланс: 100 💰</div>
+<h1>Колесо фортуны 🎡</h1>
 
-  <div class="jackpot" id="jackpot">
-    <div class="slot">❓</div>
-    <div class="slot">❓</div>
-    <div class="slot">❓</div>
-  </div>
+<div id="wheel-container">
+  <canvas id="wheel" width="360" height="360"></canvas>
+  <div id="pointer"></div>
+</div>
 
-  <button id="spinBtn">Крутить — 10 💰</button>
-  <div class="result" id="result"></div>
+<button id="spinBtn">Крутить!</button>
+<div id="result"></div>
 
-  <script>
-    const symbols = ['7️⃣','🍒','💎','🍋','⭐','🍉'];
-    const slots = document.querySelectorAll('.slot');
-    const spinBtn = document.getElementById('spinBtn');
-    const result = document.getElementById('result');
-    const balanceText = document.getElementById('balance');
+<script>
+  const canvas = document.getElementById('wheel');
+  const ctx = canvas.getContext('2d');
+  const spinBtn = document.getElementById('spinBtn');
+  const resultDiv = document.getElementById('result');
 
-    let balance = 100;
-    const spinCost = 10;
+  // Призы и их цвета
+  const prizes = [
+    {text: "100 💰", color: "#ff7f50"},
+    {text: "200 💰", color: "#f5a623"},
+    {text: "300 💰", color: "#f8e71c"},
+    {text: "500 💰", color: "#7ed321"},
+    {text: "1000 💰", color: "#50e3c2"},
+    {text: "2x шанс", color: "#4a90e2"},
+    {text: "Бонус", color: "#bd10e0"},
+    {text: "Приз сюрприз", color: "#d0021b"},
+  ];
 
-    updateBalance();
+  const wheelRadius = 180;
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+  const segmentAngle = (2 * Math.PI) / prizes.length;
 
-    spinBtn.addEventListener('click', () => {
-      if (balance < spinCost) {
-        result.textContent = "Недостаточно монет!";
-        result.className = "result lose";
-        return;
-      }
+  // Отрисовка колеса
+  function drawWheel() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for(let i = 0; i < prizes.length; i++) {
+      // сектор
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY);
+      ctx.arc(centerX, centerY, wheelRadius, i * segmentAngle, (i+1) * segmentAngle);
+      ctx.fillStyle = prizes[i].color;
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
 
-      balance -= spinCost;
-      updateBalance();
-      result.textContent = '';
-      result.className = "result";
+      // текст в секторе
+      ctx.save();
+      ctx.translate(centerX, centerY);
+      ctx.rotate(i * segmentAngle + segmentAngle / 2);
+      ctx.textAlign = "right";
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 16px Arial";
+      ctx.fillText(prizes[i].text, wheelRadius - 20, 8);
+      ctx.restore();
+    }
+  }
 
-      spinBtn.disabled = true;
+  drawWheel();
 
-      // крутятся по очереди, как в настоящем слоте
-      let finalSymbols = [];
-      let delays = [0, 500, 1000]; // задержки для каждого барабана
+  let currentAngle = 0;
+  let isSpinning = false;
 
-      slots.forEach((slot, i) => {
-        let spins = 15 + i * 5; // немного больше вращений для правых
-        let count = 0;
+  spinBtn.addEventListener('click', () => {
+    if (isSpinning) return;
 
-        const spinInterval = setInterval(() => {
-          const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
-          slot.textContent = randomSymbol;
-          count++;
+    isSpinning = true;
+    spinBtn.disabled = true;
+    resultDiv.textContent = '';
 
-          if (count >= spins) {
-            clearInterval(spinInterval);
-            finalSymbols[i] = slot.textContent;
+    // Кол-во вращений + случайный угол для остановки
+    const spins = Math.floor(Math.random() * 3) + 4; // 4-6 полных оборотов
+    const stopAngle = Math.random() * 2 * Math.PI;
 
-            // когда последний закончил
-            if (finalSymbols.length === 3 && finalSymbols.every(s => s !== undefined)) {
-              checkResult(finalSymbols);
-              spinBtn.disabled = false;
-            }
-          }
-        }, 60);
-      });
-    });
+    // Целевая позиция
+    const targetAngle = spins * 2 * Math.PI + stopAngle;
 
-    function checkResult(symbols) {
-      if (symbols[0] === symbols[1] && symbols[1] === symbols[2]) {
-        balance += 100;
-        updateBalance();
-        result.textContent = "🎉 Джекпот! +100 💰";
-        result.className = "result win";
+    // Анимация вращения с easing
+    const duration = 6000; // 6 секунд
+    const start = performance.now();
+
+    function animate(time) {
+      let elapsed = time - start;
+      if (elapsed > duration) elapsed = duration;
+
+      // ease out cubic (замедление)
+      const t = elapsed / duration;
+      const easedT = 1 - Math.pow(1 - t, 3);
+      currentAngle = easedT * targetAngle;
+
+      // вращаем колесо (отрицательно, чтобы вращалось по часовой)
+      canvas.style.transform = `rotate(${-currentAngle}rad)`;
+
+      if (elapsed < duration) {
+        requestAnimationFrame(animate);
       } else {
-        result.textContent = "😢 Не повезло. Попробуй снова!";
-        result.className = "result lose";
+        // Определяем выигрышный сектор
+        const normalizedAngle = currentAngle % (2 * Math.PI);
+        const index = prizes.length - 1 - Math.floor(normalizedAngle / segmentAngle);
+        showResult(index);
+        isSpinning = false;
+        spinBtn.disabled = false;
       }
     }
 
-    function updateBalance() {
-      balanceText.textContent = `Баланс: ${balance} 💰`;
-    }
-  </script>
+    requestAnimationFrame(animate);
+  });
+
+  function showResult(index) {
+    resultDiv.textContent = `Поздравляем! Вы выиграли: ${prizes[index].text}`;
+  }
+</script>
 
 </body>
 </html>
