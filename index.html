@@ -2,190 +2,160 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Меню ресторана</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #fdfdfd;
-      color: #333;
-      line-height: 1.6;
-    }
-    header, footer {
-      background-color: #222;
-      color: #fff;
-      padding: 20px;
-      text-align: center;
-    }
-    nav a {
-      color: #fff;
-      margin: 0 15px;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    .banner {
-      background: #eee;
-      text-align: center;
-      padding: 60px 20px;
-    }
-    .banner h1 {
-      font-size: 3em;
-    }
-    .menu-section {
-      padding: 40px 20px;
-      max-width: 1000px;
-      margin: 0 auto;
-    }
-    .menu-section h2 {
-      margin-bottom: 20px;
-      border-bottom: 2px solid #ccc;
-      padding-bottom: 5px;
-    }
-    .dish-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-    }
-    .dish {
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 15px;
-      transition: transform 0.2s;
-    }
-    .dish:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    .dish img {
-      width: 100%;
-      height: 160px;
-      object-fit: cover;
-      border-radius: 6px;
-      margin-bottom: 10px;
-      background: #ccc;
-    }
-    .dish h3 {
-      margin: 5px 0;
-      font-size: 1.1em;
-    }
-    .dish p {
-      font-size: 0.95em;
-      margin: 4px 0;
-    }
-    footer p {
-      margin: 5px 0;
-    }
-  </style>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 
-  <header>
-    <h1>Ресторан "Вкус жизни"</h1>
-    <nav>
-      <a href="#">Главная</a>
-      <a href="#">Меню</a>
-      <a href="#">О нас</a>
-      <a href="#">Контакты</a>
-    </nav>
-  </header>
+  <!-- Шапка -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand" href="#">Ресторан "Вкус жизни"</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="#">Главная</a></li>
+          <li class="nav-item"><a class="nav-link active" href="#">Меню</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">О нас</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Контакты</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
 
-  <div class="banner">
-    <h1>Наше меню</h1>
-    <p>Попробуйте лучшее от нашего шефа!</p>
+  <!-- Баннер -->
+  <div class="bg-light text-center py-5">
+    <h1 class="display-4">Наше меню</h1>
+    <p class="lead">Попробуйте лучшее от нашего шефа!</p>
   </div>
 
-  <section class="menu-section">
-    <h2>Закуски</h2>
-    <div class="dish-grid">
-      <div class="dish">
-        <img src="https://via.placeholder.com/300x160" alt="Фото блюда">
-        <h3>Брускетта с томатами</h3>
-        <p>290 ₽</p>
+  <!-- Раздел меню -->
+  <div class="container py-4">
+
+    <!-- Функция отрисовки категории и блюд -->
+    <h2 class="mt-4 mb-3 border-bottom pb-1">Закуски</h2>
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+          <img src="https://via.placeholder.com/300x160" class="card-img-top" alt="Брускетта">
+          <div class="card-body">
+            <h5 class="card-title">Брускетта с томатами</h5>
+            <p class="card-text">290 ₽</p>
+          </div>
+        </div>
       </div>
-      <div class="dish">
-        <img src="https://via.placeholder.com/300x160" alt="Фото блюда">
-        <h3>Оливки ассорти</h3>
-        <p>210 ₽</p>
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+          <img src="https://via.placeholder.com/300x160" class="card-img-top" alt="Оливки">
+          <div class="card-body">
+            <h5 class="card-title">Оливки ассорти</h5>
+            <p class="card-text">210 ₽</p>
+          </div>
+        </div>
       </div>
     </div>
-  </section>
 
-  <section class="menu-section">
-    <h2>Супы</h2>
-    <div class="dish-grid">
-      <div class="dish">
-        <img src="https://via.placeholder.com/300x160" alt="Фото блюда">
-        <h3>Том Ям</h3>
-        <p>450 ₽</p>
+    <h2 class="mt-5 mb-3 border-bottom pb-1">Супы</h2>
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+          <img src="https://via.placeholder.com/300x160" class="card-img-top" alt="Том Ям">
+          <div class="card-body">
+            <h5 class="card-title">Том Ям</h5>
+            <p class="card-text">450 ₽</p>
+          </div>
+        </div>
       </div>
-      <div class="dish">
-        <img src="https://via.placeholder.com/300x160" alt="Фото блюда">
-        <h3>Крем-суп из шампиньонов</h3>
-        <p>370 ₽</p>
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+          <img src="https://via.placeholder.com/300x160" class="card-img-top" alt="Крем-суп">
+          <div class="card-body">
+            <h5 class="card-title">Крем-суп из шампиньонов</h5>
+            <p class="card-text">370 ₽</p>
+          </div>
+        </div>
       </div>
     </div>
-  </section>
 
-  <section class="menu-section">
-    <h2>Основные блюда</h2>
-    <div class="dish-grid">
-      <div class="dish">
-        <img src="https://via.placeholder.com/300x160" alt="Фото блюда">
-        <h3>Паста Карбонара</h3>
-        <p>590 ₽</p>
+    <h2 class="mt-5 mb-3 border-bottom pb-1">Основные блюда</h2>
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+          <img src="https://via.placeholder.com/300x160" class="card-img-top" alt="Карбонара">
+          <div class="card-body">
+            <h5 class="card-title">Паста Карбонара</h5>
+            <p class="card-text">590 ₽</p>
+          </div>
+        </div>
       </div>
-      <div class="dish">
-        <img src="https://via.placeholder.com/300x160" alt="Фото блюда">
-        <h3>Стейк из говядины</h3>
-        <p>950 ₽</p>
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+          <img src="https://via.placeholder.com/300x160" class="card-img-top" alt="Стейк">
+          <div class="card-body">
+            <h5 class="card-title">Стейк из говядины</h5>
+            <p class="card-text">950 ₽</p>
+          </div>
+        </div>
       </div>
     </div>
-  </section>
 
-  <section class="menu-section">
-    <h2>Десерты</h2>
-    <div class="dish-grid">
-      <div class="dish">
-        <img src="https://via.placeholder.com/300x160" alt="Фото блюда">
-        <h3>Тирамису</h3>
-        <p>350 ₽</p>
+    <h2 class="mt-5 mb-3 border-bottom pb-1">Десерты</h2>
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+          <img src="https://via.placeholder.com/300x160" class="card-img-top" alt="Тирамису">
+          <div class="card-body">
+            <h5 class="card-title">Тирамису</h5>
+            <p class="card-text">350 ₽</p>
+          </div>
+        </div>
       </div>
-      <div class="dish">
-        <img src="https://via.placeholder.com/300x160" alt="Фото блюда">
-        <h3>Шоколадный фондан</h3>
-        <p>400 ₽</p>
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+          <img src="https://via.placeholder.com/300x160" class="card-img-top" alt="Фондан">
+          <div class="card-body">
+            <h5 class="card-title">Шоколадный фондан</h5>
+            <p class="card-text">400 ₽</p>
+          </div>
+        </div>
       </div>
     </div>
-  </section>
 
-  <section class="menu-section">
-    <h2>Напитки</h2>
-    <div class="dish-grid">
-      <div class="dish">
-        <img src="https://via.placeholder.com/300x160" alt="Фото напитка">
-        <h3>Эспрессо</h3>
-        <p>150 ₽</p>
+    <h2 class="mt-5 mb-3 border-bottom pb-1">Напитки</h2>
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+          <img src="https://via.placeholder.com/300x160" class="card-img-top" alt="Эспрессо">
+          <div class="card-body">
+            <h5 class="card-title">Эспрессо</h5>
+            <p class="card-text">150 ₽</p>
+          </div>
+        </div>
       </div>
-      <div class="dish">
-        <img src="https://via.placeholder.com/300x160" alt="Фото напитка">
-        <h3>Морс из ягод</h3>
-        <p>200 ₽</p>
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+          <img src="https://via.placeholder.com/300x160" class="card-img-top" alt="Морс">
+          <div class="card-body">
+            <h5 class="card-title">Морс из ягод</h5>
+            <p class="card-text">200 ₽</p>
+          </div>
+        </div>
       </div>
     </div>
-  </section>
+  </div>
 
-  <footer>
-    <p>Ресторан "Вкус жизни" © 2025</p>
-    <p>Адрес: г. Москва, ул. Вкусная, д. 5</p>
-    <p>Телефон: +7 (999) 123-45-67</p>
-    <p>Работаем ежедневно с 10:00 до 23:00</p>
+  <!-- Подвал -->
+  <footer class="bg-dark text-white text-center py-4 mt-5">
+    <p class="mb-1">Ресторан "Вкус жизни" © 2025</p>
+    <p class="mb-1">г. Москва, ул. Вкусная, д. 5</p>
+    <p class="mb-0">+7 (999) 123-45-67 | Работаем с 10:00 до 23:00</p>
   </footer>
 
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
