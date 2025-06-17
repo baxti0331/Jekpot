@@ -4,158 +4,93 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Меню ресторана</title>
-  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-
-  <!-- Шапка -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
-      <a class="navbar-brand" href="#">Ресторан "Вкус жизни"</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    <a class="navbar-brand" href="#">Вкус жизни</a>
+    <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="nav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link active" href="#">Меню</a></li>
+      </ul>
+      <button class="btn btn-outline-light position-relative" id="cartBtn">
+        🛒 Корзина <span id="cartCount" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
       </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="#">Главная</a></li>
-          <li class="nav-item"><a class="nav-link active" href="#">Меню</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">О нас</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">Контакты</a></li>
-        </ul>
+    </div>
+  </div>
+</nav>
+
+<div id="menuCarousel" class="carousel slide py-4" data-bs-ride="carousel">
+  <div class="carousel-inner">
+
+    <!-- Слайд: Закуски -->
+    <div class="carousel-item active">
+      <div class="container">
+        <h2 class="mb-3">Закуски</h2>
+        <div class="row g-4">
+          <!-- Карточка блюда -->
+          <div class="col-md-6 col-lg-4">
+            <div class="card h-100" onclick="openModal('Брускетта с томатами','290 ₽','Свежие тосты с томатами и базиликом.')" >
+              <img src="https://via.placeholder.com/300x160" class="card-img-top">
+              <div class="card-body">
+                <h5 class="card-title">Брускетта с томатами</h5>
+                <p class="card-text">290 ₽</p>
+                <button class="btn btn-sm btn-primary" onclick="addToCart(event,'Брускетта',290)">Добавить в корзину</button>
+              </div>
+            </div>
+          </div>
+          <!-- Повтор для других блюд -->
+        </div>
       </div>
     </div>
-  </nav>
 
-  <!-- Баннер -->
-  <div class="bg-light text-center py-5">
-    <h1 class="display-4">Наше меню</h1>
-    <p class="lead">Попробуйте лучшее от нашего шефа!</p>
+    <!-- Повторить carousel-item для других категорий -->
+
   </div>
 
-  <!-- Раздел меню -->
-  <div class="container py-4">
+  <button class="carousel-control-prev" type="button" data-bs-target="#menuCarousel" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon"></span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#menuCarousel" data-bs-slide="next">
+    <span class="carousel-control-next-icon"></span>
+  </button>
+</div>
 
-    <!-- Функция отрисовки категории и блюд -->
-    <h2 class="mt-4 mb-3 border-bottom pb-1">Закуски</h2>
-    <div class="row g-4">
-      <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-          <img src="https://via.placeholder.com/300x160" class="card-img-top" alt="Брускетта">
-          <div class="card-body">
-            <h5 class="card-title">Брускетта с томатами</h5>
-            <p class="card-text">290 ₽</p>
-          </div>
-        </div>
+<!-- Модальное окно -->
+<div class="modal fade" id="dishModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="dishModalLabel"></h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-          <img src="https://via.placeholder.com/300x160" class="card-img-top" alt="Оливки">
-          <div class="card-body">
-            <h5 class="card-title">Оливки ассорти</h5>
-            <p class="card-text">210 ₽</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <h2 class="mt-5 mb-3 border-bottom pb-1">Супы</h2>
-    <div class="row g-4">
-      <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-          <img src="https://via.placeholder.com/300x160" class="card-img-top" alt="Том Ям">
-          <div class="card-body">
-            <h5 class="card-title">Том Ям</h5>
-            <p class="card-text">450 ₽</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-          <img src="https://via.placeholder.com/300x160" class="card-img-top" alt="Крем-суп">
-          <div class="card-body">
-            <h5 class="card-title">Крем-суп из шампиньонов</h5>
-            <p class="card-text">370 ₽</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <h2 class="mt-5 mb-3 border-bottom pb-1">Основные блюда</h2>
-    <div class="row g-4">
-      <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-          <img src="https://via.placeholder.com/300x160" class="card-img-top" alt="Карбонара">
-          <div class="card-body">
-            <h5 class="card-title">Паста Карбонара</h5>
-            <p class="card-text">590 ₽</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-          <img src="https://via.placeholder.com/300x160" class="card-img-top" alt="Стейк">
-          <div class="card-body">
-            <h5 class="card-title">Стейк из говядины</h5>
-            <p class="card-text">950 ₽</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <h2 class="mt-5 mb-3 border-bottom pb-1">Десерты</h2>
-    <div class="row g-4">
-      <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-          <img src="https://via.placeholder.com/300x160" class="card-img-top" alt="Тирамису">
-          <div class="card-body">
-            <h5 class="card-title">Тирамису</h5>
-            <p class="card-text">350 ₽</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-          <img src="https://via.placeholder.com/300x160" class="card-img-top" alt="Фондан">
-          <div class="card-body">
-            <h5 class="card-title">Шоколадный фондан</h5>
-            <p class="card-text">400 ₽</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <h2 class="mt-5 mb-3 border-bottom pb-1">Напитки</h2>
-    <div class="row g-4">
-      <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-          <img src="https://via.placeholder.com/300x160" class="card-img-top" alt="Эспрессо">
-          <div class="card-body">
-            <h5 class="card-title">Эспрессо</h5>
-            <p class="card-text">150 ₽</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-          <img src="https://via.placeholder.com/300x160" class="card-img-top" alt="Морс">
-          <div class="card-body">
-            <h5 class="card-title">Морс из ягод</h5>
-            <p class="card-text">200 ₽</p>
-          </div>
-        </div>
+      <div class="modal-body">
+        <p id="dishModalPrice" class="fw-bold"></p>
+        <p id="dishModalDesc"></p>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Подвал -->
-  <footer class="bg-dark text-white text-center py-4 mt-5">
-    <p class="mb-1">Ресторан "Вкус жизни" © 2025</p>
-    <p class="mb-1">г. Москва, ул. Вкусная, д. 5</p>
-    <p class="mb-0">+7 (999) 123-45-67 | Работаем с 10:00 до 23:00</p>
-  </footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+let cartCount = 0;
 
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+function openModal(name, price, desc) {
+  document.getElementById('dishModalLabel').innerText = name;
+  document.getElementById('dishModalPrice').innerText = price;
+  document.getElementById('dishModalDesc').innerText = desc;
+  new bootstrap.Modal(document.getElementById('dishModal')).show();
+}
+
+function addToCart(event, name, price) {
+  event.stopPropagation();
+  cartCount++;
+  document.getElementById('cartCount').innerText = cartCount;
+  // здесь можно добавить логику хранения корзины
+}
+</script>
 </body>
 </html>
