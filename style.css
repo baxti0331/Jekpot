@@ -4,12 +4,18 @@ body {
   font-family: 'Segoe UI', sans-serif;
   color: #222; user-select: none;
   overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
 }
 
 #top {
+  margin-top: 20px;
   display: flex; justify-content: center; align-items: center;
-  padding: 20px; gap: 40px;
+  gap: 40px;
   flex-wrap: wrap;
+  user-select: none;
 }
 
 #score {
@@ -23,57 +29,10 @@ body {
   color: #666;
 }
 
-.shop {
-  display: flex; flex-wrap: wrap;
-  gap: 20px; justify-content: center;
-  margin: 20px;
-}
-
-.shop-item {
-  background: #fff7f0;
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  padding: 20px;
-  width: 230px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-.shop-item:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-}
-
-.shop-item button {
-  margin-top: 15px;
-  padding: 10px 18px;
-  font-size: 16px;
-  font-weight: bold;
-  color: white;
-  background: linear-gradient(135deg, #ff7b5c, #ff4e4e);
-  border: none;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(255, 100, 50, 0.3);
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-}
-.shop-item button:hover {
-  background: linear-gradient(135deg, #ff9478, #ff6b6b);
-  transform: scale(1.05);
-}
-.shop-item button:disabled {
-  background: #ccc;
-  color: #666;
-  box-shadow: none;
-  cursor: not-allowed;
-}
-
 #asic-container {
-  width: 600px;
-  height: 300px;
-  margin: 0 auto 20px;
+  width: 400px;
+  height: 200px;
+  margin: 40px auto 20px;
   position: relative;
   background: linear-gradient(to right, #3c3c3c, #1f1f1f);
   border: 6px solid #444;
@@ -82,14 +41,14 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 30px;
+  padding: 20px 40px;
   cursor: pointer;
   transition: background 0.3s;
 }
 
 .fan {
-  width: 120px;
-  height: 120px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   background: radial-gradient(#666, #222);
   position: relative;
@@ -109,8 +68,8 @@ body {
 
 .blade {
   position: absolute;
-  width: 8px;
-  height: 60px;
+  width: 6px;
+  height: 40px;
   background: #00bfa5;
   left: 50%;
   top: 10px;
@@ -151,8 +110,93 @@ body {
   100% { background-color: transparent; }
 }
 
+/* Кнопка Магазин */
+#shop-toggle {
+  background: linear-gradient(135deg, #ff7b5c, #ff4e4e);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 12px 28px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255, 100, 50, 0.4);
+  margin-bottom: 10px;
+  transition: all 0.3s ease-in-out;
+  user-select: none;
+}
+#shop-toggle:hover {
+  background: linear-gradient(135deg, #ff9478, #ff6b6b);
+  transform: scale(1.05);
+}
+
+/* Слайдер магазина */
+.shop {
+  width: 100%;
+  max-width: 800px;
+  background: #fff7f0;
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.5s ease;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  padding: 0 20px;
+}
+
+/* Активный магазин — развернут */
+.shop.open {
+  max-height: 400px; /* достаточно для нескольких товаров */
+  padding: 20px;
+}
+
+.shop-item {
+  background: #fff3ea;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 20px;
+  width: 230px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.shop-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.shop-item button {
+  margin-top: 15px;
+  padding: 10px 18px;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  background: linear-gradient(135deg, #ff7b5c, #ff4e4e);
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(255, 100, 50, 0.3);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+.shop-item button:hover {
+  background: linear-gradient(135deg, #ff9478, #ff6b6b);
+  transform: scale(1.05);
+}
+.shop-item button:disabled {
+  background: #ccc;
+  color: #666;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
 @media (max-width: 650px) {
-  #asic-container { width: 95%; height: 240px; }
-  .fan { width: 90px; height: 90px; }
-  .blade { height: 45px; }
+  #asic-container { width: 90%; height: 180px; }
+  .fan { width: 70px; height: 70px; }
+  .blade { height: 35px; }
+  .shop-item { width: 45%; }
 }
