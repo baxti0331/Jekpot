@@ -82,4 +82,4 @@ setInterval(() => {
 }, 1000);
 
 load();
-updateUI();
+updateUI(); 
