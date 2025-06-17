@@ -1,7 +1,6 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-// Задаём размеры canvas под окно
 function resize() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -9,11 +8,9 @@ function resize() {
 resize();
 window.addEventListener('resize', resize);
 
-// Настройки мира
 const WORLD_WIDTH = 2000;
 const WORLD_HEIGHT = 600;
 
-// Игрок
 const player = {
   x: 100,
   y: 100,
@@ -22,7 +19,9 @@ const player = {
   vx: 0,
   vy: 0,
   speed: 7,
+  runSpeed: 10,   // скорость бега при удержании
   jumpPower: -18,
+  strongJumpPower: -28,
   gravity: 0.8,
   onGround: false,
   color: 'orange',
@@ -36,7 +35,6 @@ const camera = {
   height: canvas.height,
 };
 
-// Платформы
 const platforms = [
   { x: 0, y: 560, width: WORLD_WIDTH, height: 40 },
   { x: 300, y: 450, width: 200, height: 20 },
@@ -47,7 +45,6 @@ const platforms = [
   { x: 1500, y: 500, width: 400, height: 20 },
 ];
 
-// Монеты
 const coins = [
   { x: 320, y: 410, size: 20, collected: false },
   { x: 180, y: 310, size: 20, collected: false },
@@ -57,64 +54,79 @@ const coins = [
   { x: 1550, y: 460, size: 20, collected: false },
 ];
 
-// Враги
 const enemies = [
   { x: 700, y: 520, width: 40, height: 40, direction: 1, speed: 2, range: [700, 900] },
   { x: 1300, y: 310, width: 40, height: 40, direction: 1, speed: 3, range: [1300, 1600] },
 ];
 
-// Счёт
 let score = 0;
-
-// Таймер
 let startTime = Date.now();
 
-// Управление клавишами
-const keys = {};
+let touchHold = false; // флаг удержания пальца
+let lastTapTime = 0;   // время последнего тапа для определения двойного тапа
 
-// Флаги для кнопок управления (мобильные)
-let leftPressed = false;
-let rightPressed = false;
-let jumpPressed = false;
+// Обработчик касаний
 
-document.addEventListener('keydown', e => {
-  keys[e.code] = true;
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+
+  touchHold = true;
+
+  const now = Date.now();
+  const tapInterval = now - lastTapTime;
+
+  if (tapInterval < 300) {
+    // Двойной тап — сильный прыжок
+    if (player.onGround) {
+      player.vy = player.strongJumpPower;
+      player.onGround = false;
+    }
+  } else {
+    // Одиночный тап — обычный прыжок
+    if (player.onGround) {
+      player.vy = player.jumpPower;
+      player.onGround = false;
+    }
+  }
+
+  lastTapTime = now;
 });
 
-document.addEventListener('keyup', e => {
-  keys[e.code] = false;
+canvas.addEventListener('touchend', e => {
+  e.preventDefault();
+  touchHold = false;
 });
 
-// Обработчики кнопок управления
-function setBtnHandlers(id, flagName) {
-  const btn = document.getElementById(id);
-  btn.addEventListener('touchstart', e => {
-    e.preventDefault();
-    window[flagName] = true;
-  }, { passive: false });
-  btn.addEventListener('touchend', e => {
-    e.preventDefault();
-    window[flagName] = false;
-  }, { passive: false });
-  btn.addEventListener('mousedown', e => {
-    e.preventDefault();
-    window[flagName] = true;
-  });
-  btn.addEventListener('mouseup', e => {
-    e.preventDefault();
-    window[flagName] = false;
-  });
-  btn.addEventListener('mouseleave', e => {
-    e.preventDefault();
-    window[flagName] = false;
-  });
-}
+// Для мыши (если хочешь тестировать на ПК)
 
-setBtnHandlers('btn-left', 'leftPressed');
-setBtnHandlers('btn-right', 'rightPressed');
-setBtnHandlers('btn-jump', 'jumpPressed');
+canvas.addEventListener('mousedown', e => {
+  e.preventDefault();
 
-// Вспомогательная функция для проверки столкновений
+  touchHold = true;
+
+  const now = Date.now();
+  const tapInterval = now - lastTapTime;
+
+  if (tapInterval < 300) {
+    if (player.onGround) {
+      player.vy = player.strongJumpPower;
+      player.onGround = false;
+    }
+  } else {
+    if (player.onGround) {
+      player.vy = player.jumpPower;
+      player.onGround = false;
+    }
+  }
+
+  lastTapTime = now;
+});
+
+canvas.addEventListener('mouseup', e => {
+  e.preventDefault();
+  touchHold = false;
+});
+
 function rectsIntersect(r1, r2) {
   return !(r2.x > r1.x + r1.width ||
            r2.x + r2.width < r1.x ||
@@ -122,7 +134,6 @@ function rectsIntersect(r1, r2) {
            r2.y + r2.height < r1.y);
 }
 
-// Сброс игры
 function resetGame() {
   player.x = 100;
   player.y = 100;
@@ -134,23 +145,17 @@ function resetGame() {
   startTime = Date.now();
 }
 
-// Обновление состояния игры
 function update() {
-  // Горизонтальное движение
-  player.vx = 0;
-  if (keys['ArrowLeft'] || keys['KeyA'] || leftPressed) player.vx = -player.speed;
-  if (keys['ArrowRight'] || keys['KeyD'] || rightPressed) player.vx = player.speed;
-
-  // Прыжок
-  if ((keys['ArrowUp'] || keys['Space'] || keys['KeyW'] || jumpPressed) && player.onGround) {
-    player.vy = player.jumpPower;
-    player.onGround = false;
+  // Горизонтальное движение: если удерживаем палец - бежим вправо
+  if (touchHold) {
+    player.vx = player.runSpeed;
+  } else {
+    player.vx = 0;
   }
 
   // Гравитация
   player.vy += player.gravity;
 
-  // Обновляем позицию
   player.x += player.vx;
   player.y += player.vy;
 
@@ -181,7 +186,7 @@ function update() {
     }
   }
 
-  // Столкновение с врагами
+  // Столкновения с врагами
   for (const enemy of enemies) {
     if (rectsIntersect(player, enemy)) {
       resetGame();
@@ -212,22 +217,19 @@ function update() {
   camera.x = player.x + player.width / 2 - canvas.width / 2;
   camera.y = player.y + player.height / 2 - canvas.height / 2;
 
-  // Ограничения камеры по миру
   if (camera.x < 0) camera.x = 0;
   if (camera.y < 0) camera.y = 0;
   if (camera.x + canvas.width > WORLD_WIDTH) camera.x = WORLD_WIDTH - canvas.width;
   if (camera.y + canvas.height > WORLD_HEIGHT) camera.y = WORLD_HEIGHT - canvas.height;
 }
 
-// Отрисовка игры
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Сдвигаем контекст по камере
   ctx.save();
   ctx.translate(-camera.x, -camera.y);
 
-  // Фон (небо)
+  // Фон
   ctx.fillStyle = '#87CEEB';
   ctx.fillRect(camera.x, camera.y, canvas.width, canvas.height);
 
@@ -242,7 +244,7 @@ function draw() {
     if (!coin.collected) {
       ctx.fillStyle = 'gold';
       ctx.beginPath();
-      ctx.arc(coin.x + coin.size/2, coin.y + coin.size/2, coin.size/2, 0, Math.PI * 2);
+      ctx.arc(coin.x + coin.size / 2, coin.y + coin.size / 2, coin.size / 2, 0, Math.PI * 2);
       ctx.fill();
     }
   });
@@ -259,22 +261,19 @@ function draw() {
 
   ctx.restore();
 
-  // Отрисовка счёта и времени в левом верхнем углу
+  // Счёт и время
   ctx.fillStyle = 'white';
   ctx.font = '20px Arial';
   ctx.fillText(`Монет: ${score}`, 20, 30);
-
   const elapsed = Math.floor((Date.now() - startTime) / 1000);
   ctx.fillText(`Время: ${elapsed}s`, 20, 60);
 }
 
-// Главный цикл
 function loop() {
   update();
   draw();
   requestAnimationFrame(loop);
 }
 
-// Запуск игры
 resetGame();
 loop();
