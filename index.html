@@ -1,83 +1,102 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>ASIC Кликер</title>
+  <meta charset="UTF-8" />
+  <title>ASIC Кликер — Реализм</title>
   <style>
     body {
       margin: 0;
       padding: 0;
-      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-      font-family: 'Segoe UI', sans-serif;
-      color: #00ffc8;
+      background: radial-gradient(ellipse at center, #1a1a1a 0%, #0d0d0d 100%);
       height: 100vh;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      flex-direction: column;
+      font-family: 'Segoe UI', sans-serif;
+      color: #00ffcc;
       user-select: none;
     }
 
     #score {
       font-size: 48px;
-      margin-bottom: 30px;
-      text-shadow: 0 0 10px #00ffc8;
+      margin-bottom: 40px;
+      text-shadow: 0 0 15px #00ffc8;
     }
 
     .asic {
-      width: 240px;
-      height: 140px;
-      background: #1e1e1e;
-      border: 4px solid #444;
+      width: 600px;
+      height: 300px;
+      background: linear-gradient(to right, #3c3c3c, #1f1f1f);
+      border: 6px solid #444;
       border-radius: 10px;
       position: relative;
-      box-shadow: 0 0 20px #00ffc888;
-      cursor: pointer;
-      transition: transform 0.1s ease;
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      justify-content: space-around;
+      padding: 30px;
+      box-shadow: 0 0 30px #00ffc840;
+      transition: transform 0.1s ease;
+      cursor: pointer;
     }
 
     .asic:active {
-      transform: scale(1.05);
+      transform: scale(1.02);
     }
 
     .fan {
-      width: 60px;
-      height: 60px;
+      width: 120px;
+      height: 120px;
       border-radius: 50%;
-      background: radial-gradient(#666, #111);
+      background: radial-gradient(#666, #222);
       position: relative;
-      animation: spin 3s linear infinite;
+      animation: spin 2s linear infinite;
+      box-shadow: inset 0 0 10px #000;
     }
 
-    .fan::after {
-      content: '';
+    .fan-blades {
       position: absolute;
-      width: 6px;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      transform-origin: center;
+      animation: spin-blades 0.8s linear infinite;
+    }
+
+    .blade {
+      position: absolute;
+      width: 8px;
       height: 60px;
       background: #00ffc8;
-      top: 0;
       left: 50%;
-      transform: translateX(-50%);
-      border-radius: 3px;
-      opacity: 0.4;
+      top: 10px;
+      transform-origin: bottom center;
+      border-radius: 4px;
+      opacity: 0.7;
+      box-shadow: 0 0 6px #00ffc8;
     }
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    .blade:nth-child(1) { transform: rotate(0deg) translateX(-50%); }
+    .blade:nth-child(2) { transform: rotate(60deg) translateX(-50%); }
+    .blade:nth-child(3) { transform: rotate(120deg) translateX(-50%); }
+    .blade:nth-child(4) { transform: rotate(180deg) translateX(-50%); }
+    .blade:nth-child(5) { transform: rotate(240deg) translateX(-50%); }
+    .blade:nth-child(6) { transform: rotate(300deg) translateX(-50%); }
+
+    @keyframes spin-blades {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
 
     .label {
       position: absolute;
-      top: 8px;
-      left: 10px;
-      font-size: 14px;
-      color: #00ffc8;
+      top: 10px;
+      left: 20px;
+      font-size: 20px;
       font-weight: bold;
-      text-shadow: 0 0 5px #000;
+      color: #00ffc8;
+      text-shadow: 0 0 10px #000;
     }
   </style>
 </head>
@@ -85,10 +104,28 @@
 
   <div id="score">Очки: 0</div>
 
-  <div class="asic" id="asic" title="Кликни на ASIC">
-    <div class="fan"></div>
-    <div class="fan"></div>
-    <div class="label">ASIC-01</div>
+  <div class="asic" id="asic" title="Кликни для майнинга!">
+    <div class="fan">
+      <div class="fan-blades">
+        <div class="blade"></div>
+        <div class="blade"></div>
+        <div class="blade"></div>
+        <div class="blade"></div>
+        <div class="blade"></div>
+        <div class="blade"></div>
+      </div>
+    </div>
+    <div class="fan">
+      <div class="fan-blades">
+        <div class="blade"></div>
+        <div class="blade"></div>
+        <div class="blade"></div>
+        <div class="blade"></div>
+        <div class="blade"></div>
+        <div class="blade"></div>
+      </div>
+    </div>
+    <div class="label">ANTMINER X-100</div>
   </div>
 
   <script>
