@@ -1,152 +1,191 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restaurant Menu</title>
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
-    <style>
-        body {
-            margin: 0;
-            font-family: 'Open Sans', sans-serif;
-            background: url('background-image.jpg') no-repeat center center fixed;
-            background-size: cover;
-            color: #fff;
-        }
-
-        .menu {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: rgba(0, 0, 0, 0.7);
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px;
-        }
-
-        .category-slider {
-            display: flex;
-            overflow-x: auto;
-            margin-bottom: 20px;
-        }
-
-        .category {
-            min-width: 200px;
-            padding: 10px;
-            background-color: #343a40;
-            border-radius: 5px;
-            margin-right: 5px;
-            cursor: pointer;
-            text-align: center;
-            transition: transform 0.3s ease-in-out;
-        }
-
-        .category:hover {
-            transform: scale(1.1);
-        }
-
-        .product-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: #212529;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 15px;
-            width: 200px;
-            transition: background-color 0.3s ease;
-        }
-
-        .product-card:hover {
-            background-color: #495057;
-        }
-
-        .product-card > img {
-            width: 100%;
-            border-radius: 5px;
-        }
-
-        .add-to-cart {
-            background-color: #28a745;
-            color: #fff;
-            padding: 5px 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .add-to-cart:hover {
-            background-color: #218838;
-        }
-
-        .cart {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            background-color: #343a40;
-            padding: 10px;
-            border-radius: 5px;
-            width: 250px;
-        }
-
-        .cart-items {
-            margin-bottom: 10px;
-        }
-
-        .checkout {
-            background-color: #007bff;
-            color: #fff;
-            padding: 5px 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .checkout:hover {
-            background-color: #0056b3;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Меню ресторана</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fdfdfd;
+      color: #333;
+      line-height: 1.6;
+    }
+    header, footer {
+      background-color: #222;
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+    }
+    nav a {
+      color: #fff;
+      margin: 0 15px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .banner {
+      background: #eee;
+      text-align: center;
+      padding: 60px 20px;
+    }
+    .banner h1 {
+      font-size: 3em;
+    }
+    .menu-section {
+      padding: 40px 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .menu-section h2 {
+      margin-bottom: 20px;
+      border-bottom: 2px solid #ccc;
+      padding-bottom: 5px;
+    }
+    .dish-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    .dish {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 15px;
+      transition: transform 0.2s;
+    }
+    .dish:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .dish img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      background: #ccc;
+    }
+    .dish h3 {
+      margin: 5px 0;
+      font-size: 1.1em;
+    }
+    .dish p {
+      font-size: 0.95em;
+      margin: 4px 0;
+    }
+    footer p {
+      margin: 5px 0;
+    }
+  </style>
 </head>
 <body>
-    <div class="menu">
-        <div class="category-slider">
-            <div class="category">Напитки</div>
-            <div class="category">Закуски</div>
-            <div class="category">Блюда</div>
-            <!-- Добавьте больше категорий -->
-        </div>
-        <div class="product-card">
-            <img src="product-image.jpg" alt="Product">
-            <h3>Имя Продукта</h3>
-            <p>Описание продукта</p>
-            <p><strong>Цена:</strong> 100₽</p>
-            <button class="add-to-cart">Добавить в корзину</button>
-        </div>
+
+  <header>
+    <h1>Ресторан "Вкус жизни"</h1>
+    <nav>
+      <a href="#">Главная</a>
+      <a href="#">Меню</a>
+      <a href="#">О нас</a>
+      <a href="#">Контакты</a>
+    </nav>
+  </header>
+
+  <div class="banner">
+    <h1>Наше меню</h1>
+    <p>Попробуйте лучшее от нашего шефа!</p>
+  </div>
+
+  <section class="menu-section">
+    <h2>Закуски</h2>
+    <div class="dish-grid">
+      <div class="dish">
+        <img src="https://via.placeholder.com/300x160" alt="Фото блюда">
+        <h3>Брускетта с томатами</h3>
+        <p>290 ₽</p>
+      </div>
+      <div class="dish">
+        <img src="https://via.placeholder.com/300x160" alt="Фото блюда">
+        <h3>Оливки ассорти</h3>
+        <p>210 ₽</p>
+      </div>
     </div>
-    <div class="cart">
-        <div class="cart-items">
-            <!-- Здесь будут отображаться добавленные товары -->
-        </div>
-        <button class="checkout">Оформить заказ</button>
+  </section>
+
+  <section class="menu-section">
+    <h2>Супы</h2>
+    <div class="dish-grid">
+      <div class="dish">
+        <img src="https://via.placeholder.com/300x160" alt="Фото блюда">
+        <h3>Том Ям</h3>
+        <p>450 ₽</p>
+      </div>
+      <div class="dish">
+        <img src="https://via.placeholder.com/300x160" alt="Фото блюда">
+        <h3>Крем-суп из шампиньонов</h3>
+        <p>370 ₽</p>
+      </div>
     </div>
+  </section>
 
-    <script>
-        const addToCartButtons = document.querySelectorAll('.add-to-cart');
-        const cartItems = document.querySelector('.cart-items');
+  <section class="menu-section">
+    <h2>Основные блюда</h2>
+    <div class="dish-grid">
+      <div class="dish">
+        <img src="https://via.placeholder.com/300x160" alt="Фото блюда">
+        <h3>Паста Карбонара</h3>
+        <p>590 ₽</p>
+      </div>
+      <div class="dish">
+        <img src="https://via.placeholder.com/300x160" alt="Фото блюда">
+        <h3>Стейк из говядины</h3>
+        <p>950 ₽</p>
+      </div>
+    </div>
+  </section>
 
-        addToCartButtons.forEach(button => {
-            button.addEventListener('click', (event) => {
-                const productCard = event.target.closest('.product-card');
-                const productName = productCard.querySelector('h3').textContent;
-                const productPrice = productCard.querySelector('p:nth-child(4)').textContent;
+  <section class="menu-section">
+    <h2>Десерты</h2>
+    <div class="dish-grid">
+      <div class="dish">
+        <img src="https://via.placeholder.com/300x160" alt="Фото блюда">
+        <h3>Тирамису</h3>
+        <p>350 ₽</p>
+      </div>
+      <div class="dish">
+        <img src="https://via.placeholder.com/300x160" alt="Фото блюда">
+        <h3>Шоколадный фондан</h3>
+        <p>400 ₽</p>
+      </div>
+    </div>
+  </section>
 
-                const cartItem = document.createElement('div');
-                cartItem.textContent = `${productName} - ${productPrice}`;
-                cartItems.appendChild(cartItem);
-            });
-        });
-    </script>
+  <section class="menu-section">
+    <h2>Напитки</h2>
+    <div class="dish-grid">
+      <div class="dish">
+        <img src="https://via.placeholder.com/300x160" alt="Фото напитка">
+        <h3>Эспрессо</h3>
+        <p>150 ₽</p>
+      </div>
+      <div class="dish">
+        <img src="https://via.placeholder.com/300x160" alt="Фото напитка">
+        <h3>Морс из ягод</h3>
+        <p>200 ₽</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Ресторан "Вкус жизни" © 2025</p>
+    <p>Адрес: г. Москва, ул. Вкусная, д. 5</p>
+    <p>Телефон: +7 (999) 123-45-67</p>
+    <p>Работаем ежедневно с 10:00 до 23:00</p>
+  </footer>
+
 </body>
 </html>
