@@ -12,6 +12,7 @@ let state = {
 
 const saveKey = 'asicClickerState';
 const scoreEl = document.getElementById('score');
+const incomeEl = document.getElementById('income');
 const shopEl = document.getElementById('shop');
 const minerSpinner = document.getElementById('miner-spinner');
 const shopToggleBtn = document.getElementById('shop-toggle');
@@ -37,7 +38,8 @@ function flashEffect() {
 
 function updateUI() {
   scoreEl.textContent = `Очки: ${Math.floor(state.score)}`;
-  
+  incomeEl.textContent = `Доход/сек: ${calcIncome()}`;
+
   shopEl.innerHTML = '';
   shopItems.forEach(item => {
     const count = state.owned[item.id] || 0;
