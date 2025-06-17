@@ -2,32 +2,34 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8" />
-<title>Кликер Майнер</title>
+<title>Кликер с ASIC-Майнером</title>
 <style>
   body {
-    margin: 0; 
+    margin: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #232526, #1c1c1c);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 100vh;
-    color: white;
+    color: #00ff99;
+    user-select: none;
   }
   #score {
     font-size: 48px;
-    margin-bottom: 20px;
-    text-shadow: 0 0 10px #000;
+    margin-bottom: 30px;
+    text-shadow: 0 0 10px #00ff99;
   }
-  #miner {
-    width: 200px;
-    height: 200px;
-    background: url('https://i.imgur.com/GFYoXHc.png') no-repeat center/contain;
+  #asic {
+    width: 240px;
+    height: 180px;
+    background: url('https://i.imgur.com/GZzPaJQ.png') no-repeat center/contain;
     cursor: pointer;
     transition: transform 0.1s ease;
+    filter: drop-shadow(0 0 10px #00ff99);
   }
-  #miner:active {
+  #asic:active {
     transform: scale(1.1);
   }
 </style>
@@ -35,14 +37,14 @@
 <body>
 
 <div id="score">Очки: 0</div>
-<div id="miner" title="Кликни меня!"></div>
+<div id="asic" title="Кликни меня!"></div>
 
 <script>
   const scoreEl = document.getElementById('score');
-  const minerEl = document.getElementById('miner');
+  const asicEl = document.getElementById('asic');
   let score = 0;
 
-  minerEl.addEventListener('click', () => {
+  asicEl.addEventListener('click', () => {
     score++;
     scoreEl.textContent = 'Очки: ' + score;
   });
