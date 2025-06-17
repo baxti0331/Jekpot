@@ -1,29 +1,160 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-<title>ASIC Кликер</title>
-<link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <title>3D Монета Кликер</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: 'Segoe UI', sans-serif;
+      background: #111;
+    }
+    canvas {
+      display: block;
+    }
+    #hud {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 12px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px gold;
+    }
+    button {
+      display: block;
+      margin-top: 10px;
+      padding: 8px 14px;
+      font-size: 15px;
+      background-color: gold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      color: black;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: orange;
+    }
+  </style>
 </head>
 <body>
 
-  <div id="main-wrapper">
-    <div id="top-info">
-      <div id="score">Очки: 0</div>
-      <div id="income">Доход/сек: 0</div>
-    </div>
+<div id="hud">
+  <div>💰 Монеты: <span id="score">0</span></div>
+  <div>🖱 Сила клика: <span id="clickPower">1</span></div>
+  <div>🤖 Помощники: <span id="helpers">0</span></div>
+  <div>⏱ Доход в секунду: <span id="income">0</span></div>
 
-    <div id="miner-spinner" title="Кликни, чтобы майнить!"></div>
-  </div>
+  <button onclick="upgradeClick()">Улучшить клик (💵 <span id="cost">10</span>)</button>
+  <button onclick="buyHelper()">Нанять помощника (💵 <span id="helperCost">50</span>)</button>
+</div>
 
-  <button id="shop-toggle">Магазин 🛒</button>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r148/three.min.js"></script>
+<script>
+  let score = 0;
+  let clickPower = 1;
+  let clickUpgradeCost = 10;
 
-  <div class="shop" id="shop">
-    <button id="shop-close">Закрыть ✕</button>
-    <div id="shop-items"></div>
-  </div>
+  let helpers = 0;
+  let helperCost = 50;
+  let helperIncome = 1;
 
-  <script src="script.js"></script>
+  // Обновление интерфейса
+  function updateHUD() {
+    document.getElementById('score').innerText = Math.floor(score);
+    document.getElementById('clickPower').innerText = clickPower;
+    document.getElementById('cost').innerText = clickUpgradeCost;
+    document.getElementById('helpers').innerText = helpers;
+    document.getElementById('helperCost').innerText = helperCost;
+    document.getElementById('income').innerText = helpers * helperIncome;
+  }
+
+  function upgradeClick() {
+    if (score >= clickUpgradeCost) {
+      score -= clickUpgradeCost;
+      clickPower++;
+      clickUpgradeCost = Math.floor(clickUpgradeCost * 1.5);
+      updateHUD();
+    }
+  }
+
+  function buyHelper() {
+    if (score >= helperCost) {
+      score -= helperCost;
+      helpers++;
+      helperCost = Math.floor(helperCost * 1.6);
+      updateHUD();
+    }
+  }
+
+  // Автодоход каждую секунду
+  setInterval(() => {
+    score += helpers * helperIncome;
+    updateHUD();
+  }, 1000);
+
+  // Three.js сцена
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+
+  // 3D Монета (цилиндр)
+  const geometry = new THREE.CylinderGeometry(1, 1, 0.1, 64);
+  const material = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 1, roughness: 0.3 });
+  const coin = new THREE.Mesh(geometry, material);
+  scene.add(coin);
+  coin.rotation.x = Math.PI / 2;
+
+  // Свет
+  const light = new THREE.PointLight(0xffffff, 1.5);
+  light.position.set(5, 5, 5);
+  scene.add(light);
+
+  const ambient = new THREE.AmbientLight(0x404040);
+  scene.add(ambient);
+
+  camera.position.z = 3;
+
+  // Клик по монете
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+
+  window.addEventListener('click', (event) => {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+
+    const intersects = raycaster.intersectObject(coin);
+    if (intersects.length > 0) {
+      score += clickPower;
+      coin.scale.set(1.1, 1.1, 1.1);
+      setTimeout(() => coin.scale.set(1, 1, 1), 100);
+      updateHUD();
+    }
+  });
+
+  // Анимация
+  function animate() {
+    requestAnimationFrame(animate);
+    coin.rotation.z += 0.01;
+    renderer.render(scene, camera);
+  }
+
+  animate();
+  updateHUD();
+
+  // Ресайз
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+</script>
+
 </body>
 </html>
