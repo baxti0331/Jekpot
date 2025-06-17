@@ -147,12 +147,13 @@ function spin() {
 }
 
 function announceResult() {
-  // Учитываем что стрелка смотрит вниз (π радиан)
-  const normalizedAngle = currentAngle % (2 * Math.PI);
-  const adjustedAngle = (normalizedAngle + Math.PI) % (2 * Math.PI);
+  let normalizedAngle = currentAngle % (2 * Math.PI);
+  if (normalizedAngle < 0) normalizedAngle += 2 * Math.PI;
 
-  let index = numSegments - Math.floor(adjustedAngle / anglePerSegment) - 1;
-  if (index < 0) index += numSegments;
+  // Учитываем, что стрелка смотрит вниз (π), и вращение против часовой
+  let adjustedAngle = (2 * Math.PI - normalizedAngle + Math.PI) % (2 * Math.PI);
+
+  let index = Math.floor(adjustedAngle / anglePerSegment);
 
   resultDiv.textContent = `Выпало: ${segments[index]}`;
 }
