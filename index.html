@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Кликер с Современным UI</title>
+<title>Кликер с Offline Earnings</title>
 <style>
   * {
     box-sizing: border-box;
@@ -56,6 +56,12 @@
       inset 0 6px 14px rgba(255, 255, 255, 0.75),
       inset 0 -6px 14px rgba(217, 157, 6, 1);
   }
+  #coin-btn:active {
+    box-shadow:
+      0 6px 15px rgba(251, 192, 45, 0.5),
+      inset 0 2px 6px rgba(255, 255, 255, 0.5),
+      inset 0 -2px 6px rgba(217, 157, 6, 0.6);
+  }
   #controls {
     margin-top: 36px;
     width: 360px;
@@ -106,7 +112,7 @@
 </head>
 <body>
 
-<header>Кликер с Современным UI</header>
+<header>Кликер с Offline Earnings</header>
 <div id="score">Монеты: 0</div>
 <button id="coin-btn" aria-label="Нажми на монету">🪙</button>
 
@@ -120,17 +126,54 @@
 </div>
 
 <script>
+  // Переменные состояния
   let coins = 0;
   let clickPower = 1;
   let clickUpgradeCost = 10;
   let helperCost = 50;
   let helpers = 0;
-  const helperIncome = 1;
+  const helperIncome = 1; // монеты в секунду на одного помощника
 
   const scoreEl = document.getElementById('score');
   const coinBtn = document.getElementById('coin-btn');
   const upgradeClickBtn = document.getElementById('upgrade-click');
   const buyHelperBtn = document.getElementById('buy-helper');
+
+  // Загрузка из localStorage
+  function loadGame() {
+    const saved = JSON.parse(localStorage.getItem('clickerSave'));
+    if (saved) {
+      coins = saved.coins || 0;
+      clickPower = saved.clickPower || 1;
+      clickUpgradeCost = saved.clickUpgradeCost || 10;
+      helperCost = saved.helperCost || 50;
+      helpers = saved.helpers || 0;
+
+      // Вычисляем время отсутствия
+      const lastTime = saved.lastTime || Date.now();
+      const now = Date.now();
+      const diffSeconds = Math.floor((now - lastTime) / 1000);
+
+      if (diffSeconds > 0 && helpers > 0) {
+        const offlineEarnings = diffSeconds * helpers * helperIncome;
+        coins += offlineEarnings;
+        alert(`За время отсутствия вы заработали ${offlineEarnings} монет!`);
+      }
+    }
+  }
+
+  // Сохранение в localStorage
+  function saveGame() {
+    const saveData = {
+      coins,
+      clickPower,
+      clickUpgradeCost,
+      helperCost,
+      helpers,
+      lastTime: Date.now()
+    };
+    localStorage.setItem('clickerSave', JSON.stringify(saveData));
+  }
 
   function updateUI() {
     scoreEl.textContent = `Монеты: ${coins}`;
@@ -141,37 +184,50 @@
     buyHelperBtn.disabled = coins < helperCost;
   }
 
+  // Клик по монете
   coinBtn.addEventListener('click', () => {
     coins += clickPower;
     updateUI();
+    saveGame();
   });
 
+  // Улучшение клика
   upgradeClickBtn.addEventListener('click', () => {
     if (coins >= clickUpgradeCost) {
       coins -= clickUpgradeCost;
       clickPower++;
       clickUpgradeCost = Math.floor(clickUpgradeCost * 1.6);
       updateUI();
+      saveGame();
     }
   });
 
+  // Покупка помощника
   buyHelperBtn.addEventListener('click', () => {
     if (coins >= helperCost) {
       coins -= helperCost;
       helpers++;
       helperCost = Math.floor(helperCost * 1.7);
       updateUI();
+      saveGame();
     }
   });
 
+  // Автоматический доход помощников каждую секунду
   setInterval(() => {
     if (helpers > 0) {
       coins += helpers * helperIncome;
       updateUI();
+      saveGame();
     }
   }, 1000);
 
+  // Инициализация игры
+  loadGame();
   updateUI();
+
+  // Сохраняем прогресс при уходе со страницы
+  window.addEventListener('beforeunload', saveGame);
 </script>
 
 </body>
