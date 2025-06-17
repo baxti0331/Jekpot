@@ -2,21 +2,35 @@ body {
   margin: 0; 
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: peachpuff;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  height: 100vh;
+  justify-content: center;
   user-select: none;
-  padding: 20px 0;
+  padding: 20px;
   box-sizing: border-box;
+}
+
+#top-info {
+  position: absolute;
+  top: 20px;
+  width: 100%;
+  max-width: 480px;
+  text-align: center;
+  color: #333;
 }
 
 #score {
   font-size: 24px;
   font-weight: 700;
-  color: #333;
-  margin-bottom: 24px;
+  margin-bottom: 4px;
+}
+
+#income {
+  font-size: 18px;
+  font-weight: 500;
+  color: #555;
 }
 
 #miner-spinner {
@@ -25,12 +39,13 @@ body {
   border: 12px solid #f3c27b;
   border-top: 12px solid #ffb347;
   border-radius: 50%;
-  margin: 20px 0 24px 0;
+  margin: 0 0 24px 0;
   animation: spin 3s linear infinite;
   cursor: pointer;
   box-shadow: 0 0 20px #ffb347aa;
   transition: box-shadow 0.3s ease;
   user-select: none;
+  z-index: 10;
 }
 
 #miner-spinner:active {
@@ -53,8 +68,13 @@ body {
   cursor: pointer;
   transition: background 0.3s ease;
   user-select: none;
-  margin-top: auto; /* push to bottom */
+  margin-top: auto;
+  margin-bottom: 20px;
+  z-index: 10;
+  max-width: 480px;
+  width: 100%;
 }
+
 #shop-toggle:hover {
   background: #666;
 }
@@ -62,7 +82,8 @@ body {
 .shop {
   position: fixed;
   bottom: -320px;
-  left: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 100%;
   max-width: 480px;
   background: #222;
@@ -76,6 +97,7 @@ body {
   font-size: 16px;
   z-index: 100;
 }
+
 .shop.open {
   bottom: 0;
 }
@@ -83,6 +105,7 @@ body {
 .shop-item {
   margin-bottom: 14px;
 }
+
 .shop-item button {
   width: 100%;
   padding: 12px;
@@ -95,9 +118,11 @@ body {
   transition: background 0.2s ease;
   user-select: none;
 }
+
 .shop-item button:hover:enabled {
   background: #777;
 }
+
 .shop-item button:disabled {
   background: #333;
   cursor: not-allowed;
@@ -106,6 +131,7 @@ body {
 .flash {
   animation: flash-bg 0.3s ease;
 }
+
 @keyframes flash-bg {
   from { box-shadow: 0 0 15px 8px #00ff8855; }
   to { box-shadow: 0 0 8px 2px #00000066; }
