@@ -2,117 +2,149 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Чат-Бот</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>J.A.R.V.I.S UI</title>
   <style>
     body {
       margin: 0;
-      font-family: "Segoe UI", sans-serif;
-      background: #121212;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
+      background: radial-gradient(circle, #050505 0%, #000000 100%);
+      font-family: 'Segoe UI', sans-serif;
+      color: #00fff7;
+      overflow: hidden;
     }
     header {
-      background: #1f1f1f;
-      padding: 16px;
-      font-size: 1.5rem;
       text-align: center;
+      padding: 20px;
+      font-size: 2rem;
       font-weight: bold;
-      border-bottom: 1px solid #333;
+      color: #0ff;
+      text-shadow: 0 0 10px #0ff;
     }
-    #chat {
-      flex: 1;
-      overflow-y: auto;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+    #jarvis-circle {
+      width: 200px;
+      height: 200px;
+      border: 2px solid #0ff;
+      border-radius: 50%;
+      margin: 40px auto;
+      position: relative;
+      animation: pulse 2s infinite;
     }
-    .message {
-      max-width: 70%;
-      padding: 12px 16px;
+    @keyframes pulse {
+      0% { box-shadow: 0 0 20px #0ff; }
+      50% { box-shadow: 0 0 60px #0ff; }
+      100% { box-shadow: 0 0 20px #0ff; }
+    }
+
+    #console {
+      background: rgba(0, 255, 255, 0.1);
+      border: 1px solid #0ff;
       border-radius: 12px;
-      white-space: pre-wrap;
-      word-break: break-word;
+      margin: 0 auto;
+      width: 80%;
+      max-width: 800px;
+      height: 250px;
+      overflow-y: auto;
+      padding: 20px;
+      font-family: monospace;
     }
-    .user {
-      align-self: flex-end;
-      background: #3b82f6;
+
+    #input-area {
+      text-align: center;
+      margin-top: 20px;
     }
-    .bot {
-      align-self: flex-start;
-      background: #444;
-    }
-    #input-container {
-      display: flex;
-      border-top: 1px solid #333;
-      background: #1a1a1a;
-    }
-    input {
-      flex: 1;
-      padding: 12px;
-      font-size: 1rem;
-      border: none;
-      background: #1a1a1a;
-      color: white;
-      outline: none;
-    }
+
     button {
-      padding: 12px 18px;
+      padding: 12px 24px;
       font-size: 1rem;
-      background: #3b82f6;
+      background: #0ff;
+      color: #000;
       border: none;
-      color: white;
+      border-radius: 8px;
       cursor: pointer;
+      box-shadow: 0 0 15px #0ff;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #00cccc;
+      box-shadow: 0 0 25px #00cccc;
     }
   </style>
 </head>
 <body>
-  <header>🤖 Чат-Бот</header>
-  <div id="chat"></div>
-  <div id="input-container">
-    <input type="text" id="user-input" placeholder="Напиши сообщение..." />
-    <button onclick="sendMessage()">Отправить</button>
+
+  <header>J.A.R.V.I.S ONLINE</header>
+  <div id="jarvis-circle"></div>
+  <div id="console"></div>
+  <div id="input-area">
+    <button onclick="startListening()">🎙️ Говорить</button>
+    <button onclick="respond('Вручную активировано')">▶️ Эмулировать</button>
   </div>
 
   <script>
-    const chat = document.getElementById("chat");
-    const input = document.getElementById("user-input");
+    const consoleDiv = document.getElementById('console');
 
-    const fakeBotReply = (msg) => {
-      // Пример простой логики бота
-      msg = msg.toLowerCase();
-      if (msg.includes("привет")) return "Привет! Чем могу помочь?";
-      if (msg.includes("как дела")) return "У меня всё отлично 🤖 А у тебя?";
-      if (msg.includes("погода")) return "Погода отличная! Особенно в коде ☀️";
-      return "Я пока не умею это понимать. Но скоро научусь!";
-    };
-
-    function addMessage(text, isUser = false) {
-      const msg = document.createElement("div");
-      msg.className = "message " + (isUser ? "user" : "bot");
-      msg.textContent = text;
-      chat.appendChild(msg);
-      chat.scrollTop = chat.scrollHeight;
+    function respond(text) {
+      addToConsole('JARVIS: ' + text);
+      speak(text);
     }
 
-    function sendMessage() {
-      const text = input.value.trim();
-      if (!text) return;
-      addMessage(text, true);
-      input.value = "";
-
-      setTimeout(() => {
-        const reply = fakeBotReply(text);
-        addMessage(reply, false);
-      }, 500);
+    function addToConsole(text) {
+      const p = document.createElement('p');
+      p.textContent = text;
+      consoleDiv.appendChild(p);
+      consoleDiv.scrollTop = consoleDiv.scrollHeight;
     }
 
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") sendMessage();
-    });
+    function speak(text) {
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = 'ru-RU';
+      utter.pitch = 1.1;
+      utter.rate = 0.95;
+      speechSynthesis.speak(utter);
+    }
+
+    function startListening() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert('Браузер не поддерживает голосовое управление');
+        return;
+      }
+
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'ru-RU';
+      recognition.start();
+
+      addToConsole('🎧 Ожидаю команду...');
+
+      recognition.onresult = function(event) {
+        const command = event.results[0][0].transcript;
+        addToConsole('Вы: ' + command);
+        processCommand(command.toLowerCase());
+      };
+
+      recognition.onerror = function(e) {
+        addToConsole('Ошибка распознавания: ' + e.error);
+      };
+    }
+
+    function processCommand(cmd) {
+      if (cmd.includes('привет')) {
+        respond('Здравствуйте, сэр. Система в полном порядке.');
+      } else if (cmd.includes('время')) {
+        const now = new Date();
+        respond('Сейчас ' + now.toLocaleTimeString('ru-RU'));
+      } else if (cmd.includes('дата')) {
+        const now = new Date();
+        respond('Сегодня ' + now.toLocaleDateString('ru-RU'));
+      } else if (cmd.includes('открой ютуб')) {
+        respond('Открываю YouTube');
+        window.open('https://youtube.com', '_blank');
+      } else {
+        respond('Команда не распознана. Попробуйте снова.');
+      }
+    }
   </script>
+
 </body>
 </html>
