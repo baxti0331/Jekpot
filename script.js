@@ -1,55 +1,147 @@
-// Создаем сцену, камеру и рендерер
+// Базовая сцена, камера, рендерер
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x222244);
+scene.background = new THREE.Color(0x87ceeb); // голубое небо
 
 const camera = new THREE.PerspectiveCamera(
-  75,
-  window.innerWidth/window.innerHeight,
-  0.1,
-  1000
+  60, window.innerWidth / window.innerHeight, 0.1, 1000
 );
-camera.position.z = 5;
+camera.position.set(0, 10, 18);
 
-const renderer = new THREE.WebGLRenderer({antialias: true});
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// Добавляем управление мышью (вращение)
+// Контролы орбит (для проверки), выключены в игре
 const controls = new THREE.OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true; // Плавное вращение
-controls.dampingFactor = 0.05;
+controls.enabled = false;
 
-// Создаем куб с цветом
-const geometry = new THREE.BoxGeometry();
-const material = new THREE.MeshStandardMaterial({ color: 0x0077ff, roughness: 0.5, metalness: 0.5 });
-const cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
+// Свет
+scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+const sun = new THREE.DirectionalLight(0xffffff, 0.8);
+sun.position.set(10, 20, 10);
+scene.add(sun);
 
-// Добавляем свет
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-scene.add(ambientLight);
+// Игрок
+const player = new THREE.Mesh(
+  new THREE.BoxGeometry(1.5, 2, 1.5),
+  new THREE.MeshStandardMaterial({ color: 0x0055ff })
+);
+player.position.set(0, 1, 0);
+scene.add(player);
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-directionalLight.position.set(5, 10, 7.5);
-scene.add(directionalLight);
+// Платформы
+const platforms = [];
+const platformGeo = new THREE.BoxGeometry(5, 1, 5);
+const platformMat = new THREE.MeshStandardMaterial({ color: 0x228B22 });
 
-// Анимация
+function addPlatform(x, y, z) {
+  const p = new THREE.Mesh(platformGeo, platformMat);
+  p.position.set(x, y, z);
+  scene.add(p);
+  platforms.push(p);
+}
+
+// несколько платформ
+addPlatform(0, 0, 0);
+addPlatform(6, 3, -4);
+addPlatform(12, 6, -8);
+addPlatform(18, 9, -12);
+addPlatform(24, 12, -16);
+
+// Бонусы (сферы)
+const bonuses = [];
+const bonusGeo = new THREE.SphereGeometry(0.5, 16, 16);
+const bonusMat = new THREE.MeshStandardMaterial({ color: 0xffd700 });
+
+function addBonus(x, y, z) {
+  const b = new THREE.Mesh(bonusGeo, bonusMat);
+  b.position.set(x, y + 1, z);
+  scene.add(b);
+  bonuses.push(b);
+}
+
+addBonus(6, 4, -4);
+addBonus(12, 7, -8);
+addBonus(24, 13, -16);
+
+// Физика игрока
+const gravity = -0.03;
+let velocityY = 0;
+let canJump = false;
+
+// Упрощённое управление
+const keys = {};
+window.addEventListener('keydown', e => keys[e.code] = true);
+window.addEventListener('keyup', e => keys[e.code] = false);
+
+// Счет
+let score = 0;
+const scoreEl = document.getElementById('score');
+
+// Обновление
 function animate() {
   requestAnimationFrame(animate);
 
-  // Вращаем куб немного
-  cube.rotation.x += 0.01;
-  cube.rotation.y += 0.01;
+  // Горизонтальное движение
+  const speed = 0.1;
+  if (keys['KeyA'] || keys['ArrowLeft']) player.position.x -= speed;
+  if (keys['KeyD'] || keys['ArrowRight']) player.position.x += speed;
+  if (keys['KeyW'] || keys['ArrowUp']) player.position.z -= speed;
+  if (keys['KeyS'] || keys['ArrowDown']) player.position.z += speed;
 
-  controls.update();
+  // Гравитация и прыжок
+  velocityY += gravity;
+  player.position.y += velocityY;
+
+  // Проверка на столкновения с платформами
+  canJump = false;
+  platforms.forEach(p => {
+    if (
+      player.position.x + 0.75 > p.position.x - 2.5 &&
+      player.position.x - 0.75 < p.position.x + 2.5 &&
+      player.position.z + 0.75 > p.position.z - 2.5 &&
+      player.position.z - 0.75 < p.position.z + 2.5 &&
+      player.position.y <= p.position.y + 1.5 &&
+      player.position.y >= p.position.y
+    ) {
+      // на платформе
+      player.position.y = p.position.y + 1.0;
+      velocityY = 0;
+      canJump = true;
+    }
+  });
+
+  // Прыжок
+  if (canJump && keys['Space']) {
+    velocityY = 0.5;
+    canJump = false;
+  }
+
+  // Сбор бонуса
+  bonuses.forEach((b, idx) => {
+    if (player.position.distanceTo(b.position) < 1.8) {
+      scene.remove(b);
+      bonuses.splice(idx, 1);
+      score++;
+      scoreEl.textContent = score;
+    }
+  });
+
+  // Камера следует за игроком
+  camera.position.lerp(
+    new THREE.Vector3(player.position.x, player.position.y + 6, player.position.z + 12),
+    0.1
+  );
+  camera.lookAt(player.position);
+
   renderer.render(scene, camera);
 }
 
 animate();
 
-// Обработка ресайза окна
+// Обновление размера экрана
 window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
