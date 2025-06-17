@@ -5,99 +5,55 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   height: 100vh;
   user-select: none;
+  padding: 20px 0;
+  box-sizing: border-box;
 }
 
 #score {
-  font-size: 22px;
-  font-weight: 600;
-  margin-bottom: 8px;
+  font-size: 24px;
+  font-weight: 700;
   color: #333;
+  margin-bottom: 24px;
 }
 
-#asic-container {
-  width: 160px;
-  height: 90px;
-  background: #3c3c3c;
-  border-radius: 12px;
-  box-shadow: 0 0 14px rgba(0,0,0,0.4);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 14px;
-  position: relative;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-#asic-container:active {
-  transform: scale(0.95);
-}
-
-.label {
-  position: absolute;
-  bottom: -26px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 14px;
-  color: #222;
-  background: #fff9;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-weight: 600;
-}
-
-.fan {
-  width: 32px;
-  height: 32px;
+#miner-spinner {
+  width: 120px;
+  height: 120px;
+  border: 12px solid #f3c27b;
+  border-top: 12px solid #ffb347;
   border-radius: 50%;
-  background: #222;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
+  margin: 20px 0 24px 0;
+  animation: spin 3s linear infinite;
+  cursor: pointer;
+  box-shadow: 0 0 20px #ffb347aa;
+  transition: box-shadow 0.3s ease;
+  user-select: none;
 }
 
-.fan-blades {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  animation: spin 0.8s linear infinite;
+#miner-spinner:active {
+  box-shadow: 0 0 40px #ffaa00cc;
+  animation-play-state: paused;
 }
-
-.blade {
-  position: absolute;
-  width: 3px;
-  height: 14px;
-  background: #aaa;
-  top: 9px;
-  left: 50%;
-  transform-origin: center bottom;
-}
-
-.blade:nth-child(2) { transform: rotate(60deg) translateX(-50%); }
-.blade:nth-child(3) { transform: rotate(120deg) translateX(-50%); }
-.blade:nth-child(4) { transform: rotate(180deg) translateX(-50%); }
-.blade:nth-child(5) { transform: rotate(240deg) translateX(-50%); }
-.blade:nth-child(6) { transform: rotate(300deg) translateX(-50%); }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
 }
 
 #shop-toggle {
-  margin-top: 20px;
-  padding: 10px 22px;
-  font-size: 16px;
+  font-size: 18px;
+  padding: 12px 30px;
   background: #444;
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
   transition: background 0.3s ease;
   user-select: none;
+  margin-top: auto; /* push to bottom */
 }
 #shop-toggle:hover {
   background: #666;
@@ -108,16 +64,16 @@ body {
   bottom: -320px;
   left: 0;
   width: 100%;
-  max-width: 400px;
+  max-width: 480px;
   background: #222;
   color: white;
   padding: 20px;
   box-sizing: border-box;
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
-  box-shadow: 0 -4px 12px rgba(0,0,0,0.5);
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  box-shadow: 0 -4px 16px rgba(0,0,0,0.7);
   transition: bottom 0.4s ease;
-  font-size: 15px;
+  font-size: 16px;
   z-index: 100;
 }
 .shop.open {
@@ -129,14 +85,15 @@ body {
 }
 .shop-item button {
   width: 100%;
-  padding: 10px;
-  font-size: 15px;
+  padding: 12px;
+  font-size: 16px;
   background: #555;
   color: white;
   border: none;
-  border-radius: 7px;
+  border-radius: 10px;
   cursor: pointer;
   transition: background 0.2s ease;
+  user-select: none;
 }
 .shop-item button:hover:enabled {
   background: #777;
