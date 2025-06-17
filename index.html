@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>🎰 Казино Джекпот 777</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: radial-gradient(circle at center, #2c003e 0%, #000000 100%);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    h1 {
+      font-size: 48px;
+      color: #ffcc00;
+      text-shadow: 0 0 10px #ffcc00, 0 0 20px #ff6600;
+      margin-bottom: 30px;
+    }
+
+    .jackpot {
+      display: flex;
+      gap: 30px;
+      font-size: 100px;
+      font-weight: bold;
+      text-shadow: 0 0 12px #fff;
+      margin-bottom: 30px;
+      transition: transform 0.3s ease;
+    }
+
+    .slot {
+      width: 120px;
+      height: 120px;
+      background: #222;
+      border: 5px solid #ffcc00;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 10px #ffcc00;
+      animation: pulse 1s infinite alternate;
+    }
+
+    .jackpot.spinning .slot {
+      animation: spin 0.5s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotateX(0); }
+      100% { transform: rotateX(360deg); }
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 10px #ffcc00; }
+      100% { box-shadow: 0 0 20px #ff6600; }
+    }
+
+    button {
+      padding: 16px 32px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #000;
+      background: linear-gradient(145deg, #ffcc00, #ffaa00);
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 5px #b38800;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: linear-gradient(145deg, #ffaa00, #ffcc00);
+    }
+
+    button:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px #b38800;
+    }
+
+    .result {
+      margin-top: 30px;
+      font-size: 28px;
+      font-weight: bold;
+      height: 40px;
+    }
+
+    .win {
+      color: #00ff8c;
+      text-shadow: 0 0 10px #00ff8c;
+      animation: flashWin 0.8s ease infinite alternate;
+    }
+
+    .lose {
+      color: #ff4d4d;
+    }
+
+    @keyframes flashWin {
+      from { opacity: 1; }
+      to { opacity: 0.5; }
+    }
+
+    /* Background particles (optional) */
+    .stars {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: url('https://i.imgur.com/Nt4S9Ko.png') repeat;
+      animation: moveStars 60s linear infinite;
+      z-index: -1;
+      opacity: 0.15;
+    }
+
+    @keyframes moveStars {
+      0% { background-position: 0 0; }
+      100% { background-position: 10000px 5000px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="stars"></div>
+
+  <h1>🎰 Казино Джекпот 777</h1>
+  <div class="jackpot" id="slots">
+    <div class="slot">❓</div>
+    <div class="slot">❓</div>
+    <div class="slot">❓</div>
+  </div>
+  <button onclick="spin()">КРУТИТЬ</button>
+  <div class="result" id="result"></div>
+
+  <script>
+    const symbols = ['7️⃣', '🍒', '💎', '🍋', '⭐', '🍉'];
+    const slots = document.querySelectorAll('.slot');
+    const result = document.getElementById('result');
+    const jackpot = document.getElementById('slots');
+
+    function spin() {
+      result.textContent = '';
+      result.className = 'result';
+      jackpot.classList.add('spinning');
+
+      const spins = 20;
+      let count = 0;
+      const interval = setInterval(() => {
+        for (let i = 0; i < slots.length; i++) {
+          const rand = Math.floor(Math.random() * symbols.length);
+          slots[i].textContent = symbols[rand];
+        }
+        count++;
+        if (count >= spins) {
+          clearInterval(interval);
+          jackpot.classList.remove('spinning');
+          checkWin();
+        }
+      }, 80);
+    }
+
+    function checkWin() {
+      const values = Array.from(slots).map(slot => slot.textContent);
+      const isWin = values.every(val => val === values[0]);
+
+      if (isWin) {
+        result.textContent = '🎉 ВЫ ВЫИГРАЛИ ДЖЕКПОТ!';
+        result.classList.add('win');
+      } else {
+        result.textContent = '😢 Попробуйте ещё раз';
+        result.classList.add('lose');
+      }
+    }
+  </script>
+
+</body>
+</html>
