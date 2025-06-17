@@ -2,100 +2,90 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>🎰 Джекпот 777 – Казино</title>
+  <title>🎰 Джекпот 777</title>
   <style>
-    /* --- Основные стили и фон --- */
     body {
       margin: 0;
-      padding: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #f7edf8, #e8e3f6);
-      color: #2d1f13;
-      min-height: 100vh;
+      background: radial-gradient(circle at center, #f0e4ff 0%, #cbb6f3 100%);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      min-height: 100vh;
+      color: #381d57;
     }
 
     h1 {
-      font-size: 40px;
-      color: #8c4c00;
-      margin-bottom: 20px;
+      font-size: 42px;
+      margin: 20px 0;
+      text-shadow: 1px 1px 2px #bfa2ff;
     }
 
-    /* --- Баланс --- */
     .balance {
       font-size: 20px;
-      margin-bottom: 20px;
       font-weight: bold;
-      color: #6a4e0f;
+      margin-bottom: 20px;
     }
 
-    /* --- Барабаны --- */
     .jackpot {
       display: flex;
-      gap: 20px;
-      margin-bottom: 20px;
+      gap: 25px;
+      margin-bottom: 30px;
     }
+
     .slot {
-      width: 100px;
-      height: 100px;
+      width: 120px;
+      height: 120px;
       background: #fff;
-      border: 4px solid #a77400;
-      border-radius: 10px;
+      border: 5px solid #9340ff;
+      border-radius: 15px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 60px;
-      box-shadow: 0 0 10px rgba(167,123,0,0.3);
-      transition: transform 0.2s;
-    }
-    .jackpot.spinning .slot {
-      animation: spin 0.07s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotateX(0deg); }
-      100% { transform: rotateX(360deg); }
+      font-size: 64px;
+      box-shadow: 0 0 15px rgba(80, 0, 200, 0.3);
     }
 
-    /* --- Кнопка --- */
     button {
+      background-color: #9340ff;
+      color: #fff;
+      font-size: 20px;
       padding: 12px 24px;
-      font-size: 18px;
-      font-weight: bold;
-      background-color: #d07a00;
-      color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
-      box-shadow: 0 3px rgba(0,0,0,0.2);
+      font-weight: bold;
       transition: background-color 0.3s, transform 0.2s;
     }
+
     button:hover {
-      background-color: #a75b00;
-    }
-    button:active {
-      transform: translateY(2px);
-      box-shadow: 0 1px rgba(0,0,0,0.2);
+      background-color: #7022c3;
     }
 
-    /* --- Результат --- */
+    button:active {
+      transform: scale(0.97);
+    }
+
     .result {
       margin-top: 20px;
       font-size: 24px;
-      min-height: 30px;
+      font-weight: bold;
+      min-height: 32px;
     }
+
     .win {
-      color: #00a000;
-      animation: flash 0.5s ease-out 3 alternate;
+      color: green;
+      animation: flash 0.5s ease-in-out 4 alternate;
     }
+
     .lose {
-      color: #c00;
+      color: red;
     }
+
     @keyframes flash {
       from { opacity: 1; }
-      to { opacity: 0.4; }
+      to { opacity: 0.3; }
     }
   </style>
 </head>
@@ -104,71 +94,82 @@
   <h1>🎰 Джекпот 777</h1>
   <div class="balance" id="balance">Баланс: 100 💰</div>
 
-  <div class="jackpot" id="slots">
+  <div class="jackpot" id="jackpot">
     <div class="slot">❓</div>
     <div class="slot">❓</div>
     <div class="slot">❓</div>
   </div>
 
-  <button id="spinBtn">Крутить — 10💰</button>
+  <button id="spinBtn">Крутить — 10 💰</button>
   <div class="result" id="result"></div>
 
   <script>
     const symbols = ['7️⃣','🍒','💎','🍋','⭐','🍉'];
     const slots = document.querySelectorAll('.slot');
-    const resultEl = document.getElementById('result');
-    const jackpot = document.getElementById('slots');
-    const balanceEl = document.getElementById('balance');
     const spinBtn = document.getElementById('spinBtn');
+    const result = document.getElementById('result');
+    const balanceText = document.getElementById('balance');
 
     let balance = 100;
-    const cost = 10;
-    balanceEl.textContent = `Баланс: ${balance} 💰`;
+    const spinCost = 10;
 
-    spinBtn.addEventListener('click', spin);
+    updateBalance();
 
-    function spin() {
-      if (balance < cost) {
-        resultEl.textContent = 'Недостаточно монет!';
-        resultEl.className = 'result lose';
+    spinBtn.addEventListener('click', () => {
+      if (balance < spinCost) {
+        result.textContent = "Недостаточно монет!";
+        result.className = "result lose";
         return;
       }
 
-      balance -= cost;
-      balanceEl.textContent = `Баланс: ${balance} 💰`;
-      resultEl.textContent = '';
-      jackpot.classList.add('spinning');
+      balance -= spinCost;
+      updateBalance();
+      result.textContent = '';
+      result.className = "result";
+
       spinBtn.disabled = true;
 
-      let count = 0;
-      const spins = 25;
-      const interval = setInterval(() => {
-        slots.forEach(slot => {
-          slot.textContent = symbols[Math.floor(Math.random()*symbols.length)];
-        });
-        if (++count >= spins) finishSpin();
-      }, 80);
+      // крутятся по очереди, как в настоящем слоте
+      let finalSymbols = [];
+      let delays = [0, 500, 1000]; // задержки для каждого барабана
 
-      function finishSpin() {
-        clearInterval(interval);
-        jackpot.classList.remove('spinning');
-        spinBtn.disabled = false;
-        checkWin();
+      slots.forEach((slot, i) => {
+        let spins = 15 + i * 5; // немного больше вращений для правых
+        let count = 0;
+
+        const spinInterval = setInterval(() => {
+          const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+          slot.textContent = randomSymbol;
+          count++;
+
+          if (count >= spins) {
+            clearInterval(spinInterval);
+            finalSymbols[i] = slot.textContent;
+
+            // когда последний закончил
+            if (finalSymbols.length === 3 && finalSymbols.every(s => s !== undefined)) {
+              checkResult(finalSymbols);
+              spinBtn.disabled = false;
+            }
+          }
+        }, 60);
+      });
+    });
+
+    function checkResult(symbols) {
+      if (symbols[0] === symbols[1] && symbols[1] === symbols[2]) {
+        balance += 100;
+        updateBalance();
+        result.textContent = "🎉 Джекпот! +100 💰";
+        result.className = "result win";
+      } else {
+        result.textContent = "😢 Не повезло. Попробуй снова!";
+        result.className = "result lose";
       }
     }
 
-    function checkWin() {
-      const [a,b,c] = Array.from(slots, el=>el.textContent);
-      if (a===b && b===c) {
-        const winSum = 100;
-        balance += winSum;
-        balanceEl.textContent = `Баланс: ${balance} 💰`;
-        resultEl.textContent = `🎉 Джекпот! +${winSum} 💰`;
-        resultEl.className = 'result win';
-      } else {
-        resultEl.textContent = '😢 Попробуй ещё';
-        resultEl.className = 'result lose';
-      }
+    function updateBalance() {
+      balanceText.textContent = `Баланс: ${balance} 💰`;
     }
   </script>
 
