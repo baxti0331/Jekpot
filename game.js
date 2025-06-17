@@ -8,18 +8,18 @@ function resize() {
 resize();
 window.addEventListener('resize', resize);
 
-const WORLD_WIDTH = 2000;
+// Параметры мира (по ширине сделаем очень длинным, но реализуем бесконечную платформу)
+const WORLD_WIDTH = 100000;  // Очень длинный мир по горизонтали
 const WORLD_HEIGHT = 600;
 
 const player = {
   x: 100,
-  y: 100,
+  y: 0,
   width: 40,
   height: 40,
   vx: 0,
   vy: 0,
-  speed: 7,
-  runSpeed: 10,   // скорость бега при удержании
+  runSpeed: 10,
   jumpPower: -18,
   strongJumpPower: -28,
   gravity: 0.8,
@@ -35,37 +35,39 @@ const camera = {
   height: canvas.height,
 };
 
+// Основная платформа — бесконечная дорога (по высоте fixed)
+const PLATFORM_HEIGHT = 40;
+const PLATFORM_Y = WORLD_HEIGHT - PLATFORM_HEIGHT;
+
+// Несколько платформ для прыжков вверх
 const platforms = [
-  { x: 0, y: 560, width: WORLD_WIDTH, height: 40 },
   { x: 300, y: 450, width: 200, height: 20 },
-  { x: 150, y: 350, width: 150, height: 20 },
-  { x: 500, y: 300, width: 200, height: 20 },
-  { x: 800, y: 400, width: 150, height: 20 },
-  { x: 1100, y: 350, width: 300, height: 20 },
-  { x: 1500, y: 500, width: 400, height: 20 },
+  { x: 700, y: 380, width: 150, height: 20 },
+  { x: 1100, y: 320, width: 200, height: 20 },
+  { x: 1500, y: 450, width: 180, height: 20 },
+  { x: 1900, y: 380, width: 220, height: 20 },
 ];
 
+// Монеты на платформах
 const coins = [
   { x: 320, y: 410, size: 20, collected: false },
-  { x: 180, y: 310, size: 20, collected: false },
-  { x: 550, y: 260, size: 20, collected: false },
-  { x: 850, y: 360, size: 20, collected: false },
-  { x: 1200, y: 310, size: 20, collected: false },
-  { x: 1550, y: 460, size: 20, collected: false },
+  { x: 720, y: 340, size: 20, collected: false },
+  { x: 1120, y: 280, size: 20, collected: false },
+  { x: 1520, y: 410, size: 20, collected: false },
+  { x: 1920, y: 340, size: 20, collected: false },
 ];
 
+// Враги патрулируют на платформах
 const enemies = [
-  { x: 700, y: 520, width: 40, height: 40, direction: 1, speed: 2, range: [700, 900] },
-  { x: 1300, y: 310, width: 40, height: 40, direction: 1, speed: 3, range: [1300, 1600] },
+  { x: 600, y: PLATFORM_Y - 40, width: 40, height: 40, direction: 1, speed: 2, range: [600, 800] },
+  { x: 1400, y: PLATFORM_Y - 40, width: 40, height: 40, direction: 1, speed: 3, range: [1400, 1700] },
 ];
 
 let score = 0;
 let startTime = Date.now();
 
-let touchHold = false; // флаг удержания пальца
-let lastTapTime = 0;   // время последнего тапа для определения двойного тапа
-
-// Обработчик касаний
+let touchHold = false;
+let lastTapTime = 0;
 
 canvas.addEventListener('touchstart', e => {
   e.preventDefault();
@@ -76,13 +78,11 @@ canvas.addEventListener('touchstart', e => {
   const tapInterval = now - lastTapTime;
 
   if (tapInterval < 300) {
-    // Двойной тап — сильный прыжок
     if (player.onGround) {
       player.vy = player.strongJumpPower;
       player.onGround = false;
     }
   } else {
-    // Одиночный тап — обычный прыжок
     if (player.onGround) {
       player.vy = player.jumpPower;
       player.onGround = false;
@@ -97,8 +97,7 @@ canvas.addEventListener('touchend', e => {
   touchHold = false;
 });
 
-// Для мыши (если хочешь тестировать на ПК)
-
+// Для ПК мыши — тоже самое (удобно для теста)
 canvas.addEventListener('mousedown', e => {
   e.preventDefault();
 
@@ -136,22 +135,18 @@ function rectsIntersect(r1, r2) {
 
 function resetGame() {
   player.x = 100;
-  player.y = 100;
+  player.y = PLATFORM_Y - player.height;
   player.vx = 0;
   player.vy = 0;
-  player.onGround = false;
+  player.onGround = true;
   score = 0;
   coins.forEach(c => c.collected = false);
   startTime = Date.now();
 }
 
 function update() {
-  // Горизонтальное движение: если удерживаем палец - бежим вправо
-  if (touchHold) {
-    player.vx = player.runSpeed;
-  } else {
-    player.vx = 0;
-  }
+  // Горизонтальное движение: удержание пальца - бежим вправо
+  player.vx = touchHold ? player.runSpeed : 0;
 
   // Гравитация
   player.vy += player.gravity;
@@ -159,8 +154,16 @@ function update() {
   player.x += player.vx;
   player.y += player.vy;
 
-  // Столкновения с платформами
-  player.onGround = false;
+  // Проверяем столкновение с бесконечной основной платформой (дорогой)
+  if (player.y + player.height > PLATFORM_Y) {
+    player.y = PLATFORM_Y - player.height;
+    player.vy = 0;
+    player.onGround = true;
+  } else {
+    player.onGround = false;
+  }
+
+  // Столкновения с дополнительными платформами
   for (const plat of platforms) {
     if (
       player.x < plat.x + plat.width &&
@@ -168,7 +171,6 @@ function update() {
       player.y < plat.y + plat.height &&
       player.y + player.height > plat.y
     ) {
-      // Стоим сверху платформы
       if (player.vy > 0 && (player.y + player.height - player.vy) <= plat.y) {
         player.y = plat.y - player.height;
         player.vy = 0;
@@ -186,21 +188,21 @@ function update() {
     }
   }
 
-  // Столкновения с врагами
-  for (const enemy of enemies) {
-    if (rectsIntersect(player, enemy)) {
-      resetGame();
-      break;
-    }
-  }
-
-  // Обновляем врагов (патрулирование)
+  // Обновляем врагов (патрулируют)
   enemies.forEach(enemy => {
     enemy.x += enemy.speed * enemy.direction;
     if (enemy.x < enemy.range[0] || enemy.x > enemy.range[1]) {
       enemy.direction *= -1;
     }
   });
+
+  // Проверка столкновений с врагами
+  for (const enemy of enemies) {
+    if (rectsIntersect(player, enemy)) {
+      resetGame();
+      break;
+    }
+  }
 
   // Сбор монет
   coins.forEach(coin => {
@@ -213,14 +215,12 @@ function update() {
     }
   });
 
-  // Камера следует за игроком
+  // Камера следует за игроком по горизонтали, фиксируем по вертикали
   camera.x = player.x + player.width / 2 - canvas.width / 2;
-  camera.y = player.y + player.height / 2 - canvas.height / 2;
+  camera.y = 0;  // по вертикали камера не двигается (фокус на платформе)
 
   if (camera.x < 0) camera.x = 0;
-  if (camera.y < 0) camera.y = 0;
   if (camera.x + canvas.width > WORLD_WIDTH) camera.x = WORLD_WIDTH - canvas.width;
-  if (camera.y + canvas.height > WORLD_HEIGHT) camera.y = WORLD_HEIGHT - canvas.height;
 }
 
 function draw() {
@@ -233,7 +233,11 @@ function draw() {
   ctx.fillStyle = '#87CEEB';
   ctx.fillRect(camera.x, camera.y, canvas.width, canvas.height);
 
-  // Платформы
+  // Бесконечная платформа (длинная дорога)
+  ctx.fillStyle = '#654321';
+  ctx.fillRect(camera.x, PLATFORM_Y, canvas.width, PLATFORM_HEIGHT);
+
+  // Рисуем дополнительные платформы
   ctx.fillStyle = '#654321';
   platforms.forEach(plat => {
     ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
@@ -261,7 +265,7 @@ function draw() {
 
   ctx.restore();
 
-  // Счёт и время
+  // Счёт и время (в левом верхнем углу)
   ctx.fillStyle = 'white';
   ctx.font = '20px Arial';
   ctx.fillText(`Монет: ${score}`, 20, 30);
