@@ -2,14 +2,99 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>3D Платформер на Three.js</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Платформер</title>
+  <style>
+    body { margin: 0; background: #222; overflow: hidden; }
+    canvas { display: block; margin: 0 auto; background: #87CEEB; }
+  </style>
 </head>
 <body>
-  <div id="info">Очки: <span id="score">0</span></div>
+<canvas id="gameCanvas" width="800" height="600"></canvas>
 
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.min.js"></script>
-  <script src="script.js"></script>
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+// Игрок
+const player = {
+  x: 100,
+  y: 100,
+  width: 40,
+  height: 40,
+  vx: 0,
+  vy: 0,
+  speed: 4,
+  jumpPower: -12,
+  gravity: 0.6,
+  onGround: false,
+};
+
+// Платформы
+const platforms = [
+  { x: 0, y: 560, width: 800, height: 40 },
+  { x: 300, y: 450, width: 200, height: 20 },
+  { x: 150, y: 350, width: 150, height: 20 },
+  { x: 500, y: 300, width: 200, height: 20 },
+];
+
+// Управление
+const keys = {};
+document.addEventListener('keydown', e => keys[e.code] = true);
+document.addEventListener('keyup', e => keys[e.code] = false);
+
+// Главный цикл
+function gameLoop() {
+  requestAnimationFrame(gameLoop);
+
+  // Горизонтальное движение
+  player.vx = 0;
+  if (keys['ArrowLeft'] || keys['KeyA']) player.vx = -player.speed;
+  if (keys['ArrowRight'] || keys['KeyD']) player.vx = player.speed;
+
+  // Прыжок
+  if ((keys['ArrowUp'] || keys['Space'] || keys['KeyW']) && player.onGround) {
+    player.vy = player.jumpPower;
+    player.onGround = false;
+  }
+
+  // Применение физики
+  player.vy += player.gravity;
+  player.x += player.vx;
+  player.y += player.vy;
+
+  // Проверка столкновений с платформами
+  player.onGround = false;
+  for (const plat of platforms) {
+    if (
+      player.x < plat.x + plat.width &&
+      player.x + player.width > plat.x &&
+      player.y < plat.y + plat.height &&
+      player.y + player.height > plat.y
+    ) {
+      // Стоим сверху платформы
+      if (player.vy > 0 && player.y + player.height - player.vy <= plat.y) {
+        player.y = plat.y - player.height;
+        player.vy = 0;
+        player.onGround = true;
+      }
+    }
+  }
+
+  // Очистка
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Рисуем платформы
+  ctx.fillStyle = "#444";
+  for (const plat of platforms) {
+    ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
+  }
+
+  // Рисуем игрока
+  ctx.fillStyle = "orange";
+  ctx.fillRect(player.x, player.y, player.width, player.height);
+}
+
+gameLoop();
+</script>
 </body>
 </html>
