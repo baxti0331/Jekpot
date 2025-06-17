@@ -58,7 +58,6 @@ function resetGame() {
 }
 
 function createObstacle() {
-  // Верхняя труба: высота от 50 до canvas.height - gap - 50
   const topHeight = 50 + Math.random() * (canvas.height - OBSTACLE_GAP - 100);
   obstacles.push({
     x: canvas.width,
@@ -72,11 +71,9 @@ function createObstacle() {
 function update(deltaTime) {
   if (gameOver) return;
 
-  // Движение игрока с гравитацией
   player.vy += GRAVITY;
   player.y += player.vy;
 
-  // Ограничения по верхнему и нижнему краю
   if (player.y < 0) {
     player.y = 0;
     player.vy = 0;
@@ -86,32 +83,25 @@ function update(deltaTime) {
     gameOver = true;
   }
 
-  // Создаём препятствия через интервалы времени
   if (Date.now() - lastObstacleTime > OBSTACLE_INTERVAL) {
     createObstacle();
     lastObstacleTime = Date.now();
   }
 
-  // Движение препятствий влево
   obstacles.forEach(ob => {
     ob.x -= 5;
   });
 
-  // Удаляем вышедшие за левый край препятствия
   obstacles = obstacles.filter(ob => ob.x + ob.width > 0);
 
-  // Проверка столкновений с препятствиями
   for (const ob of obstacles) {
-    // Верхняя труба
     const topRect = { x: ob.x, y: 0, width: ob.width, height: ob.topHeight };
-    // Нижняя труба
     const bottomRect = { x: ob.x, y: ob.bottomY, width: ob.width, height: canvas.height - ob.bottomY };
 
     if (rectsIntersect(player, topRect) || rectsIntersect(player, bottomRect)) {
       gameOver = true;
     }
 
-    // Подсчёт очков — когда игрок пролетает препятствие
     if (!ob.passed && ob.x + ob.width < player.x) {
       ob.passed = true;
       score++;
@@ -126,25 +116,84 @@ function rectsIntersect(r1, r2) {
            r2.y + r2.height < r1.y);
 }
 
+function drawPlayer(x, y, width, height) {
+  ctx.save();
+  ctx.translate(x + width / 2, y + height / 2);
+
+  // Тело (овал)
+  ctx.fillStyle = '#FFA500';
+  ctx.beginPath();
+  ctx.ellipse(0, 0, width * 0.5, height * 0.6, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Голова (круг)
+  ctx.beginPath();
+  ctx.arc(0, -height * 0.6, width * 0.35, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  // Глаза
+  ctx.fillStyle = '#000';
+  ctx.beginPath();
+  ctx.arc(-width * 0.15, -height * 0.65, width * 0.08, 0, Math.PI * 2);
+  ctx.arc(width * 0.15, -height * 0.65, width * 0.08, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Носик (треугольник)
+  ctx.fillStyle = '#D2691E';
+  ctx.beginPath();
+  ctx.moveTo(0, -height * 0.55);
+  ctx.lineTo(-width * 0.06, -height * 0.5);
+  ctx.lineTo(width * 0.06, -height * 0.5);
+  ctx.closePath();
+  ctx.fill();
+
+  // Уши (треугольники)
+  ctx.fillStyle = '#FFA500';
+  ctx.beginPath();
+  ctx.moveTo(-width * 0.3, -height * 0.85);
+  ctx.lineTo(-width * 0.15, -height * 1.1);
+  ctx.lineTo(0, -height * 0.85);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(width * 0.3, -height * 0.85);
+  ctx.lineTo(width * 0.15, -height * 1.1);
+  ctx.lineTo(0, -height * 0.85);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // Крылья (прозрачные)
+  ctx.fillStyle = 'rgba(255, 165, 0, 0.5)';
+  ctx.beginPath();
+  ctx.ellipse(-width * 0.6, 0, width * 0.4, height * 0.8, Math.PI / 6, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.ellipse(width * 0.6, 0, width * 0.4, height * 0.8, -Math.PI / 6, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.restore();
+}
+
 function draw() {
-  // Фон небо
   ctx.fillStyle = '#87CEEB';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Рисуем игрока
-  ctx.fillStyle = player.color;
-  ctx.fillRect(player.x, player.y, player.width, player.height);
+  drawPlayer(player.x, player.y, player.width, player.height);
 
-  // Рисуем препятствия — трубы зелёные
   ctx.fillStyle = 'green';
   obstacles.forEach(ob => {
-    // Верхняя труба
     ctx.fillRect(ob.x, 0, ob.width, ob.topHeight);
-    // Нижняя труба
     ctx.fillRect(ob.x, ob.bottomY, ob.width, canvas.height - ob.bottomY);
   });
 
-  // Счёт и время
   ctx.fillStyle = 'white';
   ctx.font = '24px Arial';
   ctx.fillText(`Очки: ${score}`, 20, 40);
