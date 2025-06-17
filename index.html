@@ -1,159 +1,137 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>3D Монета Кликер</title>
-  <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      font-family: 'Segoe UI', sans-serif;
-      background: #111;
-    }
-    canvas {
-      display: block;
-    }
-    #hud {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      color: #fff;
-      background: rgba(0, 0, 0, 0.6);
-      padding: 12px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px gold;
-    }
-    button {
-      display: block;
-      margin-top: 10px;
-      padding: 8px 14px;
-      font-size: 15px;
-      background-color: gold;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      color: black;
-      font-weight: bold;
-    }
-    button:hover {
-      background-color: orange;
-    }
-  </style>
+<meta charset="UTF-8" />
+<title>Кликер с Историей</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #222;
+    color: #eee;
+    text-align: center;
+    padding: 30px;
+  }
+  #coin {
+    font-size: 80px;
+    cursor: pointer;
+    user-select: none;
+    margin: 20px auto;
+    width: 120px;
+    height: 120px;
+    line-height: 120px;
+    background: gold;
+    border-radius: 50%;
+    box-shadow: 0 0 15px 3px gold;
+    transition: transform 0.1s;
+  }
+  #coin:active {
+    transform: scale(1.2);
+  }
+  #stats {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  #story {
+    max-width: 600px;
+    margin: 0 auto 30px auto;
+    font-size: 18px;
+    background: #333;
+    padding: 20px;
+    border-radius: 10px;
+  }
+  button {
+    font-size: 18px;
+    padding: 10px 20px;
+    margin: 10px 5px;
+    cursor: pointer;
+    background: gold;
+    border: none;
+    border-radius: 8px;
+    color: #222;
+    font-weight: bold;
+    box-shadow: 0 0 8px gold;
+    transition: background-color 0.3s;
+  }
+  button:hover {
+    background: orange;
+  }
+  button:disabled {
+    background: #555;
+    cursor: default;
+    box-shadow: none;
+    color: #999;
+  }
+</style>
 </head>
 <body>
 
-<div id="hud">
-  <div>💰 Монеты: <span id="score">0</span></div>
-  <div>🖱 Сила клика: <span id="clickPower">1</span></div>
-  <div>🤖 Помощники: <span id="helpers">0</span></div>
-  <div>⏱ Доход в секунду: <span id="income">0</span></div>
+<div id="stats">Монеты: <span id="money">0</span></div>
+<div id="coin">🪙</div>
 
-  <button onclick="upgradeClick()">Улучшить клик (💵 <span id="cost">10</span>)</button>
-  <button onclick="buyHelper()">Нанять помощника (💵 <span id="helperCost">50</span>)</button>
+<div id="story">
+  <p>Добро пожаловать в свой первый магазин! Нажимай на монету, чтобы заработать деньги.</p>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r148/three.min.js"></script>
+<div id="actions"></div>
+
 <script>
-  let score = 0;
+  let money = 0;
   let clickPower = 1;
-  let clickUpgradeCost = 10;
+  let storyStage = 0;
 
-  let helpers = 0;
-  let helperCost = 50;
-  let helperIncome = 1;
+  const moneyEl = document.getElementById('money');
+  const storyEl = document.getElementById('story');
+  const actionsEl = document.getElementById('actions');
+  const coin = document.getElementById('coin');
 
-  // Обновление интерфейса
-  function updateHUD() {
-    document.getElementById('score').innerText = Math.floor(score);
-    document.getElementById('clickPower').innerText = clickPower;
-    document.getElementById('cost').innerText = clickUpgradeCost;
-    document.getElementById('helpers').innerText = helpers;
-    document.getElementById('helperCost').innerText = helperCost;
-    document.getElementById('income').innerText = helpers * helperIncome;
-  }
+  function update() {
+    moneyEl.textContent = money;
 
-  function upgradeClick() {
-    if (score >= clickUpgradeCost) {
-      score -= clickUpgradeCost;
-      clickPower++;
-      clickUpgradeCost = Math.floor(clickUpgradeCost * 1.5);
-      updateHUD();
+    // История и действия
+    if (storyStage === 0 && money >= 10) {
+      storyStage = 1;
+      storyEl.innerHTML = `<p>Вы накопили 10 монет! Можно улучшить свой магазин.</p>`;
+      actionsEl.innerHTML = `<button id="upgradeBtn">Улучшить клики (+1 сила клика) за 10 монет</button>`;
+      document.getElementById('upgradeBtn').onclick = () => {
+        if (money >= 10) {
+          money -= 10;
+          clickPower += 1;
+          storyEl.innerHTML = `<p>Сила клика увеличена! Теперь за каждый клик вы получаете ${clickPower} монет.</p>`;
+          actionsEl.innerHTML = '';
+          update();
+        }
+      };
+    } else if (storyStage === 1 && money >= 50) {
+      storyStage = 2;
+      storyEl.innerHTML = `<p>Поздравляем! Теперь можно нанять помощника, который будет приносить монеты автоматически.</p>`;
+      actionsEl.innerHTML = `<button id="hireBtn">Нанять помощника за 50 монет</button>`;
+      document.getElementById('hireBtn').onclick = () => {
+        if (money >= 50) {
+          money -= 50;
+          startAutoIncome();
+          storyEl.innerHTML = `<p>Помощник нанят! Теперь у вас есть постоянный доход.</p>`;
+          actionsEl.innerHTML = '';
+          update();
+        }
+      };
     }
   }
 
-  function buyHelper() {
-    if (score >= helperCost) {
-      score -= helperCost;
-      helpers++;
-      helperCost = Math.floor(helperCost * 1.6);
-      updateHUD();
+  function startAutoIncome() {
+    if (!window.autoIncomeInterval) {
+      window.autoIncomeInterval = setInterval(() => {
+        money += 2;
+        update();
+      }, 1000);
     }
   }
 
-  // Автодоход каждую секунду
-  setInterval(() => {
-    score += helpers * helperIncome;
-    updateHUD();
-  }, 1000);
-
-  // Three.js сцена
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
-  const renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  document.body.appendChild(renderer.domElement);
-
-  // 3D Монета (цилиндр)
-  const geometry = new THREE.CylinderGeometry(1, 1, 0.1, 64);
-  const material = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 1, roughness: 0.3 });
-  const coin = new THREE.Mesh(geometry, material);
-  scene.add(coin);
-  coin.rotation.x = Math.PI / 2;
-
-  // Свет
-  const light = new THREE.PointLight(0xffffff, 1.5);
-  light.position.set(5, 5, 5);
-  scene.add(light);
-
-  const ambient = new THREE.AmbientLight(0x404040);
-  scene.add(ambient);
-
-  camera.position.z = 3;
-
-  // Клик по монете
-  const raycaster = new THREE.Raycaster();
-  const mouse = new THREE.Vector2();
-
-  window.addEventListener('click', (event) => {
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-    raycaster.setFromCamera(mouse, camera);
-
-    const intersects = raycaster.intersectObject(coin);
-    if (intersects.length > 0) {
-      score += clickPower;
-      coin.scale.set(1.1, 1.1, 1.1);
-      setTimeout(() => coin.scale.set(1, 1, 1), 100);
-      updateHUD();
-    }
+  coin.addEventListener('click', () => {
+    money += clickPower;
+    update();
   });
 
-  // Анимация
-  function animate() {
-    requestAnimationFrame(animate);
-    coin.rotation.z += 0.01;
-    renderer.render(scene, camera);
-  }
-
-  animate();
-  updateHUD();
-
-  // Ресайз
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
+  update();
 </script>
 
 </body>
