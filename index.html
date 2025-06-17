@@ -2,26 +2,32 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>ASIC Кликер — Реализм</title>
+  <title>ASIC Кликер — Улучшения</title>
   <style>
     body {
       margin: 0;
       padding: 0;
-      background: radial-gradient(ellipse at center, #1a1a1a 0%, #0d0d0d 100%);
+      background: linear-gradient(135deg, #ffe5b4, #ffcba4); /* персиковый фон */
       height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       font-family: 'Segoe UI', sans-serif;
-      color: #00ffcc;
+      color: #0f0f0f;
       user-select: none;
     }
 
     #score {
       font-size: 48px;
-      margin-bottom: 40px;
-      text-shadow: 0 0 15px #00ffc8;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+
+    #income {
+      font-size: 20px;
+      margin-bottom: 30px;
+      color: #444;
     }
 
     .asic {
@@ -35,7 +41,7 @@
       justify-content: space-between;
       align-items: center;
       padding: 30px;
-      box-shadow: 0 0 30px #00ffc840;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
       transition: transform 0.1s ease;
       cursor: pointer;
     }
@@ -68,13 +74,13 @@
       position: absolute;
       width: 8px;
       height: 60px;
-      background: #00ffc8;
+      background: #00bfa5;
       left: 50%;
       top: 10px;
       transform-origin: bottom center;
       border-radius: 4px;
       opacity: 0.7;
-      box-shadow: 0 0 6px #00ffc8;
+      box-shadow: 0 0 6px #00bfa5;
     }
 
     .blade:nth-child(1) { transform: rotate(0deg) translateX(-50%); }
@@ -95,48 +101,95 @@
       left: 20px;
       font-size: 20px;
       font-weight: bold;
-      color: #00ffc8;
+      color: #00bfa5;
       text-shadow: 0 0 10px #000;
+    }
+
+    .shop {
+      margin-top: 40px;
+    }
+
+    .upgrade-btn {
+      padding: 12px 24px;
+      font-size: 18px;
+      background-color: #ffab91;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      transition: background-color 0.2s;
+    }
+
+    .upgrade-btn:hover {
+      background-color: #ff8a65;
+    }
+
+    .upgrade-btn:disabled {
+      background-color: #e0e0e0;
+      cursor: not-allowed;
     }
   </style>
 </head>
 <body>
 
   <div id="score">Очки: 0</div>
+  <div id="income">Доход: 0 / сек</div>
 
   <div class="asic" id="asic" title="Кликни для майнинга!">
     <div class="fan">
       <div class="fan-blades">
-        <div class="blade"></div>
-        <div class="blade"></div>
-        <div class="blade"></div>
-        <div class="blade"></div>
-        <div class="blade"></div>
-        <div class="blade"></div>
+        <div class="blade"></div><div class="blade"></div><div class="blade"></div>
+        <div class="blade"></div><div class="blade"></div><div class="blade"></div>
       </div>
     </div>
     <div class="fan">
       <div class="fan-blades">
-        <div class="blade"></div>
-        <div class="blade"></div>
-        <div class="blade"></div>
-        <div class="blade"></div>
-        <div class="blade"></div>
-        <div class="blade"></div>
+        <div class="blade"></div><div class="blade"></div><div class="blade"></div>
+        <div class="blade"></div><div class="blade"></div><div class="blade"></div>
       </div>
     </div>
     <div class="label">ANTMINER X-100</div>
   </div>
 
+  <div class="shop">
+    <button id="upgradeBtn" class="upgrade-btn">Улучшить майнер (+1/sec) — 50 очков</button>
+  </div>
+
   <script>
-    const scoreEl = document.getElementById('score');
-    const asicEl = document.getElementById('asic');
     let score = 0;
+    let incomePerSecond = 0;
+    let upgradeCost = 50;
+
+    const scoreEl = document.getElementById('score');
+    const incomeEl = document.getElementById('income');
+    const asicEl = document.getElementById('asic');
+    const upgradeBtn = document.getElementById('upgradeBtn');
+
+    function updateUI() {
+      scoreEl.textContent = 'Очки: ' + score;
+      incomeEl.textContent = 'Доход: ' + incomePerSecond + ' / сек';
+      upgradeBtn.textContent = `Улучшить майнер (+1/sec) — ${upgradeCost} очков`;
+      upgradeBtn.disabled = score < upgradeCost;
+    }
 
     asicEl.addEventListener('click', () => {
       score++;
-      scoreEl.textContent = 'Очки: ' + score;
+      updateUI();
     });
+
+    upgradeBtn.addEventListener('click', () => {
+      if (score >= upgradeCost) {
+        score -= upgradeCost;
+        incomePerSecond++;
+        upgradeCost = Math.floor(upgradeCost * 1.5);
+        updateUI();
+      }
+    });
+
+    setInterval(() => {
+      score += incomePerSecond;
+      updateUI();
+    }, 1000); // Каждую секунду начисляем доход
   </script>
 
 </body>
