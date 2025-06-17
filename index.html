@@ -2,136 +2,171 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8" />
-<title>Кликер с Историей</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Кликер с Хорошим UI</title>
 <style>
+  * {
+    box-sizing: border-box;
+  }
   body {
-    font-family: Arial, sans-serif;
-    background: #222;
-    color: #eee;
-    text-align: center;
-    padding: 30px;
+    margin: 0; padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: #f0e9e0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
   }
-  #coin {
-    font-size: 80px;
-    cursor: pointer;
+  header {
+    padding: 20px 0;
+    font-size: 2rem;
+    font-weight: 700;
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
     user-select: none;
-    margin: 20px auto;
-    width: 120px;
-    height: 120px;
-    line-height: 120px;
-    background: gold;
-    border-radius: 50%;
-    box-shadow: 0 0 15px 3px gold;
-    transition: transform 0.1s;
   }
-  #coin:active {
-    transform: scale(1.2);
+  #score {
+    font-size: 2.8rem;
+    margin: 15px 0 10px 0;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-shadow: 0 0 8px gold;
   }
-  #stats {
-    font-size: 24px;
-    margin-bottom: 20px;
-  }
-  #story {
-    max-width: 600px;
-    margin: 0 auto 30px auto;
-    font-size: 18px;
-    background: #333;
-    padding: 20px;
-    border-radius: 10px;
-  }
-  button {
-    font-size: 18px;
-    padding: 10px 20px;
-    margin: 10px 5px;
-    cursor: pointer;
-    background: gold;
+  #coin-btn {
+    width: 140px;
+    height: 140px;
+    background: radial-gradient(circle at center, #ffd700 0%, #c9a200 80%);
     border: none;
-    border-radius: 8px;
-    color: #222;
-    font-weight: bold;
-    box-shadow: 0 0 8px gold;
-    transition: background-color 0.3s;
+    border-radius: 50%;
+    box-shadow:
+      0 0 12px 4px rgba(255, 215, 0, 0.7),
+      inset 0 5px 15px 0 rgba(255, 255, 255, 0.5),
+      inset 0 -5px 10px 0 rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    font-size: 4rem;
+    color: #fff;
+    text-shadow: 0 0 5px #fff;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    user-select: none;
+    outline: none;
   }
-  button:hover {
-    background: orange;
+  #coin-btn:active {
+    transform: scale(1.2);
+    box-shadow:
+      0 0 20px 6px rgba(255, 215, 0, 0.9),
+      inset 0 5px 15px 0 rgba(255, 255, 255, 0.7),
+      inset 0 -5px 10px 0 rgba(0, 0, 0, 0.3);
   }
-  button:disabled {
+  #controls {
+    margin-top: 30px;
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  button.upgrade-btn {
+    padding: 14px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    background: linear-gradient(45deg, #ffca28, #f57f17);
+    box-shadow: 0 0 10px 2px #ffca28;
+    color: #333;
+    transition: background-color 0.25s ease;
+    user-select: none;
+  }
+  button.upgrade-btn:disabled {
     background: #555;
-    cursor: default;
     box-shadow: none;
-    color: #999;
+    color: #aaa;
+    cursor: not-allowed;
+  }
+  button.upgrade-btn:hover:not(:disabled) {
+    background: linear-gradient(45deg, #fdd835, #fbc02d);
+  }
+  @media (max-width: 400px) {
+    #coin-btn {
+      width: 110px;
+      height: 110px;
+      font-size: 3rem;
+    }
+    #controls {
+      width: 90vw;
+    }
   }
 </style>
 </head>
 <body>
 
-<div id="stats">Монеты: <span id="money">0</span></div>
-<div id="coin">🪙</div>
+<header>Кликер с Хорошим UI</header>
+<div id="score">Монеты: 0</div>
+<button id="coin-btn" aria-label="Нажми на монету">🪙</button>
 
-<div id="story">
-  <p>Добро пожаловать в свой первый магазин! Нажимай на монету, чтобы заработать деньги.</p>
+<div id="controls">
+  <button id="upgrade-click" class="upgrade-btn" disabled>
+    Улучшить клик (+1) — стоимость 10
+  </button>
+  <button id="buy-helper" class="upgrade-btn" disabled>
+    Нанять помощника — стоимость 50
+  </button>
 </div>
 
-<div id="actions"></div>
-
 <script>
-  let money = 0;
+  let coins = 0;
   let clickPower = 1;
-  let storyStage = 0;
+  let clickUpgradeCost = 10;
+  let helperCost = 50;
+  let helpers = 0;
+  const helperIncome = 1;
 
-  const moneyEl = document.getElementById('money');
-  const storyEl = document.getElementById('story');
-  const actionsEl = document.getElementById('actions');
-  const coin = document.getElementById('coin');
+  const scoreEl = document.getElementById('score');
+  const coinBtn = document.getElementById('coin-btn');
+  const upgradeClickBtn = document.getElementById('upgrade-click');
+  const buyHelperBtn = document.getElementById('buy-helper');
 
-  function update() {
-    moneyEl.textContent = money;
+  function updateUI() {
+    scoreEl.textContent = `Монеты: ${coins}`;
+    upgradeClickBtn.textContent = `Улучшить клик (+1) — стоимость ${clickUpgradeCost}`;
+    buyHelperBtn.textContent = `Нанять помощника — стоимость ${helperCost}`;
 
-    // История и действия
-    if (storyStage === 0 && money >= 10) {
-      storyStage = 1;
-      storyEl.innerHTML = `<p>Вы накопили 10 монет! Можно улучшить свой магазин.</p>`;
-      actionsEl.innerHTML = `<button id="upgradeBtn">Улучшить клики (+1 сила клика) за 10 монет</button>`;
-      document.getElementById('upgradeBtn').onclick = () => {
-        if (money >= 10) {
-          money -= 10;
-          clickPower += 1;
-          storyEl.innerHTML = `<p>Сила клика увеличена! Теперь за каждый клик вы получаете ${clickPower} монет.</p>`;
-          actionsEl.innerHTML = '';
-          update();
-        }
-      };
-    } else if (storyStage === 1 && money >= 50) {
-      storyStage = 2;
-      storyEl.innerHTML = `<p>Поздравляем! Теперь можно нанять помощника, который будет приносить монеты автоматически.</p>`;
-      actionsEl.innerHTML = `<button id="hireBtn">Нанять помощника за 50 монет</button>`;
-      document.getElementById('hireBtn').onclick = () => {
-        if (money >= 50) {
-          money -= 50;
-          startAutoIncome();
-          storyEl.innerHTML = `<p>Помощник нанят! Теперь у вас есть постоянный доход.</p>`;
-          actionsEl.innerHTML = '';
-          update();
-        }
-      };
-    }
+    upgradeClickBtn.disabled = coins < clickUpgradeCost;
+    buyHelperBtn.disabled = coins < helperCost;
   }
 
-  function startAutoIncome() {
-    if (!window.autoIncomeInterval) {
-      window.autoIncomeInterval = setInterval(() => {
-        money += 2;
-        update();
-      }, 1000);
-    }
-  }
-
-  coin.addEventListener('click', () => {
-    money += clickPower;
-    update();
+  coinBtn.addEventListener('click', () => {
+    coins += clickPower;
+    updateUI();
   });
 
-  update();
+  upgradeClickBtn.addEventListener('click', () => {
+    if (coins >= clickUpgradeCost) {
+      coins -= clickUpgradeCost;
+      clickPower++;
+      clickUpgradeCost = Math.floor(clickUpgradeCost * 1.6);
+      updateUI();
+    }
+  });
+
+  buyHelperBtn.addEventListener('click', () => {
+    if (coins >= helperCost) {
+      coins -= helperCost;
+      helpers++;
+      helperCost = Math.floor(helperCost * 1.7);
+      updateUI();
+    }
+  });
+
+  // Автоматический доход от помощников
+  setInterval(() => {
+    if (helpers > 0) {
+      coins += helpers * helperIncome;
+      updateUI();
+    }
+  }, 1000);
+
+  updateUI();
 </script>
 
 </body>
