@@ -12,7 +12,6 @@ let state = {
 
 const saveKey = 'asicClickerState';
 const scoreEl = document.getElementById('score');
-const incomeEl = document.getElementById('income');
 const shopEl = document.getElementById('shop');
 const asicContainer = document.getElementById('asic-container');
 const asicLabel = document.getElementById('asic-label');
@@ -50,14 +49,11 @@ function flashEffect() {
 
 function updateUI() {
   scoreEl.textContent = `Очки: ${Math.floor(state.score)}`;
-  incomeEl.textContent = `Доход/сек: ${calcIncome()}`;
-
-  // Обновить внешний вид ASIC по лучшему устройству
+  
   const best = getBestAsic();
   asicLabel.textContent = best.name;
   asicContainer.style.background = best.color;
 
-  // Обновить магазин
   shopEl.innerHTML = '';
   shopItems.forEach(item => {
     const count = state.owned[item.id] || 0;
@@ -90,7 +86,6 @@ asicContainer.addEventListener('click', () => {
 
 shopToggleBtn.addEventListener('click', () => {
   shopEl.classList.toggle('open');
-  // Можно добавить иконку поворота или изменение текста кнопки
 });
 
 setInterval(() => {
