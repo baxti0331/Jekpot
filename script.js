@@ -40,21 +40,18 @@ function drawWheel(angle) {
   ctx.translate(centerX, centerY);
   ctx.rotate(angle);
 
-  // Нарисуем 3D эффекты барабана
-
-  // Нарисуем тёмный край барабана (толщина "боковой стенки")
+  // Рисуем тёмный край барабана
   const rimWidth = 18;
   ctx.beginPath();
   ctx.arc(0, 0, wheelRadius + rimWidth, 0, 2 * Math.PI);
   ctx.fillStyle = '#111c';
   ctx.fill();
 
-  // Нарисуем секторные сегменты с градиентами
+  // Сегменты с градиентом
   for (let i = 0; i < numSegments; i++) {
     const startAngle = i * anglePerSegment;
     const endAngle = startAngle + anglePerSegment;
 
-    // Градиент для реалистичного свечения сектора
     const grad = ctx.createRadialGradient(
       Math.cos(startAngle + anglePerSegment / 2) * wheelRadius * 0.5,
       Math.sin(startAngle + anglePerSegment / 2) * wheelRadius * 0.5,
@@ -73,7 +70,7 @@ function drawWheel(angle) {
     ctx.fillStyle = grad;
     ctx.fill();
 
-    // Добавим лёгкое внутреннее свечение для 3D эффекта
+    // Внутреннее свечение
     const shading = ctx.createLinearGradient(
       Math.cos(startAngle) * wheelRadius,
       Math.sin(startAngle) * wheelRadius,
@@ -86,7 +83,7 @@ function drawWheel(angle) {
     ctx.fillStyle = shading;
     ctx.fill();
 
-    // Нарисуем текст
+    // Текст
     ctx.save();
     ctx.fillStyle = '#eee';
     ctx.font = 'bold 16px Verdana';
@@ -98,7 +95,7 @@ function drawWheel(angle) {
     ctx.restore();
   }
 
-  // Нарисуем центральный круг (ось)
+  // Центр
   const centerRadius = 40;
   ctx.beginPath();
   ctx.shadowColor = '#0ff';
@@ -118,7 +115,7 @@ function spin() {
   resultDiv.textContent = '';
   spinBtn.disabled = true;
 
-  const spins = Math.floor(Math.random() * 3) + 4; // 4-6 полных оборотов
+  const spins = Math.floor(Math.random() * 3) + 4; // 4-6 оборотов
   const extraAngle = Math.random() * 2 * Math.PI;
 
   const targetAngle = spins * 2 * Math.PI + extraAngle;
@@ -150,11 +147,11 @@ function spin() {
 }
 
 function announceResult() {
-  // Нормализуем угол от 0 до 2π
+  // Учитываем что стрелка смотрит вниз (π радиан)
   const normalizedAngle = currentAngle % (2 * Math.PI);
+  const adjustedAngle = (normalizedAngle + Math.PI) % (2 * Math.PI);
 
-  // Индекс сектора по текущему углу, учитывая что стрелка сверху (0 по оси Y)
-  let index = numSegments - Math.floor(normalizedAngle / anglePerSegment) - 1;
+  let index = numSegments - Math.floor(adjustedAngle / anglePerSegment) - 1;
   if (index < 0) index += numSegments;
 
   resultDiv.textContent = `Выпало: ${segments[index]}`;
