@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Колесо Фортуны</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>3D Колесо Фортуны</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="wrapper">
-    <h1>Колесо Фортуны</h1>
+  <div class="container">
+    <h1>3D Колесо Фортуны</h1>
     <div class="wheel-container">
-      <div class="pointer"></div>
       <canvas id="wheel" width="500" height="500"></canvas>
+      <div class="pointer"></div>
     </div>
     <button id="spinBtn">Крутить</button>
-    <div class="balance">Баланс: <span id="balance">1000</span> ₽</div>
-    <div class="result" id="result"></div>
+    <div id="result"></div>
   </div>
   <script src="script.js"></script>
 </body>
