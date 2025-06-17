@@ -4,28 +4,28 @@ const spinBtn = document.getElementById('spinBtn');
 const resultDiv = document.getElementById('result');
 
 const segments = [
-  'Приз 1',
-  'Приз 2',
-  'Приз 3',
-  'Приз 4',
-  'Приз 5',
-  'Приз 6',
-  'Приз 7',
-  'Приз 8',
+  '10 монет',
+  '20 монет',
+  '50 монет',
+  '100 монет',
+  'Удвоить ставку',
+  'Подарок',
+  'Потерять ход',
+  'Бонусный ход',
 ];
 
 const colors = [
-  '#e74c3c',
-  '#3498db',
-  '#f1c40f',
-  '#2ecc71',
-  '#9b59b6',
-  '#e67e22',
-  '#1abc9c',
-  '#e84393',
+  '#c0392b',
+  '#2980b9',
+  '#f39c12',
+  '#27ae60',
+  '#8e44ad',
+  '#d35400',
+  '#16a085',
+  '#d91e18',
 ];
 
-const wheelRadius = 240;
+const wheelRadius = 150;
 const centerX = canvas.width / 2;
 const centerY = canvas.height / 2;
 const numSegments = segments.length;
@@ -40,54 +40,71 @@ function drawWheel(angle) {
   ctx.translate(centerX, centerY);
   ctx.rotate(angle);
 
-  // 3D light gradient style
-  const grad = ctx.createRadialGradient(0, 0, wheelRadius * 0.3, 0, 0, wheelRadius);
-  grad.addColorStop(0, '#ffffffaa');
-  grad.addColorStop(1, '#000000aa');
-  ctx.fillStyle = grad;
+  // Нарисуем 3D эффекты барабана
+
+  // Нарисуем тёмный край барабана (толщина "боковой стенки")
+  const rimWidth = 18;
   ctx.beginPath();
-  ctx.arc(0, 0, wheelRadius, 0, 2 * Math.PI);
+  ctx.arc(0, 0, wheelRadius + rimWidth, 0, 2 * Math.PI);
+  ctx.fillStyle = '#111c';
   ctx.fill();
 
+  // Нарисуем секторные сегменты с градиентами
   for (let i = 0; i < numSegments; i++) {
     const startAngle = i * anglePerSegment;
     const endAngle = startAngle + anglePerSegment;
 
-    // Draw segment
+    // Градиент для реалистичного свечения сектора
+    const grad = ctx.createRadialGradient(
+      Math.cos(startAngle + anglePerSegment / 2) * wheelRadius * 0.5,
+      Math.sin(startAngle + anglePerSegment / 2) * wheelRadius * 0.5,
+      wheelRadius * 0.1,
+      0,
+      0,
+      wheelRadius
+    );
+    grad.addColorStop(0, colors[i]);
+    grad.addColorStop(1, '#222');
+
     ctx.beginPath();
     ctx.moveTo(0, 0);
     ctx.arc(0, 0, wheelRadius, startAngle, endAngle);
     ctx.closePath();
-
-    ctx.fillStyle = colors[i % colors.length];
+    ctx.fillStyle = grad;
     ctx.fill();
 
-    // Add subtle shading for 3D effect
-    const shading = ctx.createLinearGradient(0, -wheelRadius, 0, wheelRadius);
-    shading.addColorStop(0, 'rgba(0,0,0,0.15)');
-    shading.addColorStop(0.5, 'rgba(255,255,255,0.2)');
-    shading.addColorStop(1, 'rgba(0,0,0,0.15)');
+    // Добавим лёгкое внутреннее свечение для 3D эффекта
+    const shading = ctx.createLinearGradient(
+      Math.cos(startAngle) * wheelRadius,
+      Math.sin(startAngle) * wheelRadius,
+      Math.cos(endAngle) * wheelRadius,
+      Math.sin(endAngle) * wheelRadius
+    );
+    shading.addColorStop(0, 'rgba(255,255,255,0.15)');
+    shading.addColorStop(0.5, 'rgba(0,0,0,0.2)');
+    shading.addColorStop(1, 'rgba(255,255,255,0.15)');
     ctx.fillStyle = shading;
     ctx.fill();
 
-    // Draw text
+    // Нарисуем текст
     ctx.save();
-    ctx.fillStyle = 'white';
-    ctx.font = 'bold 18px Arial';
+    ctx.fillStyle = '#eee';
+    ctx.font = 'bold 16px Verdana';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
     const textAngle = startAngle + anglePerSegment / 2;
     ctx.rotate(textAngle);
-    ctx.fillText(segments[i], wheelRadius - 15, 0);
+    ctx.fillText(segments[i], wheelRadius - 20, 0);
     ctx.restore();
   }
 
-  // Draw center circle
+  // Нарисуем центральный круг (ось)
+  const centerRadius = 40;
   ctx.beginPath();
-  ctx.fillStyle = '#222';
-  ctx.shadowColor = '#00ffcc';
-  ctx.shadowBlur = 20;
-  ctx.arc(0, 0, 40, 0, 2 * Math.PI);
+  ctx.shadowColor = '#0ff';
+  ctx.shadowBlur = 12;
+  ctx.fillStyle = '#111';
+  ctx.arc(0, 0, centerRadius, 0, 2 * Math.PI);
   ctx.fill();
 
   ctx.restore();
@@ -101,19 +118,18 @@ function spin() {
   resultDiv.textContent = '';
   spinBtn.disabled = true;
 
-  const spins = Math.floor(Math.random() * 3) + 4; // 4-6 полных вращений
-  const extraAngle = Math.random() * 2 * Math.PI; // дополнительный угол
+  const spins = Math.floor(Math.random() * 3) + 4; // 4-6 полных оборотов
+  const extraAngle = Math.random() * 2 * Math.PI;
 
   const targetAngle = spins * 2 * Math.PI + extraAngle;
 
   let start = null;
-  const duration = 6000; // 6 секунд
+  const duration = 6000;
 
   function animate(timestamp) {
     if (!start) start = timestamp;
     const elapsed = timestamp - start;
 
-    // ease out cubic
     const t = Math.min(elapsed / duration, 1);
     const easeOut = 1 - Math.pow(1 - t, 3);
 
@@ -134,12 +150,14 @@ function spin() {
 }
 
 function announceResult() {
-  // Определяем индекс сегмента по текущему углу
+  // Нормализуем угол от 0 до 2π
   const normalizedAngle = currentAngle % (2 * Math.PI);
-  const index = numSegments - Math.floor(normalizedAngle / anglePerSegment) - 1;
-  const finalIndex = (index + numSegments) % numSegments; // на всякий случай
 
-  resultDiv.textContent = `Поздравляем! Выпал: ${segments[finalIndex]}`;
+  // Индекс сектора по текущему углу, учитывая что стрелка сверху (0 по оси Y)
+  let index = numSegments - Math.floor(normalizedAngle / anglePerSegment) - 1;
+  if (index < 0) index += numSegments;
+
+  resultDiv.textContent = `Выпало: ${segments[index]}`;
 }
 
 spinBtn.addEventListener('click', spin);
