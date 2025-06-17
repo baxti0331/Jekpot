@@ -16,6 +16,7 @@ const incomeEl = document.getElementById('income');
 const shopEl = document.getElementById('shop');
 const asicContainer = document.getElementById('asic-container');
 const asicLabel = document.getElementById('asic-label');
+const shopToggleBtn = document.getElementById('shop-toggle');
 
 function save() {
   localStorage.setItem(saveKey, JSON.stringify(state));
@@ -56,6 +57,7 @@ function updateUI() {
   asicLabel.textContent = best.name;
   asicContainer.style.background = best.color;
 
+  // Обновить магазин
   shopEl.innerHTML = '';
   shopItems.forEach(item => {
     const count = state.owned[item.id] || 0;
@@ -84,6 +86,11 @@ asicContainer.addEventListener('click', () => {
   state.score++;
   save();
   updateUI();
+});
+
+shopToggleBtn.addEventListener('click', () => {
+  shopEl.classList.toggle('open');
+  // Можно добавить иконку поворота или изменение текста кнопки
 });
 
 setInterval(() => {
