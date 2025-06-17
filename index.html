@@ -4,144 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>ASIC Кликер с Магазином</title>
-  <style>
-    body {
-      margin: 0; padding: 0;
-      background: linear-gradient(135deg, #ffe5b4, #ffcba4);
-      font-family: 'Segoe UI', sans-serif;
-      color: #0f0f0f; user-select: none;
-      overflow-x: hidden;
-    }
-
-    #top {
-      display: flex; justify-content: center; align-items: center;
-      padding: 20px; gap: 40px;
-      flex-wrap: wrap;
-    }
-
-    #score { font-size: 36px; }
-    #income { font-size: 20px; color: #555; }
-
-    .shop {
-      display: flex; flex-wrap: wrap;
-      gap: 20px; justify-content: center;
-      margin: 20px;
-    }
-
-    .shop-item {
-      background: linear-gradient(to bottom, #fff, #ffe8d4);
-      border: 2px solid #ccc; border-radius: 8px;
-      padding: 15px; text-align: center;
-      width: 200px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      transition: transform 0.2s;
-    }
-
-    .shop-item:active {
-      transform: scale(1.03);
-    }
-
-    .shop-item button {
-      margin-top: 10px;
-      padding: 10px 15px;
-      background: #ffab91;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .shop-item button:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-    }
-
-    #asic-container {
-      width: 600px;
-      height: 300px;
-      margin: 0 auto 20px;
-      position: relative;
-      background: linear-gradient(to right, #3c3c3c, #1f1f1f);
-      border: 6px solid #444;
-      border-radius: 10px;
-      box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 30px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    .fan {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      background: radial-gradient(#666, #222);
-      position: relative;
-      animation: spin 2s linear infinite;
-      box-shadow: inset 0 0 10px #000;
-    }
-
-    .fan-blades {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-      transform-origin: center;
-      animation: spin-blades 0.8s linear infinite;
-    }
-
-    .blade {
-      position: absolute;
-      width: 8px;
-      height: 60px;
-      background: #00bfa5;
-      left: 50%;
-      top: 10px;
-      transform-origin: bottom center;
-      border-radius: 4px;
-      opacity: 0.7;
-      box-shadow: 0 0 6px #00bfa5;
-    }
-
-    .blade:nth-child(1) { transform: rotate(0deg) translateX(-50%); }
-    .blade:nth-child(2) { transform: rotate(60deg) translateX(-50%); }
-    .blade:nth-child(3) { transform: rotate(120deg) translateX(-50%); }
-    .blade:nth-child(4) { transform: rotate(180deg) translateX(-50%); }
-    .blade:nth-child(5) { transform: rotate(240deg) translateX(-50%); }
-    .blade:nth-child(6) { transform: rotate(300deg) translateX(-50%); }
-
-    @keyframes spin-blades {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .label {
-      position: absolute;
-      top: 10px;
-      left: 20px;
-      font-size: 20px;
-      font-weight: bold;
-      color: #00bfa5;
-      text-shadow: 0 0 10px #000;
-    }
-
-    .flash {
-      animation: flash-effect 0.4s ease-out;
-    }
-
-    @keyframes flash-effect {
-      0% { background-color: #fff2e0; }
-      100% { background-color: transparent; }
-    }
-
-    @media (max-width: 650px) {
-      #asic-container { width: 95%; height: 240px; }
-      .fan { width: 90px; height: 90px; }
-      .blade { height: 45px; }
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
@@ -151,110 +14,19 @@
   </div>
 
   <div id="asic-container" title="Кликни на ASIC">
-    <div class="fan"><div class="fan-blades"><div class="blade"></div><div class="blade"></div><div class="blade"></div><div class="blade"></div><div class="blade"></div><div class="blade"></div></div></div>
-    <div class="fan"><div class="fan-blades"><div class="blade"></div><div class="blade"></div><div class="blade"></div><div class="blade"></div><div class="blade"></div><div class="blade"></div></div></div>
+    <div class="fan"><div class="fan-blades">
+      <div class="blade"></div><div class="blade"></div><div class="blade"></div>
+      <div class="blade"></div><div class="blade"></div><div class="blade"></div>
+    </div></div>
+    <div class="fan"><div class="fan-blades">
+      <div class="blade"></div><div class="blade"></div><div class="blade"></div>
+      <div class="blade"></div><div class="blade"></div><div class="blade"></div>
+    </div></div>
     <div class="label" id="asic-label">ASIC X1</div>
   </div>
 
   <div class="shop" id="shop"></div>
 
-  <script>
-    const shopItems = [
-      { id: 'X1', name: 'ASIC X1', cost: 50, income: 1, color: '#3c3c3c' },
-      { id: 'S9', name: 'Antminer S9', cost: 200, income: 5, color: '#444' },
-      { id: 'S19', name: 'Antminer S19', cost: 1000, income: 30, color: '#2e2e2e' },
-      { id: 'M30', name: 'WhatsMiner M30', cost: 5000, income: 150, color: '#1a1a1a' }
-    ];
-
-    let state = {
-      score: 0,
-      owned: { X1: 1, S9: 0, S19: 0, M30: 0 }
-    };
-
-    const saveKey = 'asicClickerState';
-    const scoreEl = document.getElementById('score');
-    const incomeEl = document.getElementById('income');
-    const shopEl = document.getElementById('shop');
-    const asicContainer = document.getElementById('asic-container');
-    const asicLabel = document.getElementById('asic-label');
-
-    function save() {
-      localStorage.setItem(saveKey, JSON.stringify(state));
-    }
-
-    function load() {
-      const data = localStorage.getItem(saveKey);
-      if (data) state = JSON.parse(data);
-    }
-
-    function calcIncome() {
-      return shopItems.reduce((sum, item) =>
-        sum + (state.owned[item.id] || 0) * item.income, 0);
-    }
-
-    function getBestAsic() {
-      let best = shopItems[0];
-      for (let i = shopItems.length - 1; i >= 0; i--) {
-        if ((state.owned[shopItems[i].id] || 0) > 0) {
-          best = shopItems[i];
-          break;
-        }
-      }
-      return best;
-    }
-
-    function flashEffect() {
-      asicContainer.classList.add('flash');
-      setTimeout(() => asicContainer.classList.remove('flash'), 400);
-    }
-
-    function updateUI() {
-      scoreEl.textContent = `Очки: ${Math.floor(state.score)}`;
-      incomeEl.textContent = `Доход/сек: ${calcIncome()}`;
-
-      // Обновить внешний вид ASIC по лучшему устройству
-      const best = getBestAsic();
-      asicLabel.textContent = best.name;
-      asicContainer.style.background = best.color;
-
-      shopEl.innerHTML = '';
-      shopItems.forEach(item => {
-        const count = state.owned[item.id] || 0;
-        const div = document.createElement('div');
-        div.className = 'shop-item';
-
-        const btn = document.createElement('button');
-        btn.textContent = `${item.name} (${count}) — ${item.cost} очков`;
-        btn.disabled = state.score < item.cost;
-        btn.onclick = () => {
-          if (state.score >= item.cost) {
-            state.score -= item.cost;
-            state.owned[item.id] = count + 1;
-            save();
-            updateUI();
-            flashEffect();
-          }
-        };
-
-        div.appendChild(btn);
-        shopEl.appendChild(div);
-      });
-    }
-
-    asicContainer.addEventListener('click', () => {
-      state.score++;
-      save();
-      updateUI();
-    });
-
-    setInterval(() => {
-      state.score += calcIncome();
-      save();
-      updateUI();
-    }, 1000);
-
-    load();
-    updateUI();
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
