@@ -1,8 +1,8 @@
 const shopItems = [
-  { id: 'X1', name: 'ASIC X1', cost: 50, income: 1, color: '#3c3c3c' },
-  { id: 'S9', name: 'Antminer S9', cost: 200, income: 5, color: '#444' },
-  { id: 'S19', name: 'Antminer S19', cost: 1000, income: 30, color: '#2e2e2e' },
-  { id: 'M30', name: 'WhatsMiner M30', cost: 5000, income: 150, color: '#1a1a1a' }
+  { id: 'X1', name: 'ASIC X1', cost: 50, income: 1 },
+  { id: 'S9', name: 'Antminer S9', cost: 200, income: 5 },
+  { id: 'S19', name: 'Antminer S19', cost: 1000, income: 30 },
+  { id: 'M30', name: 'WhatsMiner M30', cost: 5000, income: 150 }
 ];
 
 let state = {
@@ -13,8 +13,7 @@ let state = {
 const saveKey = 'asicClickerState';
 const scoreEl = document.getElementById('score');
 const shopEl = document.getElementById('shop');
-const asicContainer = document.getElementById('asic-container');
-const asicLabel = document.getElementById('asic-label');
+const minerSpinner = document.getElementById('miner-spinner');
 const shopToggleBtn = document.getElementById('shop-toggle');
 
 function save() {
@@ -31,29 +30,14 @@ function calcIncome() {
     sum + (state.owned[item.id] || 0) * item.income, 0);
 }
 
-function getBestAsic() {
-  let best = shopItems[0];
-  for (let i = shopItems.length - 1; i >= 0; i--) {
-    if ((state.owned[shopItems[i].id] || 0) > 0) {
-      best = shopItems[i];
-      break;
-    }
-  }
-  return best;
-}
-
 function flashEffect() {
-  asicContainer.classList.add('flash');
-  setTimeout(() => asicContainer.classList.remove('flash'), 400);
+  minerSpinner.classList.add('flash');
+  setTimeout(() => minerSpinner.classList.remove('flash'), 400);
 }
 
 function updateUI() {
   scoreEl.textContent = `Очки: ${Math.floor(state.score)}`;
   
-  const best = getBestAsic();
-  asicLabel.textContent = best.name;
-  asicContainer.style.background = best.color;
-
   shopEl.innerHTML = '';
   shopItems.forEach(item => {
     const count = state.owned[item.id] || 0;
@@ -78,10 +62,11 @@ function updateUI() {
   });
 }
 
-asicContainer.addEventListener('click', () => {
+minerSpinner.addEventListener('click', () => {
   state.score++;
   save();
   updateUI();
+  flashEffect();
 });
 
 shopToggleBtn.addEventListener('click', () => {
