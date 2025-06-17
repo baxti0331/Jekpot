@@ -1,54 +1,80 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8" />
-<title>Кликер с ASIC-Майнером</title>
-<style>
-  body {
-    margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #232526, #1c1c1c);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    color: #00ff99;
-    user-select: none;
-  }
-  #score {
-    font-size: 48px;
-    margin-bottom: 30px;
-    text-shadow: 0 0 10px #00ff99;
-  }
-  #asic {
-    width: 240px;
-    height: 180px;
-    background: url('https://i.imgur.com/GZzPaJQ.png') no-repeat center/contain;
-    cursor: pointer;
-    transition: transform 0.1s ease;
-    filter: drop-shadow(0 0 10px #00ff99);
-  }
-  #asic:active {
-    transform: scale(1.1);
-  }
-</style>
+  <meta charset="UTF-8" />
+  <title>ASIC Майнер Кликер</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: radial-gradient(circle at top, #0f0f0f 0%, #000 100%);
+      color: #00ffcc;
+      user-select: none;
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      background: repeating-radial-gradient(circle, rgba(0,255,204,0.1) 0px, rgba(0,255,204,0.05) 2px, transparent 4px);
+      animation: rotate 60s linear infinite;
+      z-index: 0;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    #container {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #score {
+      font-size: 48px;
+      margin-bottom: 30px;
+      text-shadow: 0 0 15px #00ffcc, 0 0 25px #009988;
+    }
+
+    #asic {
+      width: 260px;
+      height: 200px;
+      background: url('https://i.imgur.com/GZzPaJQ.png') no-repeat center/contain;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+      filter: drop-shadow(0 0 15px #00ffcc);
+    }
+
+    #asic:active {
+      transform: scale(1.1);
+    }
+  </style>
 </head>
 <body>
+  <div id="container">
+    <div id="score">Очки: 0</div>
+    <div id="asic" title="Кликни на ASIC-майнер!"></div>
+  </div>
 
-<div id="score">Очки: 0</div>
-<div id="asic" title="Кликни меня!"></div>
+  <script>
+    const scoreEl = document.getElementById('score');
+    const asicEl = document.getElementById('asic');
+    let score = 0;
 
-<script>
-  const scoreEl = document.getElementById('score');
-  const asicEl = document.getElementById('asic');
-  let score = 0;
-
-  asicEl.addEventListener('click', () => {
-    score++;
-    scoreEl.textContent = 'Очки: ' + score;
-  });
-</script>
-
+    asicEl.addEventListener('click', () => {
+      score++;
+      scoreEl.textContent = 'Очки: ' + score;
+    });
+  </script>
 </body>
 </html>
