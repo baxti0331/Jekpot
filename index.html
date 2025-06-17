@@ -8,16 +8,21 @@
 </head>
 <body>
 
-  <div id="top-info">
-    <div id="score">Очки: 0</div>
-    <div id="income">Доход/сек: 0</div>
-  </div>
+  <div id="main-wrapper">
+    <div id="top-info">
+      <div id="score">Очки: 0</div>
+      <div id="income">Доход/сек: 0</div>
+    </div>
 
-  <div id="miner-spinner" title="Кликни, чтобы майнить!"></div>
+    <div id="miner-spinner" title="Кликни, чтобы майнить!"></div>
+  </div>
 
   <button id="shop-toggle">Магазин 🛒</button>
 
-  <div class="shop" id="shop"></div>
+  <div class="shop" id="shop">
+    <button id="shop-close">Закрыть ✕</button>
+    <div id="shop-items"></div>
+  </div>
 
   <script src="script.js"></script>
 </body>
