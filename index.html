@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Генератор QR-кодов</title>
+  <link rel="stylesheet" href="style.css" />
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
 
@@ -15,149 +16,176 @@
       margin: 0;
       padding: 0;
       font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      background: linear-gradient(135deg, #74ebd5, #ACB6E5);
       min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      color: #fff;
+      color: #333;
     }
 
     .container {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(15px);
-      border-radius: 16px;
-      padding: 30px 40px;
-      max-width: 460px;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 40px 50px;
+      max-width: 480px;
       width: 100%;
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
       text-align: center;
     }
 
     h1 {
-      margin-bottom: 24px;
+      margin-bottom: 28px;
       font-weight: 700;
-      font-size: 28px;
+      font-size: 32px;
+      color: #1b1b1b;
     }
 
     label {
       display: block;
       text-align: left;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       font-weight: 600;
-      font-size: 14px;
+      font-size: 15px;
+      color: #444;
     }
 
     input[type="text"], input[type="color"], select {
       width: 100%;
-      padding: 12px 14px;
-      border-radius: 10px;
-      border: none;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1.5px solid #ccc;
       font-size: 16px;
       outline: none;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
+      transition: border-color 0.3s ease;
     }
 
-    .color-group {
+    input[type="text"]:focus,
+    input[type="color"]:focus,
+    select:focus {
+      border-color: #2575fc;
+      box-shadow: 0 0 8px rgba(37, 117, 252, 0.4);
+    }
+
+    .color-group, .size-logo-group {
       display: flex;
-      gap: 16px;
-      margin-bottom: 24px;
+      gap: 20px;
+      margin-bottom: 30px;
       justify-content: space-between;
     }
 
-    .color-input {
+    .color-input, .size-input {
       flex: 1;
     }
 
     button {
       background: #2575fc;
       border: none;
-      border-radius: 12px;
+      border-radius: 14px;
       color: white;
       font-weight: 700;
-      font-size: 16px;
-      padding: 14px 0;
+      font-size: 18px;
+      padding: 16px 0;
       cursor: pointer;
       width: 100%;
-      transition: background-color 0.3s ease;
-      user-select: none;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 6px 15px rgba(37, 117, 252, 0.4);
     }
 
     button:disabled {
-      background: #7a96e0;
+      background: #a3b1fc;
       cursor: not-allowed;
+      box-shadow: none;
     }
 
     button:hover:not(:disabled) {
-      background: #1b56d9;
+      background-color: #1b56d9;
+      box-shadow: 0 8px 18px rgba(27, 86, 217, 0.6);
     }
 
     #qrCode {
-      margin-top: 30px;
+      margin-top: 40px;
+      display: flex;
+      justify-content: center;
     }
 
     canvas {
-      border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-    }
-
-    footer {
-      margin-top: 28px;
-      font-size: 13px;
-      color: rgba(255, 255, 255, 0.5);
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
     }
 
     .button-group {
       display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-top: 20px;
+      gap: 16px;
+      margin-top: 30px;
+      justify-content: center;
+    }
+
+    .button-group button {
+      width: auto;
+      padding: 12px 28px;
+      font-size: 16px;
+      border-radius: 12px;
+      box-shadow: 0 5px 12px rgba(37, 117, 252, 0.4);
+      transition: background-color 0.3s ease;
+    }
+
+    footer {
+      margin-top: 40px;
+      font-size: 14px;
+      color: #666;
+      text-align: center;
+      user-select: none;
     }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <h1>Генератор QR-кодов</h1>
+  <div class="container">
+    <h1>Генератор QR-кодов</h1>
 
-  <label for="textInput">Введите текст или ссылку</label>
-  <input type="text" id="textInput" placeholder="https://example.com" />
+    <label for="textInput">Введите текст или ссылку</label>
+    <input type="text" id="textInput" placeholder="https://example.com" />
 
-  <div class="color-group">
-    <div class="color-input">
-      <label for="fgColor">Цвет QR-кода</label>
-      <input type="color" id="fgColor" value="#000000" />
+    <div class="color-group">
+      <div class="color-input">
+        <label for="fgColor">Цвет QR-кода</label>
+        <input type="color" id="fgColor" value="#000000" />
+      </div>
+      <div class="color-input">
+        <label for="bgColor">Цвет фона</label>
+        <input type="color" id="bgColor" value="#ffffff" />
+      </div>
     </div>
-    <div class="color-input">
-      <label for="bgColor">Цвет фона</label>
-      <input type="color" id="bgColor" value="#ffffff" />
+
+    <div class="size-logo-group">
+      <div class="size-input">
+        <label for="sizeSelect">Размер</label>
+        <select id="sizeSelect">
+          <option value="128">128x128</option>
+          <option value="256" selected>256x256</option>
+          <option value="384">384x384</option>
+          <option value="512">512x512</option>
+        </select>
+      </div>
     </div>
+
+    <button id="generateBtn" disabled>Сгенерировать QR-код</button>
+
+    <div id="qrCode"></div>
+
+    <div class="button-group">
+      <button id="downloadBtn" style="display:none;">Скачать PNG</button>
+      <button id="printBtn" style="display:none;">Распечатать QR-код</button>
+    </div>
+
+    <footer>© 2025 Генератор QR-кодов</footer>
   </div>
 
-  <label for="sizeSelect">Размер</label>
-  <select id="sizeSelect">
-    <option value="128">128x128</option>
-    <option value="256" selected>256x256</option>
-    <option value="384">384x384</option>
-    <option value="512">512x512</option>
-  </select>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script src="script.js"></script>
 
-  <button id="generateBtn" disabled>Сгенерировать QR-код</button>
-
-  <div id="qrCode"></div>
-
-  <div class="button-group">
-    <button id="downloadBtn" style="display:none;" 
-      aria-label="Скачать PNG. Нажмите и удерживайте для скачивания в новой вкладке">
-      Скачать PNG
-    </button>
-    <button id="printBtn" style="display:none;">Распечатать QR-код</button>
-  </div>
-
-  <footer>© 2025 Генератор QR-кодов</footer>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-<script src="script.js"></script>
 </body>
 </html>
