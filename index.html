@@ -1,88 +1,10 @@
 <!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Телефонный магазин — учёт товаров</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <header>
-    <h1>Телефонный магазин — учёт товаров</h1>
-  </header>
-
-  <main>
-    <section id="add-product-section">
-      <h2>Добавить новый товар на склад</h2>
-      <form id="add-product-form">
-        <input type="text" id="product-name" placeholder="Название телефона (обязательное)" required />
-        <input type="text" id="product-model" placeholder="Модель (обязательное)" required />
-        <input type="number" id="product-quantity" placeholder="Начальное количество" min="0" value="0" />
-        <input type="number" id="product-cost-price" placeholder="Цена закупки (₽)" min="0" step="0.01" />
-        <input type="number" id="product-sale-price" placeholder="Цена продажи (₽)" min="0" step="0.01" />
-        <button type="submit">Добавить товар</button>
-      </form>
-    </section>
-
-    <section id="products-list-section">
-      <h2>Склад: список товаров</h2>
-      <div id="products-list"></div>
-    </section>
-
-    <section id="product-details-section" class="hidden">
-      <button id="back-to-list-btn">← Вернуться к складу</button>
-      <h2 id="product-title"></h2>
-      <p><strong>Текущий остаток:</strong> <span id="current-stock"></span></p>
-
-      <div id="operations-section">
-        <h3>Добавить операцию</h3>
-        <form id="add-operation-form">
-          <select id="operation-type" required>
-            <option value="" disabled selected>Выберите тип операции</option>
-            <option value="sale">Продажа</option>
-            <option value="restock">Пополнение склада</option>
-            <option value="loan">Займ</option>
-          </select>
-
-          <input type="date" id="operation-date" required />
-          <input type="number" id="operation-quantity" placeholder="Количество" min="1" required />
-          <input type="number" id="operation-price" placeholder="Сумма (₽) — для продажи и пополнения" min="0" step="0.01" />
-          <input type="text" id="operation-loan-person" placeholder="Кому отдан в долг (для займа)" />
-
-          <button type="submit">Добавить операцию</button>
-        </form>
-      </div>
-
-      <div id="recent-operations-section">
-        <h3>Последние операции</h3>
-        <table id="operations-table">
-          <thead>
-            <tr>
-              <th>Дата</th>
-              <th>Тип</th>
-              <th>Количество</th>
-              <th>Сумма (₽)</th>
-              <th>Кому (для займа)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- операции будут здесь -->
-          </tbody>
-        </table>
-      </div>
-
-      <div id="chart-section">
-        <h3>Динамика остатков</h3>
-        <canvas id="stock-chart" width="400" height="200"></canvas>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    <p>© 2025 Телефонный магазин</p>
-  </footer>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="app.js"></script>
-</body>
+<html>
+  <head>
+    <title>Мой первый сайт</title>
+  </head>
+  <body>
+    <h1>Привет!</h1>
+    <p>Я учусь программировать.</p>
+  </body>
 </html>
