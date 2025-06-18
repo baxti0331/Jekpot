@@ -2,244 +2,128 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>Учёт расходов в поездке</title>
+  <title>Поездки — учёт расходов</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script defer src="script.js"></script>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to bottom right, #e0f2ff, #cfd8dc);
-      color: #333;
+      font-family: sans-serif;
       margin: 0;
-      padding: 0;
+      background: linear-gradient(to right, #e0f0ff, #f8faff);
+      color: #333;
     }
-
     header {
-      background-color: #1565c0;
+      background-color: #007acc;
       color: white;
       padding: 1rem;
       text-align: center;
     }
-
-    .container {
+    h1 i { margin-right: 0.5em; }
+    main {
+      padding: 1em;
       max-width: 800px;
-      margin: 2rem auto;
-      padding: 1rem;
-      background-color: white;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin: auto;
     }
-
-    h2 {
-      color: #1565c0;
-    }
-
-    label {
-      display: block;
-      margin-top: 1rem;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 0.5rem;
-      margin-top: 0.25rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-
     button {
-      background-color: #1976d2;
+      padding: 0.5em 1em;
+      margin-top: 0.5em;
+      background: #007acc;
       color: white;
       border: none;
-      padding: 0.75rem 1.5rem;
-      margin-top: 1rem;
-      border-radius: 4px;
       cursor: pointer;
     }
-
-    button:hover {
-      background-color: #0d47a1;
+    input, select {
+      margin: 0.3em;
+      padding: 0.4em;
+      font-size: 1em;
     }
-
-    .expense-list {
-      margin-top: 2rem;
+    .expense-form, .transfer-form, .trip-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5em;
+      align-items: center;
     }
-
-    .expense {
-      padding: 0.75rem;
-      border-bottom: 1px solid #ccc;
+    .trip-item {
+      padding: 0.5em;
+      background: #fff;
+      border: 1px solid #ccc;
+      margin: 0.3em 0;
+      cursor: pointer;
     }
-
-    .balance {
-      margin-top: 2rem;
-      padding: 1rem;
-      background-color: #e3f2fd;
-      border-radius: 6px;
+    table {
+      width: 100%;
+      margin-top: 1em;
+      border-collapse: collapse;
     }
-
-    .balance.positive {
-      color: green;
+    table, th, td {
+      border: 1px solid #ccc;
     }
-
-    .balance.negative {
-      color: red;
+    th, td {
+      padding: 0.5em;
+      text-align: center;
     }
-
     @media (max-width: 600px) {
-      .container {
-        margin: 1rem;
-        padding: 1rem;
+      .expense-form, .transfer-form, .trip-meta {
+        flex-direction: column;
+        align-items: flex-start;
       }
     }
   </style>
 </head>
 <body>
+  <header>
+    <h1><i class="fa-solid fa-plane-departure"></i> Поездки</h1>
+  </header>
 
-<header>
-  <h1>Учёт расходов в поездке</h1>
-</header>
+  <main>
+    <section id="trip-list-section">
+      <h2>Мои поездки</h2>
+      <div id="trip-list"></div>
+      <button id="create-trip-btn">➕ Новая поездка</button>
+    </section>
 
-<div class="container">
-  <h2>Создать поездку</h2>
-  <label>Название поездки
-    <input type="text" id="tripName">
-  </label>
-  <label>Локация
-    <input type="text" id="tripLocation">
-  </label>
-  <label>Дата начала
-    <input type="date" id="startDate">
-  </label>
-  <label>Дата окончания
-    <input type="date" id="endDate">
-  </label>
-  <button onclick="createTrip()">Создать поездку</button>
+    <section id="trip-editor-section" style="display:none;">
+      <button id="back-to-trips">← Назад</button>
+      <h2 id="trip-title"></h2>
 
-  <div id="tripSection" style="display:none;">
-    <h2>Добавить участника</h2>
-    <label>Имя
-      <input type="text" id="participantName">
-    </label>
-    <button onclick="addParticipant()">Добавить участника</button>
+      <div class="trip-meta">
+        <label>Локация: <input id="trip-location" /></label>
+        <label>Дата начала: <input type="date" id="trip-start" /></label>
+        <label>Дата окончания: <input type="date" id="trip-end" /></label>
+      </div>
 
-    <h2>Добавить расход</h2>
-    <label>Описание
-      <input type="text" id="description">
-    </label>
-    <label>Сумма
-      <input type="number" id="amount" step="0.01">
-    </label>
-    <label>Плательщик
-      <select id="payerSelect"></select>
-    </label>
-    <label>Дата
-      <input type="date" id="expenseDate">
-    </label>
-    <button onclick="addExpense()">Добавить расход</button>
+      <h3>Участники</h3>
+      <ul id="participant-list"></ul>
+      <input id="new-participant" placeholder="Имя участника" />
+      <button id="add-participant-btn">Добавить</button>
 
-    <div class="expense-list" id="expenses">
-      <h3>Последние расходы</h3>
-      <div id="expenseEntries"></div>
-    </div>
+      <h3>Расходы</h3>
+      <div class="expense-form">
+        <input id="expense-desc" placeholder="Описание" />
+        <input id="expense-amount" type="number" placeholder="Сумма" />
+        <input id="expense-date" type="date" />
+        <select id="expense-payer"></select>
+        <label><input type="checkbox" id="custom-split" /> Кастомное разделение</label>
+        <div id="custom-split-fields" style="display:none;"></div>
+        <button id="add-expense-btn">Добавить расход</button>
+      </div>
 
-    <div class="balance" id="balance"></div>
-  </div>
-</div>
+      <h3>Переводы</h3>
+      <div class="transfer-form">
+        <select id="transfer-from"></select> →
+        <select id="transfer-to"></select>
+        <input id="transfer-amount" type="number" placeholder="Сумма" />
+        <button id="add-transfer-btn">Добавить перевод</button>
+      </div>
 
-<script>
-  let trip = null;
-  let participants = [];
-  let expenses = [];
-
-  function createTrip() {
-    const name = document.getElementById('tripName').value;
-    if (!name) {
-      alert("Введите название поездки");
-      return;
-    }
-    trip = {
-      name,
-      location: document.getElementById('tripLocation').value,
-      startDate: document.getElementById('startDate').value,
-      endDate: document.getElementById('endDate').value
-    };
-    document.getElementById('tripSection').style.display = 'block';
-  }
-
-  function addParticipant() {
-    const name = document.getElementById('participantName').value.trim();
-    if (!name) return;
-    if (participants.includes(name)) {
-      alert("Такой участник уже есть");
-      return;
-    }
-    participants.push(name);
-    const payerSelect = document.getElementById('payerSelect');
-    const option = document.createElement('option');
-    option.text = name;
-    payerSelect.add(option);
-    document.getElementById('participantName').value = '';
-  }
-
-  function addExpense() {
-    const desc = document.getElementById('description').value.trim();
-    const amount = parseFloat(document.getElementById('amount').value);
-    const payer = document.getElementById('payerSelect').value;
-    const date = document.getElementById('expenseDate').value;
-
-    if (!desc || isNaN(amount) || !payer) {
-      alert("Заполните все обязательные поля");
-      return;
-    }
-
-    const expense = { desc, amount, payer, date };
-    expenses.push(expense);
-
-    document.getElementById('description').value = '';
-    document.getElementById('amount').value = '';
-    document.getElementById('expenseDate').value = date || new Date().toISOString().split('T')[0];
-
-    updateExpenses();
-    updateBalance();
-  }
-
-  function updateExpenses() {
-    const list = document.getElementById('expenseEntries');
-    list.innerHTML = '';
-    expenses.slice(-5).reverse().forEach(e => {
-      const div = document.createElement('div');
-      div.className = 'expense';
-      div.innerText = `${e.payer} потратил ${e.amount.toFixed(2)}₽: ${e.desc}`;
-      list.appendChild(div);
-    });
-  }
-
-  function updateBalance() {
-    const balances = {};
-    participants.forEach(p => balances[p] = 0);
-
-    expenses.forEach(e => {
-      const share = e.amount / participants.length;
-      participants.forEach(p => {
-        if (p === e.payer) {
-          balances[p] += e.amount - share;
-        } else {
-          balances[p] -= share;
-        }
-      });
-    });
-
-    const balanceDiv = document.getElementById('balance');
-    balanceDiv.innerHTML = "<strong>Баланс участников:</strong><br><br>";
-    for (const p in balances) {
-      const val = balances[p].toFixed(2);
-      const span = document.createElement('div');
-      span.className = "balance-entry";
-      span.style.color = balances[p] > 0 ? 'green' : (balances[p] < 0 ? 'red' : 'black');
-      span.textContent = `${p}: ${val} ₽`;
-      balanceDiv.appendChild(span);
-    }
-  }
-</script>
-
+      <h3>Сводка</h3>
+      <canvas id="balance-chart" height="100"></canvas>
+      <div id="summary-table"></div>
+      <h4>Матрица долгов</h4>
+      <div id="debt-matrix"></div>
+    </section>
+  </main>
 </body>
 </html>
