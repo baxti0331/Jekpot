@@ -1,231 +1,395 @@
-let trips = JSON.parse(localStorage.getItem('trips') || '[]');
-let currentTripIndex = null;
+// =============== Данные и локальное хранилище ===============
 
-function saveTrips() {
-  localStorage.setItem('trips', JSON.stringify(trips));
+let products = []; // список товаров
+let currentProductId = null; // выбранный товар
+
+// Загрузка данных из localStorage
+function loadData() {
+  const data = localStorage.getItem('phoneShopData');
+  if (data) {
+    products = JSON.parse(data);
+  } else {
+    products = [];
+  }
 }
 
-function renderTripList() {
-  const list = document.getElementById('trip-list');
-  list.innerHTML = '';
-  trips.forEach((trip, index) => {
-    const div = document.createElement('div');
-    div.className = 'trip-item';
-    div.textContent = trip.name;
-    div.onclick = () => openTrip(index);
-    list.appendChild(div);
-  });
+// Сохранение данных в localStorage
+function saveData() {
+  localStorage.setItem('phoneShopData', JSON.stringify(products));
 }
 
-function openTrip(index) {
-  currentTripIndex = index;
-  const trip = trips[index];
-  document.getElementById('trip-list-section').style.display = 'none';
-  document.getElementById('trip-editor-section').style.display = 'block';
+// =============== Утилиты ===============
 
-  document.getElementById('trip-title').textContent = trip.name;
-  document.getElementById('trip-location').value = trip.location || '';
-  document.getElementById('trip-start').value = trip.startDate || '';
-  document.getElementById('trip-end').value = trip.endDate || '';
-
-  renderParticipants();
-  renderExpenseForm();
-  updateSummary();
+// Генерация уникального id
+function generateId() {
+  return 'id-' + Math.random().toString(36).substr(2, 9);
 }
 
-function renderParticipants() {
-  const trip = trips[currentTripIndex];
-  const ul = document.getElementById('participant-list');
-  ul.innerHTML = '';
-  trip.participants = trip.participants || [];
-  trip.participants.forEach(p => {
-    const li = document.createElement('li');
-    li.textContent = p;
-    ul.appendChild(li);
-  });
-
-  ['expense-payer', 'transfer-from', 'transfer-to'].forEach(id => {
-    const select = document.getElementById(id);
-    select.innerHTML = '';
-    trip.participants.forEach(p => {
-      const option = document.createElement('option');
-      option.value = option.text = p;
-      select.appendChild(option);
-    });
-  });
-
-  const customSplit = document.getElementById('custom-split-fields');
-  customSplit.innerHTML = '';
-  trip.participants.forEach(p => {
-    const input = document.createElement('input');
-    input.type = 'number';
-    input.placeholder = p;
-    input.dataset.name = p;
-    customSplit.appendChild(input);
-  });
+// Формат даты в строку ГГГГ-ММ-ДД
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d)) return '';
+  return d.toISOString().slice(0, 10);
 }
 
-function renderExpenseForm() {
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('expense-date').value = today;
+// Получить текущую дату в формате YYYY-MM-DD
+function getToday() {
+  return formatDate(new Date());
 }
 
-function updateSummary() {
-  const trip = trips[currentTripIndex];
-  const balances = {};
-  trip.participants.forEach(p => balances[p] = 0);
+// =============== Работа с товарами ===============
 
-  const entries = [...(trip.expenses || []), ...(trip.transfers || [])];
+// Добавление товара
+function addProduct(name, model, quantity, costPrice, salePrice) {
+  const newProduct = {
+    id: generateId(),
+    name: name.trim(),
+    model: model.trim(),
+    quantity: Number(quantity) || 0,
+    costPrice: costPrice ? Number(costPrice) : null,
+    salePrice: salePrice ? Number(salePrice) : null,
+    operations: [] // операции: продажи, пополнения, займы
+  };
+  products.push(newProduct);
+  saveData();
+  renderProductsList();
+}
 
-  for (const entry of entries) {
-    if (entry.type === 'expense') {
-      const payer = entry.payer;
-      const amount = entry.amount;
-      const shares = entry.custom || {};
-      const perPerson = !entry.custom ? amount / trip.participants.length : null;
-      trip.participants.forEach(p => {
-        const share = entry.custom ? (shares[p] || 0) : perPerson;
-        balances[p] -= share;
-      });
-      balances[payer] += amount;
-    } else if (entry.type === 'transfer') {
-      balances[entry.from] -= entry.amount;
-      balances[entry.to] += entry.amount;
-    }
+// Рендер списка товаров
+function renderProductsList() {
+  const container = document.getElementById('products-list');
+  container.innerHTML = '';
+
+  if (products.length === 0) {
+    container.textContent = 'Товары отсутствуют.';
+    return;
   }
 
-  // Chart
-  const ctx = document.getElementById('balance-chart').getContext('2d');
-  if (window.balanceChart) window.balanceChart.destroy();
-  window.balanceChart = new Chart(ctx, {
-    type: 'bar',
+  products.forEach(product => {
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.tabIndex = 0;
+    card.setAttribute('data-id', product.id);
+
+    const title = document.createElement('h3');
+    title.className = 'product-title';
+    title.textContent = `${product.name} — ${product.model}`;
+
+    const info = document.createElement('p');
+    info.className = 'product-info';
+    info.textContent = `Остаток: ${calculateCurrentStock(product)} шт.`;
+
+    card.appendChild(title);
+    card.appendChild(info);
+
+    card.addEventListener('click', () => {
+      openProductDetails(product.id);
+    });
+    card.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openProductDetails(product.id);
+      }
+    });
+
+    container.appendChild(card);
+  });
+}
+
+// Вычисление текущего остатка (с учётом операций)
+function calculateCurrentStock(product) {
+  let stock = product.quantity; // начальный остаток
+  product.operations.forEach(op => {
+    if (op.type === 'sale') stock -= op.quantity;
+    else if (op.type === 'restock') stock += op.quantity;
+    else if (op.type === 'loan') stock -= op.quantity;
+  });
+  return stock;
+}
+// =============== Работа с деталями товара ===============
+
+function openProductDetails(productId) {
+  currentProductId = productId;
+  const product = products.find(p => p.id === productId);
+  if (!product) return;
+
+  // Скрыть список товаров, показать детали
+  document.getElementById('add-product-section').classList.add('hidden');
+  document.getElementById('products-list-section').classList.add('hidden');
+  document.getElementById('product-details-section').classList.remove('hidden');
+
+  // Заголовок
+  document.getElementById('product-title').textContent = `${product.name} — ${product.model}`;
+
+  // Текущий остаток
+  document.getElementById('current-stock').textContent = calculateCurrentStock(product);
+
+  // Очистить форму добавления операции
+  resetOperationForm();
+
+  // Заполнить дату в форме операцией сегодня
+  document.getElementById('operation-date').value = getToday();
+
+  // Отобразить последние 5 операций
+  renderOperationsTable(product);
+
+  // Отрисовать график
+  renderStockChart(product);
+}
+
+function resetOperationForm() {
+  const form = document.getElementById('add-operation-form');
+  form.reset();
+  document.getElementById('operation-date').value = getToday();
+  document.getElementById('operation-price').disabled = true;
+  document.getElementById('operation-loan-person').disabled = true;
+}
+
+function closeProductDetails() {
+  currentProductId = null;
+  document.getElementById('add-product-section').classList.remove('hidden');
+  document.getElementById('products-list-section').classList.remove('hidden');
+  document.getElementById('product-details-section').classList.add('hidden');
+}
+
+// =============== Работа с операциями ===============
+
+function addOperation(productId, type, date, quantity, price, loanPerson) {
+  const product = products.find(p => p.id === productId);
+  if (!product) return;
+
+  const op = {
+    id: generateId(),
+    type,
+    date: date || getToday(),
+    quantity: Number(quantity),
+    price: price !== null && price !== '' ? Number(price) : null,
+    loanPerson: loanPerson ? loanPerson.trim() : null,
+  };
+
+  product.operations.push(op);
+  saveData();
+}
+function renderOperationsTable(product) {
+  const tbody = document.querySelector('#operations-table tbody');
+  tbody.innerHTML = '';
+
+  // Отсортируем по дате, последние сверху
+  const opsSorted = [...product.operations].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  const last5 = opsSorted.slice(0, 5);
+
+  if (last5.length === 0) {
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+    td.colSpan = 5;
+    td.textContent = 'Операции отсутствуют.';
+    td.style.textAlign = 'center';
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+    return;
+  }
+
+  last5.forEach(op => {
+    const tr = document.createElement('tr');
+
+    const tdDate = document.createElement('td');
+    tdDate.textContent = formatDate(op.date);
+    tr.appendChild(tdDate);
+
+    const tdType = document.createElement('td');
+    let typeText = '';
+    if (op.type === 'sale') typeText = 'Продажа';
+    else if (op.type === 'restock') typeText = 'Пополнение';
+    else if (op.type === 'loan') typeText = 'Займ';
+    tdType.textContent = typeText;
+    tr.appendChild(tdType);
+
+    const tdQty = document.createElement('td');
+    tdQty.textContent = op.quantity;
+    tr.appendChild(tdQty);
+
+    const tdPrice = document.createElement('td');
+    tdPrice.textContent = op.price !== null ? op.price.toFixed(2) : '-';
+    tr.appendChild(tdPrice);
+
+    const tdLoanPerson = document.createElement('td');
+    tdLoanPerson.textContent = op.loanPerson || '-';
+    tr.appendChild(tdLoanPerson);
+
+    tbody.appendChild(tr);
+  });
+}
+
+// =============== График динамики остатков ===============
+
+let stockChart = null;
+
+function renderStockChart(product) {
+  const ctx = document.getElementById('stock-chart').getContext('2d');
+
+  if (stockChart) {
+    stockChart.destroy();
+  }
+
+  // Получаем все даты операций + сегодня
+  const datesSet = new Set(product.operations.map(op => op.date));
+  datesSet.add(getToday());
+
+  const datesArr = Array.from(datesSet).sort((a,b) => new Date(a) - new Date(b));
+
+  // Функция для подсчёта остатка на конкретную дату
+  function stockAtDate(dateStr) {
+    let stock = product.quantity;
+    product.operations.forEach(op => {
+      if (new Date(op.date) <= new Date(dateStr)) {
+        if (op.type === 'sale') stock -= op.quantity;
+        else if (op.type === 'restock') stock += op.quantity;
+        else if (op.type === 'loan') stock -= op.quantity;
+      }
+    });
+    return stock;
+  }
+
+  const labels = datesArr.map(d => formatDate(d));
+  const data = datesArr.map(d => stockAtDate(d));
+
+  stockChart = new Chart(ctx, {
+    type: 'line',
     data: {
-      labels: Object.keys(balances),
+      labels,
       datasets: [{
-        label: 'Баланс ₽',
-        data: Object.values(balances),
-        backgroundColor: Object.values(balances).map(v => v >= 0 ? 'green' : 'red')
+        label: 'Остаток на складе',
+        data,
+        borderColor: '#2a5d9f',
+        backgroundColor: 'rgba(42, 93, 159, 0.3)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 4,
+        pointHoverRadius: 6,
       }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { stepSize: 1 }
+        }
+      },
+      plugins: {
+        legend: {
+          labels: {
+            color: '#1a1a1a',
+            font: { size: 14 }
+          }
+        },
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+        },
+      },
+      interaction: {
+        mode: 'nearest',
+        intersect: false
+      }
     }
   });
-
-  const summary = document.getElementById('summary-table');
-  summary.innerHTML = '';
-  const table = document.createElement('table');
-  table.innerHTML = '<tr><th>Участник</th><th>Баланс (₽)</th></tr>';
-  for (const [name, balance] of Object.entries(balances)) {
-    const row = document.createElement('tr');
-    row.innerHTML = `<td>${name}</td><td style="color:${balance >= 0 ? 'green' : 'red'}">${balance.toFixed(2)}</td>`;
-    table.appendChild(row);
-  }
-  summary.appendChild(table);
-
-  // Debt Matrix
-  const matrixDiv = document.getElementById('debt-matrix');
-  matrixDiv.innerHTML = '';
-  const debtTable = document.createElement('table');
-  const headerRow = document.createElement('tr');
-  headerRow.innerHTML = '<th></th>' + trip.participants.map(p => `<th>${p}</th>`).join('');
-  debtTable.appendChild(headerRow);
-
-  trip.participants.forEach(from => {
-    const row = document.createElement('tr');
-    row.innerHTML = `<th>${from}</th>`;
-    trip.participants.forEach(to => {
-      const cell = document.createElement('td');
-      if (from === to) {
-        cell.innerHTML = '-';
-      } else {
-        const diff = (balances[to] - balances[from]) / 2;
-        if (diff > 0.01) {
-          const btn = document.createElement('button');
-          btn.textContent = `→ ${diff.toFixed(2)}₽`;
-          btn.onclick = () => addTransfer(from, to, parseFloat(diff.toFixed(2)));
-          cell.appendChild(btn);
-        }
-      }
-      row.appendChild(cell);
-    });
-    debtTable.appendChild(row);
-  });
-  matrixDiv.appendChild(debtTable);
 }
+// Обработка добавления товара из формы
+document.getElementById('add-product-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const name = e.target.productName.value;
+  const model = e.target.productModel.value;
+  const quantity = e.target.productQuantity.value;
+  const costPrice = e.target.productCost.value;
+  const salePrice = e.target.productSale.value;
 
-function addTransfer(from, to, amount) {
-  const trip = trips[currentTripIndex];
-  trip.transfers.push({ type: 'transfer', from, to, amount });
-  saveTrips();
-  updateSummary();
-}
-
-document.getElementById('create-trip-btn').onclick = () => {
-  const name = prompt("Название поездки:");
-  if (!name) return;
-  trips.push({ name, participants: [], expenses: [], transfers: [] });
-  saveTrips();
-  renderTripList();
-};
-
-document.getElementById('back-to-trips').onclick = () => {
-  document.getElementById('trip-editor-section').style.display = 'none';
-  document.getElementById('trip-list-section').style.display = 'block';
-  saveTrips();
-  renderTripList();
-};
-
-document.getElementById('add-participant-btn').onclick = () => {
-  const name = document.getElementById('new-participant').value.trim();
-  if (!name) return;
-  const trip = trips[currentTripIndex];
-  if (!trip.participants.includes(name)) {
-    trip.participants.push(name);
-    saveTrips();
-    renderParticipants();
-    updateSummary();
-  }
-  document.getElementById('new-participant').value = '';
-};
-
-document.getElementById('custom-split').onchange = (e) => {
-  document.getElementById('custom-split-fields').style.display = e.target.checked ? 'block' : 'none';
-};
-
-document.getElementById('add-expense-btn').onclick = () => {
-  const trip = trips[currentTripIndex];
-  const desc = document.getElementById('expense-desc').value;
-  const amount = parseFloat(document.getElementById('expense-amount').value);
-  const payer = document.getElementById('expense-payer').value;
-  const date = document.getElementById('expense-date').value;
-  const customSplit = document.getElementById('custom-split').checked;
-
-  if (!desc || !amount || !payer) return alert('Заполните все поля');
-
-  let custom = null;
-  if (customSplit) {
-    custom = {};
-    const inputs = document.querySelectorAll('#custom-split-fields input');
-    inputs.forEach(input => {
-      const value = parseFloat(input.value);
-      if (!isNaN(value)) {
-        custom[input.dataset.name] = value;
-      }
-    });
+  if (!name.trim()) {
+    alert('Название товара обязательно');
+    return;
   }
 
-  trip.expenses.push({ type: 'expense', desc, amount, payer, date, custom });
-  saveTrips();
-  renderExpenseForm();
-  updateSummary();
-};
+  addProduct(name, model, quantity, costPrice, salePrice);
 
-document.getElementById('add-transfer-btn').onclick = () => {
-  const from = document.getElementById('transfer-from').value;
-  const to = document.getElementById('transfer-to').value;
-  const amount = parseFloat(document.getElementById('transfer-amount').value);
-  if (!from || !to || !amount || from === to) return;
-  addTransfer(from, to, amount);
-  document.getElementById('transfer-amount').value = '';
-};
+  e.target.reset();
+});
 
-// init
-renderTripList();
+// Обработка переключения типа операции
+document.getElementById('operation-type').addEventListener('change', e => {
+  const val = e.target.value;
+  const priceInput = document.getElementById('operation-price');
+  const loanPersonInput = document.getElementById('operation-loan-person');
+
+  if (val === 'sale') {
+    priceInput.disabled = false;
+    loanPersonInput.disabled = true;
+  } else if (val === 'restock') {
+    priceInput.disabled = false;
+    loanPersonInput.disabled = true;
+  } else if (val === 'loan') {
+    priceInput.disabled = true;
+    loanPersonInput.disabled = false;
+  } else {
+    priceInput.disabled = true;
+    loanPersonInput.disabled = true;
+  }
+});
+
+// Добавление операции
+document.getElementById('add-operation-form').addEventListener('submit', e => {
+  e.preventDefault();
+
+  if (!currentProductId) return alert('Выберите товар');
+
+  const type = e.target['operation-type'].value;
+  const date = e.target['operation-date'].value;
+  const quantity = e.target['operation-quantity'].value;
+  const price = e.target['operation-price'].value;
+  const loanPerson = e.target['operation-loan-person'].value;
+
+  if (!type) {
+    alert('Выберите тип операции');
+    return;
+  }
+
+  if (!quantity || Number(quantity) <= 0) {
+    alert('Введите количество больше 0');
+    return;
+  }
+
+  if ((type === 'sale' || type === 'restock') && (!price || Number(price) <= 0)) {
+    alert('Введите корректную цену');
+    return;
+  }
+
+  if (type === 'loan' && !loanPerson.trim()) {
+    alert('Введите имя лица, которому даёте займ');
+    return;
+  }
+
+  addOperation(currentProductId, type, date, quantity, price, loanPerson);
+
+  // Обновить интерфейс
+  const product = products.find(p => p.id === currentProductId);
+  if (!product) return;
+
+  document.getElementById('current-stock').textContent = calculateCurrentStock(product);
+  renderOperationsTable(product);
+  renderStockChart(product);
+
+  e.target.reset();
+  e.target['operation-date'].value = getToday();
+});
+
+// Кнопка закрытия деталей
+document.getElementById('close-details-btn').addEventListener('click', () => {
+  closeProductDetails();
+});
+
+// Инициализация
+window.addEventListener('DOMContentLoaded', () => {
+  loadData();
+  renderProductsList();
+});
