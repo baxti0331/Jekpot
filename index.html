@@ -1,124 +1,155 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Меню ресторана — Чистое и стильное</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <style>
-    body {
-      background: #1e1e2f;
-      color: #f0f0f5;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      padding-top: 60px;
-    }
-    .navbar {
-      background: #27293d !important;
-    }
-    .carousel-item {
-      padding-bottom: 40px;
-    }
-    .card {
-      background: linear-gradient(135deg, #5a4d7d, #2e2a47);
-      border: none;
-      border-radius: 12px;
-      color: #fff;
-      cursor: pointer;
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
-      min-height: 160px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.3rem;
-      font-weight: 600;
-      text-align: center;
-      padding: 20px;
-      box-shadow: 0 4px 15px rgba(90, 77, 125, 0.5);
-    }
-    .card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 10px 30px rgba(90, 77, 125, 0.8);
-    }
-    .carousel-control-prev-icon,
-    .carousel-control-next-icon {
-      filter: invert(1);
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Генератор случайных чисел с анимацией и настройками</title>
+<style>
+  body {
+    background: #222;
+    color: #eee;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 20px;
+  }
+  .display {
+    font-size: 5rem;
+    letter-spacing: 0.2em;
+    font-weight: 900;
+    margin: 30px 0;
+    width: 300px;
+    text-align: center;
+    background: linear-gradient(135deg, #5a4d7d, #2e2a47);
+    border-radius: 20px;
+    padding: 20px 0;
+    box-shadow: 0 0 20px #5a4d7d;
+    user-select: none;
+  }
+  button {
+    font-size: 1.3rem;
+    padding: 12px 30px;
+    border-radius: 12px;
+    border: none;
+    background: #5a4d7d;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(90, 77, 125, 0.7);
+    transition: background 0.3s ease;
+    margin-top: 10px;
+  }
+  button:hover:not(:disabled) {
+    background: #7a68a3;
+  }
+  button:disabled {
+    background: #444;
+    cursor: default;
+  }
+  label {
+    font-size: 1.1rem;
+    margin: 5px 0 2px;
+    display: block;
+  }
+  input[type="number"] {
+    padding: 8px;
+    font-size: 1.2rem;
+    width: 100%;
+    border-radius: 8px;
+    border: none;
+    text-align: center;
+    margin-bottom: 12px;
+    background: #3a3460;
+    color: #eee;
+  }
+  .settings {
+    max-width: 320px;
+    width: 100%;
+  }
+</style>
 </head>
 <body>
-<nav class="navbar fixed-top navbar-expand-lg navbar-dark">
-  <div class="container">
-    <a class="navbar-brand" href="#">Вкус жизни</a>
-  </div>
-</nav>
 
-<div id="menuCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
-  <div class="carousel-inner">
-
-    <!-- Закуски -->
-    <div class="carousel-item active">
-      <div class="container">
-        <h2 class="mb-4">Закуски</h2>
-        <div class="row g-4">
-          <div class="col-md-4">
-            <div class="card" onclick="alert('Брускетта с томатами')">Брускетта с томатами</div>
-          </div>
-          <div class="col-md-4">
-            <div class="card" onclick="alert('Оливье классический')">Оливье классический</div>
-          </div>
-          <div class="col-md-4">
-            <div class="card" onclick="alert('Мини-кростини с грибами')">Мини-кростини с грибами</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Супы -->
-    <div class="carousel-item">
-      <div class="container">
-        <h2 class="mb-4">Супы</h2>
-        <div class="row g-4">
-          <div class="col-md-4">
-            <div class="card" onclick="alert('Том Ям')">Том Ям</div>
-          </div>
-          <div class="col-md-4">
-            <div class="card" onclick="alert('Борщ')">Борщ</div>
-          </div>
-          <div class="col-md-4">
-            <div class="card" onclick="alert('Крем-суп из шампиньонов')">Крем-суп из шампиньонов</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Основные блюда -->
-    <div class="carousel-item">
-      <div class="container">
-        <h2 class="mb-4">Основные блюда</h2>
-        <div class="row g-4">
-          <div class="col-md-4">
-            <div class="card" onclick="alert('Стейк из говядины')">Стейк из говядины</div>
-          </div>
-          <div class="col-md-4">
-            <div class="card" onclick="alert('Паста Карбонара')">Паста Карбонара</div>
-          </div>
-          <div class="col-md-4">
-            <div class="card" onclick="alert('Курица терияки')">Курица терияки</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <button class="carousel-control-prev" type="button" data-bs-target="#menuCarousel" data-bs-slide="prev">
-    <span class="carousel-control-prev-icon"></span>
-  </button>
-  <button class="carousel-control-next" type="button" data-bs-target="#menuCarousel" data-bs-slide="next">
-    <span class="carousel-control-next-icon"></span>
-  </button>
+<div class="settings">
+  <label for="minInput">Минимальное число</label>
+  <input type="number" id="minInput" value="0" />
+  <label for="maxInput">Максимальное число</label>
+  <input type="number" id="maxInput" value="9999" />
+  <label for="lengthInput">Длина числа (0 — авто)</label>
+  <input type="number" id="lengthInput" value="4" min="0" />
+  <button id="generateBtn">Сгенерировать число</button>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<div class="display" id="numberDisplay">0000</div>
+
+<script>
+  const display = document.getElementById('numberDisplay');
+  const btn = document.getElementById('generateBtn');
+  const minInput = document.getElementById('minInput');
+  const maxInput = document.getElementById('maxInput');
+  const lengthInput = document.getElementById('lengthInput');
+
+  function getRandomDigit() {
+    return Math.floor(Math.random() * 10);
+  }
+
+  function animateRandomNumber(length = 4, duration = 2000) {
+    let start = null;
+    let elapsed = 0;
+    return new Promise(resolve => {
+      function step(timestamp) {
+        if (!start) start = timestamp;
+        elapsed = timestamp - start;
+
+        let result = '';
+        for (let i = 0; i < length; i++) {
+          result += getRandomDigit();
+        }
+        display.textContent = result;
+
+        if (elapsed < duration) {
+          requestAnimationFrame(step);
+        } else {
+          resolve();
+        }
+      }
+      requestAnimationFrame(step);
+    });
+  }
+
+  btn.addEventListener('click', async () => {
+    let min = parseInt(minInput.value);
+    let max = parseInt(maxInput.value);
+    let length = parseInt(lengthInput.value);
+
+    if (isNaN(min) || isNaN(max) || min > max) {
+      alert('Проверьте корректность введённых минимального и максимального чисел.');
+      return;
+    }
+    if (isNaN(length) || length < 0) {
+      alert('Длина числа должна быть неотрицательной.');
+      return;
+    }
+
+    btn.disabled = true;
+
+    // Анимация
+    const animLength = length > 0 ? length : max.toString().length;
+    await animateRandomNumber(animLength, 2000);
+
+    // Генерация итогового числа
+    const randNum = Math.floor(Math.random() * (max - min + 1)) + min;
+    let resultStr = randNum.toString();
+    if (length > 0) {
+      resultStr = resultStr.padStart(length, '0');
+    }
+    display.textContent = resultStr;
+
+    btn.disabled = false;
+  });
+</script>
+
 </body>
 </html>
