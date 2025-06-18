@@ -3,407 +3,197 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Онлайн Генератор Резюме</title>
+<title>Генератор QR-кодов</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
   body {
     margin: 0; padding: 0;
     font-family: 'Inter', sans-serif;
-    background: linear-gradient(135deg, #6b73ff 0%, #000dff 100%);
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
     min-height: 100vh;
-    color: #222;
     display: flex;
-    flex-direction: column;
+    justify-content: center;
     align-items: center;
-    padding: 20px;
-  }
-  h1 {
-    color: white;
-    margin-bottom: 15px;
+    color: #fff;
   }
   .container {
-    background: white;
-    border-radius: 12px;
-    padding: 25px 30px;
-    max-width: 900px;
+    background: rgba(255 255 255 / 0.1);
+    backdrop-filter: blur(15px);
+    border-radius: 16px;
+    padding: 30px 40px;
+    max-width: 420px;
     width: 100%;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.25);
-    display: flex;
-    gap: 30px;
-    flex-wrap: wrap;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+    text-align: center;
   }
-  form {
-    flex: 1 1 350px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  h1 {
+    margin-bottom: 24px;
+    font-weight: 700;
+    font-size: 28px;
+    letter-spacing: 0.04em;
+    user-select: none;
   }
   label {
+    display: block;
+    text-align: left;
+    margin-bottom: 8px;
     font-weight: 600;
+    font-size: 14px;
+    user-select: none;
+  }
+  input[type="text"], input[type="color"] {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: none;
+    font-size: 16px;
+    outline: none;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+    transition: box-shadow 0.3s ease;
+    user-select: text;
+  }
+  input[type="text"]:focus {
+    box-shadow: 0 0 10px #2575fc;
+  }
+  .color-group {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    justify-content: space-between;
+  }
+  .color-input {
+    flex: 1;
+  }
+  .color-input label {
     margin-bottom: 6px;
   }
-  input[type=text], input[type=email], textarea {
-    padding: 10px 12px;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    font-size: 15px;
-    resize: vertical;
-  }
-  textarea {
-    min-height: 60px;
-  }
-  .small-input {
-    width: 48%;
-  }
-  .row {
-    display: flex;
-    gap: 4%;
-    flex-wrap: wrap;
-  }
   button {
-    margin-top: 20px;
-    padding: 14px 20px;
-    background: #000dff;
-    color: white;
+    background: #2575fc;
     border: none;
-    border-radius: 10px;
+    border-radius: 12px;
+    color: white;
     font-weight: 700;
     font-size: 16px;
+    padding: 14px 0;
     cursor: pointer;
-    transition: background 0.3s ease;
+    width: 100%;
+    transition: background-color 0.3s ease;
+    user-select: none;
   }
-  button:hover {
-    background: #3f48cc;
+  button:disabled {
+    background: #7a96e0;
+    cursor: not-allowed;
   }
-  .resume-preview {
-    flex: 1 1 450px;
-    background: #f9f9f9;
-    border-radius: 10px;
-    padding: 25px 30px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    max-height: 85vh;
-    overflow-y: auto;
+  button:hover:not(:disabled) {
+    background: #1b56d9;
   }
-  .resume-preview h2 {
-    margin-top: 0;
-    border-bottom: 2px solid #000dff;
-    padding-bottom: 6px;
-    color: #000dff;
+  #qrCode {
+    margin-top: 30px;
+    user-select: none;
   }
-  .section {
-    margin-bottom: 20px;
+  canvas {
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
   }
-  .section-title {
-    font-weight: 700;
-    margin-bottom: 8px;
-    font-size: 18px;
-    color: #222;
-    border-bottom: 1px solid #ccc;
-    padding-bottom: 4px;
-  }
-  .item {
-    margin-bottom: 8px;
-  }
-  .item-title {
-    font-weight: 600;
-  }
-  .item-subtitle {
-    font-style: italic;
-    color: #555;
-    font-size: 14px;
-  }
-  .item-desc {
-    margin-top: 4px;
-    font-size: 14px;
-    line-height: 1.3;
-  }
-  /* Scrollbar for preview */
-  .resume-preview::-webkit-scrollbar {
-    width: 8px;
-  }
-  .resume-preview::-webkit-scrollbar-track {
-    background: #f0f0f0;
-  }
-  .resume-preview::-webkit-scrollbar-thumb {
-    background: #000dff;
-    border-radius: 4px;
-  }
-  /* Responsive */
-  @media (max-width: 760px) {
-    .container {
-      flex-direction: column;
-    }
-    .resume-preview, form {
-      flex: 1 1 100%;
-      max-height: none;
-    }
+  footer {
+    margin-top: 28px;
+    font-size: 13px;
+    color: rgba(255 255 255 / 0.5);
+    user-select: none;
   }
 </style>
 </head>
 <body>
 
-<h1>Онлайн Генератор Резюме</h1>
+<div class="container" role="main" aria-label="Генератор QR-кодов">
+  <h1>Генератор QR-кодов</h1>
 
-<div class="container">
+  <label for="textInput">Введите текст или ссылку</label>
+  <input type="text" id="textInput" placeholder="https://example.com" aria-describedby="errorMsg" aria-required="true" />
 
-  <form id="resumeForm" autocomplete="off">
-    <label for="fullName">ФИО *</label>
-    <input type="text" id="fullName" placeholder="Иван Иванов" required />
-
-    <label for="email">Email *</label>
-    <input type="email" id="email" placeholder="ivan@mail.com" required />
-
-    <label for="phone">Телефон</label>
-    <input type="text" id="phone" placeholder="+7 (999) 999-99-99" />
-
-    <label for="objective">Цель / Краткое описание</label>
-    <textarea id="objective" placeholder="Опишите свои цели или кратко о себе"></textarea>
-
-    <div id="educationContainer">
-      <label>Образование</label>
-      <div class="edu-item">
-        <input type="text" class="edu-school" placeholder="Учебное заведение" />
-        <input type="text" class="edu-degree" placeholder="Специальность" />
-        <input type="text" class="edu-year" placeholder="Годы обучения (напр. 2015-2019)" />
-      </div>
+  <div class="color-group">
+    <div class="color-input">
+      <label for="fgColor">Цвет QR-кода</label>
+      <input type="color" id="fgColor" value="#000000" aria-label="Цвет QR-кода" />
     </div>
-    <button type="button" id="addEduBtn" style="background:#3399ff; margin-bottom: 15px;">+ Добавить образование</button>
-
-    <div id="experienceContainer">
-      <label>Опыт работы</label>
-      <div class="exp-item">
-        <input type="text" class="exp-company" placeholder="Компания" />
-        <input type="text" class="exp-position" placeholder="Должность" />
-        <input type="text" class="exp-period" placeholder="Период (напр. 2020-2023)" />
-        <textarea class="exp-desc" placeholder="Краткое описание обязанностей и достижений"></textarea>
-      </div>
+    <div class="color-input">
+      <label for="bgColor">Цвет фона</label>
+      <input type="color" id="bgColor" value="#ffffff" aria-label="Цвет фона QR-кода" />
     </div>
-    <button type="button" id="addExpBtn" style="background:#3399ff; margin-bottom: 15px;">+ Добавить опыт работы</button>
-
-    <label for="skills">Навыки (через запятую)</label>
-    <input type="text" id="skills" placeholder="JavaScript, React, CSS" />
-
-    <button type="submit">Сгенерировать резюме</button>
-  </form>
-
-  <div class="resume-preview" id="resumePreview">
-    <h2>Ваше резюме появится здесь</h2>
-    <p>Заполните форму слева и нажмите "Сгенерировать резюме".</p>
   </div>
+
+  <button id="generateBtn" disabled>Сгенерировать QR-код</button>
+
+  <div id="qrCode" aria-live="polite" aria-atomic="true" aria-label="Зона вывода QR-кода"></div>
+
+  <button id="downloadBtn" style="display:none; margin-top: 20px;">Скачать PNG</button>
+
+  <footer>© 2025 Генератор QR-кодов</footer>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 <script>
-  const form = document.getElementById('resumeForm');
-  const resumePreview = document.getElementById('resumePreview');
-  const addEduBtn = document.getElementById('addEduBtn');
-  const educationContainer = document.getElementById('educationContainer');
-  const addExpBtn = document.getElementById('addExpBtn');
-  const experienceContainer = document.getElementById('experienceContainer');
+  const textInput = document.getElementById('textInput');
+  const fgColor = document.getElementById('fgColor');
+  const bgColor = document.getElementById('bgColor');
+  const generateBtn = document.getElementById('generateBtn');
+  const qrCodeContainer = document.getElementById('qrCode');
+  const downloadBtn = document.getElementById('downloadBtn');
 
-  // Добавление блока образования
-  addEduBtn.addEventListener('click', () => {
-    const div = document.createElement('div');
-    div.classList.add('edu-item');
-    div.style.marginTop = '10px';
-    div.innerHTML = `
-      <input type="text" class="edu-school" placeholder="Учебное заведение" />
-      <input type="text" class="edu-degree" placeholder="Специальность" />
-      <input type="text" class="edu-year" placeholder="Годы обучения (напр. 2015-2019)" />
-    `;
-    educationContainer.appendChild(div);
+  // Активируем кнопку только если есть текст
+  textInput.addEventListener('input', () => {
+    generateBtn.disabled = !textInput.value.trim();
   });
 
-  // Добавление блока опыта работы
-  addExpBtn.addEventListener('click', () => {
-    const div = document.createElement('div');
-    div.classList.add('exp-item');
-    div.style.marginTop = '10px';
-    div.innerHTML = `
-      <input type="text" class="exp-company" placeholder="Компания" />
-      <input type="text" class="exp-position" placeholder="Должность" />
-      <input type="text" class="exp-period" placeholder="Период (напр. 2020-2023)" />
-      <textarea class="exp-desc" placeholder="Краткое описание обязанностей и достижений"></textarea>
-    `;
-    experienceContainer.appendChild(div);
-  });
+  // Функция генерации QR
+  async function generateQRCode() {
+    const text = textInput.value.trim();
+    if (!text) return;
 
-  function escapeHtml(text) {
-    return text.replace(/&/g, "&amp;")
-               .replace(/</g, "&lt;")
-               .replace(/>/g, "&gt;")
-               .replace(/"/g, "&quot;")
-               .replace(/'/g, "&#039;");
-  }
+    qrCodeContainer.innerHTML = ''; // очистить прошлый код
+    downloadBtn.style.display = 'none';
 
-  form.addEventListener('submit', e => {
-    e.preventDefault();
+    try {
+      const opts = {
+        color: {
+          dark: fgColor.value,
+          light: bgColor.value,
+        },
+        margin: 2,
+        width: 280,
+      };
+      // Создаем canvas с QR-кодом
+      const canvas = document.createElement('canvas');
+      await QRCode.toCanvas(canvas, text, opts);
+      qrCodeContainer.appendChild(canvas);
 
-    const fullName = form.fullName.value.trim();
-    const email = form.email.value.trim();
-    const phone = form.phone.value.trim();
-    const objective = form.objective.value.trim();
-
-    if (!fullName || !email) {
-      alert('Пожалуйста, заполните обязательные поля: ФИО и Email');
-      return;
+      downloadBtn.style.display = 'inline-block';
+    } catch (err) {
+      qrCodeContainer.textContent = 'Ошибка генерации QR-кода.';
+      console.error(err);
+      downloadBtn.style.display = 'none';
     }
+  }
 
-    // Сбор образования
-    const eduItems = Array.from(document.querySelectorAll('.edu-item'));
-    const educations = eduItems.map(div => ({
-      school: div.querySelector('.edu-school').value.trim(),
-      degree: div.querySelector('.edu-degree').value.trim(),
-      year: div.querySelector('.edu-year').value.trim(),
-    })).filter(e => e.school || e.degree || e.year);
+  generateBtn.addEventListener('click', generateQRCode);
 
-    // Сбор опыта
-    const expItems = Array.from(document.querySelectorAll('.exp-item'));
-    const experiences = expItems.map(div => ({
-      company: div.querySelector('.exp-company').value.trim(),
-      position: div.querySelector('.exp-position').value.trim(),
-      period: div.querySelector('.exp-period').value.trim(),
-      desc: div.querySelector('.exp-desc').value.trim(),
-    })).filter(e => e.company || e.position || e.period || e.desc);
-
-    // Навыки
-    const skillsRaw = form.skills.value.trim();
-    const skills = skillsRaw ? skillsRaw.split(',').map(s => s.trim()).filter(s => s) : [];
-
-    // Формируем HTML резюме
-    const html = `
-      <h2>${escapeHtml(fullName)}</h2>
-      <p><strong>Email:</strong> ${escapeHtml(email)}</p>
-      ${phone ? `<p><strong>Телефон:</strong> ${escapeHtml(phone)}</p>` : ''}
-      ${objective ? `<div class="section"><div class="section-title">Цель</div><p>${escapeHtml(objective)}</p></div>` : ''}
-
-      ${educations.length ? `
-      <div class="section">
-        <div class="section-title">Образование</div>
-        ${educations.map(ed => `
-          <div class="item">
-            <div class="item-title">${escapeHtml(ed.school)}</div>
-            <div class="item-subtitle">${escapeHtml(ed.degree)} ${ed.year ? ', ' + escapeHtml(ed.year) : ''}</div>
-          </div>
-        `).join('')}
-      </div>
-      ` : ''}
-
-      ${experiences.length ? `
-      <div class="section">
-        <div class="section-title">Опыт работы</div>
-        ${experiences.map(ex => `
-          <div class="item">
-            <div class="item-title">${escapeHtml(ex.position)} — ${escapeHtml(ex.company)}</div>
-            <div class="item-subtitle">${escapeHtml(ex.period)}</div>
-            ${ex.desc ? `<div class="item-desc">${escapeHtml(ex.desc)}</div>` : ''}
-          </div>
-        `).join('')}
-      </div>
-      ` : ''}
-
-      ${skills.length ? `
-      <div class="section">
-        <div class="section-title">Навыки</div>
-        <p>${skills.map(s => escapeHtml(s)).join(', ')}</p>
-      </div>
-      ` : ''}
-    `;
-
-    resumePreview.innerHTML = html;
-    addDownloadButton();
+  downloadBtn.addEventListener('click', () => {
+    const canvas = qrCodeContainer.querySelector('canvas');
+    if (!canvas) return;
+    const link = document.createElement('a');
+    link.download = 'qr-code.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
   });
 
-  // Добавляем кнопку скачивания PDF после генерации
-  function addDownloadButton() {
-    let existingBtn = document.getElementById('downloadPdfBtn');
-    if (existingBtn) return;
-
-    const btn = document.createElement('button');
-    btn.id = 'downloadPdfBtn';
-    btn.textContent = 'Скачать PDF';
-    btn.style.marginTop = '10px';
-    resumePreview.appendChild(btn);
-
-    btn.addEventListener('click', () => {
-      generatePDF();
-    });
-  }
-
-  function generatePDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({
-      unit: 'pt',
-      format: 'a4'
-    });
-
-    // Получаем HTML резюме
-    const content = resumePreview.innerHTML;
-
-    // Создадим временный div для форматирования текста
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = content;
-    tempDiv.style.width = '500px'; // ширина для текста в PDF
-
-    // Функция для добавления текста в PDF с переносами строк
-    let y = 40;
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(22);
-
-    // Добавляем имя
-    const nameEl = tempDiv.querySelector('h2');
-    if (nameEl) {
-      doc.text(nameEl.textContent, 40, y);
-      y += 30;
+  // Чтобы юзер мог нажать Enter в поле ввода
+  textInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !generateBtn.disabled) {
+      e.preventDefault();
+      generateQRCode();
     }
-
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(12);
-
-    // Добавляем остальные секции
-    const paragraphs = tempDiv.querySelectorAll('p, .section-title, .item-title, .item-subtitle, .item-desc');
-
-    paragraphs.forEach(p => {
-      if (y > 750) {
-        doc.addPage();
-        y = 40;
-      }
-
-      if (p.classList.contains('section-title')) {
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(16);
-        doc.text(p.textContent, 40, y);
-        y += 22;
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(12);
-      } else if (p.classList.contains('item-title')) {
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(13);
-        doc.text(p.textContent, 50, y);
-        y += 18;
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(12);
-      } else if (p.classList.contains('item-subtitle')) {
-        doc.setTextColor(100);
-        doc.setFont('helvetica', 'italic');
-        doc.text(p.textContent, 55, y);
-        y += 16;
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(0);
-      } else if (p.classList.contains('item-desc')) {
-        let textLines = doc.splitTextToSize(p.textContent, 450);
-        doc.text(textLines, 60, y);
-        y += textLines.length * 14;
-      } else {
-        // простой параграф
-        let textLines = doc.splitTextToSize(p.textContent, 500);
-        doc.text(textLines, 40, y);
-        y += textLines.length * 14;
-      }
-    });
-
-    doc.save('resume.pdf');
-  }
+  });
 </script>
 
 </body>
