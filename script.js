@@ -50,6 +50,7 @@
 
   let pressTimer = null;
 
+  // Обычный клик — скачать файл
   downloadBtn.addEventListener('click', () => {
     const canvas = qrCodeContainer.querySelector('canvas');
     if (!canvas) return;
@@ -66,28 +67,80 @@
     }, 'image/png');
   });
 
+  // Удержание — открыть окно на весь экран с кнопками
   downloadBtn.addEventListener('mousedown', () => {
     pressTimer = setTimeout(() => {
       const canvas = qrCodeContainer.querySelector('canvas');
       if (!canvas) return;
 
       const dataUrl = canvas.toDataURL('image/png');
-      const newTab = window.open();
+      const newTab = window.open('', '_blank', 'fullscreen=yes');
       if (newTab) {
         newTab.document.write(`
           <html>
-            <head><title>QR-код для скачивания</title></head>
-            <body style="margin:0;display:flex;justify-content:center;align-items:center;height:100vh;background:#f0f4f8;">
-              <img src="${dataUrl}" alt="QR-код" style="max-width:90%; max-height:90%; border-radius:16px;"/>
-              <p style="text-align:center; font-family:sans-serif; margin-top:10px;">
-                Правый клик по изображению и "Сохранить как..." для скачивания.
-              </p>
+            <head>
+              <title>QR-код</title>
+              <style>
+                body {
+                  margin: 0;
+                  display: flex;
+                  flex-direction: column;
+                  justify-content: center;
+                  align-items: center;
+                  height: 100vh;
+                  background: #f0f4f8;
+                  font-family: sans-serif;
+                  text-align: center;
+                }
+                img {
+                  max-width: 90vw;
+                  max-height: 70vh;
+                  border-radius: 16px;
+                  box-shadow: 0 12px 24px rgba(0,0,0,0.2);
+                }
+                .buttons {
+                  margin-top: 20px;
+                  display: flex;
+                  gap: 20px;
+                }
+                button {
+                  padding: 10px 20px;
+                  font-size: 16px;
+                  border: none;
+                  border-radius: 10px;
+                  cursor: pointer;
+                  background-color: #2575fc;
+                  color: white;
+                  transition: background-color 0.3s ease;
+                }
+                button:hover {
+                  background-color: #1b56d9;
+                }
+              </style>
+            </head>
+            <body>
+              <img src="${dataUrl}" alt="QR-код" />
+              <div class="buttons">
+                <button id="downloadBtn">Скачать PNG</button>
+                <button id="closeBtn">Закрыть</button>
+              </div>
+              <script>
+                document.getElementById('closeBtn').onclick = () => window.close();
+                document.getElementById('downloadBtn').onclick = () => {
+                  const link = document.createElement('a');
+                  link.href = '${dataUrl}';
+                  link.download = 'qr-code.png';
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                };
+              <\/script>
             </body>
           </html>
         `);
         newTab.document.close();
       }
-    }, 700);
+    }, 700); // 700мс удержания
   });
 
   downloadBtn.addEventListener('mouseup', () => {
