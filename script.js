@@ -1,39 +1,33 @@
-window.onload = () => {
+// tic-tac-toe-bot.js
+
+document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     document.getElementById('loaderScreen').style.display = 'none';
     createBoard();
-  }, 2000); // 2 секунды загрузки
-};
+    messageElement.textContent = `Ход: ${currentPlayer}`;
+  }, 2000);
+});
 
 const boardElement = document.getElementById('board');
 const messageElement = document.getElementById('message');
 const countdownElement = document.getElementById('countdown');
 const scoreboard = document.getElementById('scoreboard');
 const difficultySelect = document.getElementById('difficulty');
-const canvas = document.getElementById('fireworksCanvas');
-const ctx = canvas.getContext('2d');
 
 let board = ['', '', '', '', '', '', '', '', ''];
 let currentPlayer = '❌';
 let gameActive = true;
-let fireworks = [];
-let animationId;
 let playerWins = 0;
 let botWins = 0;
 let draws = 0;
+let fireworks = [];
+let animationId;
 
 const winningConditions = [
   [0,1,2],[3,4,5],[6,7,8],
   [0,3,6],[1,4,7],[2,5,8],
   [0,4,8],[2,4,6]
 ];
-
-function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-}
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
 
 class FireworkParticle {
   constructor(x,y,color){
@@ -53,7 +47,7 @@ class FireworkParticle {
     this.y += this.speedY;
     this.alpha -= this.decay;
   }
-  draw() {
+  draw(ctx) {
     ctx.save();
     ctx.globalAlpha = this.alpha;
     ctx.fillStyle = this.color;
@@ -63,6 +57,16 @@ class FireworkParticle {
     ctx.restore();
   }
 }
+
+const canvas = document.getElementById('fireworksCanvas');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
 
 function createFireworks(x, y) {
   const colors = ['#ff4757','#ffa502','#1e90ff','#2ed573','#ff6b81','#3742fa'];
@@ -77,7 +81,7 @@ function animateFireworks() {
   for(let i = fireworks.length - 1; i >= 0; i--){
     const p = fireworks[i];
     p.update();
-    p.draw();
+    p.draw(ctx);
     if(p.alpha <= 0){
       fireworks.splice(i,1);
     }
@@ -142,7 +146,7 @@ function checkResult() {
     }
   }
   if(roundWon){
-    messageElement.textContent = `Победитель: ${currentPlayer}! 🎉`;
+    messageElement.textContent = `Победил: ${currentPlayer}! 🎉`;
     gameActive = false;
     highlightWinningCells();
     showFireworks();
@@ -171,15 +175,15 @@ function highlightWinningCells() {
   for(const condition of winningConditions){
     const [a,b,c] = condition;
     if(board[a] !== '' && board[a] === board[b] && board[b] === board[c]){
-      document.querySelector(`.cell[data-index="${a}"]`).style.backgroundColor = '#55efc4';
-      document.querySelector(`.cell[data-index="${b}"]`).style.backgroundColor = '#55efc4';
-      document.querySelector(`.cell[data-index="${c}"]`).style.backgroundColor = '#55efc4';
+      document.querySelector(`.cell[data-index="${a}"]`).style.backgroundColor = '#90ee90';
+      document.querySelector(`.cell[data-index="${b}"]`).style.backgroundColor = '#90ee90';
+      document.querySelector(`.cell[data-index="${c}"]`).style.backgroundColor = '#90ee90';
     }
   }
 }
 
 function startCountdownAndRestart() {
-  let timeLeft = 3;
+  let timeLeft = 2;
   countdownElement.textContent = timeLeft;
   clearInterval(window.countdownInterval);
   window.countdownInterval = setInterval(() => {
@@ -206,46 +210,23 @@ function restartGame() {
   cancelAnimationFrame(animationId);
 }
 
-// Бот ходит в зависимости от выбранного уровня сложности
+// Уровни сложности
 function botMove() {
   if (!gameActive) return;
-  const difficulty = difficultySelect.value;
 
+  const difficulty = difficultySelect ? difficultySelect.value : 'medium';
   if (difficulty === 'easy') {
-    easyBotMove();
+    randomBotMove();
   } else if (difficulty === 'medium') {
     mediumBotMove();
-  } else {
+  } else if (difficulty === 'hard') {
     hardBotMove();
+  } else if (difficulty === 'boss') {
+    bossBotMove();
   }
 }
 
-// Средний бот: минимакс с 70% вероятностью, случайный ход 30%
-function mediumBotMove() {
-  const randomChance = Math.random();
-  if (randomChance < 0.7) {
-    minimaxMove();
-  } else {
-    randomMove();
-  }
-}
-
-// Сильный бот: минимакс с 90% вероятностью, случайный ход 10%
-function hardBotMove() {
-  const randomChance = Math.random();
-  if (randomChance < 0.9) {
-    minimaxMove();
-  } else {
-    randomMove();
-  }
-}
-
-// Легкий бот: всегда случайный ход
-function easyBotMove() {
-  randomMove();
-}
-
-function randomMove() {
+function randomBotMove() {
   const emptyIndices = board.map((val, idx) => val === '' ? idx : -1).filter(idx => idx !== -1);
   if (emptyIndices.length === 0) return;
   const randomIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
@@ -254,7 +235,30 @@ function randomMove() {
   checkResult();
 }
 
-function minimaxMove() {
+function mediumBotMove() {
+  // Минимакс с 50% вероятностью идеальный ход, иначе случайный
+  if (Math.random() < 0.5) {
+    minimaxBotMove();
+  } else {
+    randomBotMove();
+  }
+}
+
+function hardBotMove() {
+  // Минимакс с 80% вероятностью идеальный ход
+  if (Math.random() < 0.8) {
+    minimaxBotMove();
+  } else {
+    randomBotMove();
+  }
+}
+
+function bossBotMove() {
+  // Минимакс всегда идеальный ход
+  minimaxBotMove();
+}
+
+function minimaxBotMove() {
   let bestScore = -Infinity;
   let move;
   for (let i = 0; i < board.length; i++) {
@@ -268,9 +272,11 @@ function minimaxMove() {
       }
     }
   }
-  board[move] = '⭕';
-  updateBoard();
-  checkResult();
+  if (move !== undefined) {
+    board[move] = '⭕';
+    updateBoard();
+    checkResult();
+  }
 }
 
 function minimax(newBoard, depth, isMaximizing) {
@@ -312,4 +318,4 @@ function checkWinner(bd) {
   }
   if (!bd.includes('')) return 'tie';
   return null;
-} 
+}
