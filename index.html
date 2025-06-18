@@ -1,18 +1,109 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Мой первый сайт</title>
-  </head>
-  <body>
-    <h1>Привет!</h1>
-    <p>Я учусь программировать.</p>
-    <h2>Это мой первый строка кода.</h2>
-    <h3>Мои интересы</h3>
-    <ul>
-      <li>Программирование</li>
-      <li>Учиться</li>
-      <li>Итд.</li>
-      </ul>
-    <img src="https://placekitten.com/300/200" alt="Котик" />
-  </body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To-Do List</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f5f5f5;
+    }
+    .container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    input[type="text"] {
+      width: calc(100% - 50px);
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    button {
+      padding: 10px;
+      border: none;
+      background-color: #5cb85c;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #4cae4c;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #ddd;
+    }
+    li.completed {
+      text-decoration: line-through;
+      color: #aaa;
+    }
+    .delete {
+      color: red;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>To-Do List</h1>
+    <div>
+      <input id="taskInput" type="text" placeholder="Enter a new task">
+      <button onclick="addTask()">Add</button>
+    </div>
+    <ul id="taskList"></ul>
+  </div>
+
+  <script>
+    function addTask() {
+      const taskInput = document.getElementById("taskInput");
+      const taskText = taskInput.value.trim();
+
+      if (taskText === "") {
+        alert("Please enter a task.");
+        return;
+      }
+
+      const taskList = document.getElementById("taskList");
+      const li = document.createElement("li");
+
+      li.innerHTML = `
+        <span onclick="toggleComplete(this)">${taskText}</span>
+        <span class="delete" onclick="deleteTask(this)">✖</span>
+      `;
+
+      taskList.appendChild(li);
+      taskInput.value = ""; // Очистить поле ввода
+    }
+
+    function toggleComplete(task) {
+      task.parentElement.classList.toggle("completed");
+    }
+
+    function deleteTask(task) {
+      task.parentElement.remove();
+    }
+  </script>
+</body>
 </html>
