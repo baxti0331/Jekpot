@@ -1,220 +1,245 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>Крестики-нолики — Игра с ботом</title>
-<style>
-  /* Сброс и базовые стили */
-  * {
-    box-sizing: border-box;
-  }
-  body {
-    margin: 0; padding: 20px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    display: flex; flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    min-height: 100vh;
-    color: #f0f0f5;
-    user-select: none;
-  }
-  #loaderScreen {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: linear-gradient(135deg, #4b6cb7, #182848);
-    display: flex; justify-content: center; align-items: center; flex-direction: column;
-    color: #e0e0ff; font-size: 30px; font-weight: 700; z-index: 1000;
-  }
-  .spinner {
-    margin-top: 25px; width: 60px; height: 60px;
-    border: 8px solid rgba(255,255,255,0.15);
-    border-top: 8px solid #a29bfe;
-    border-radius: 50%;
-    animation: spin 1.3s linear infinite;
-  }
-  @keyframes spin {
-    0% { transform: rotate(0deg);}
-    100% { transform: rotate(360deg);}
-  }
-
-  /* Контейнер выбора сложности */
-  #difficultySelect {
-    margin-bottom: 25px;
-    background: rgba(255,255,255,0.15);
-    padding: 14px 24px;
-    border-radius: 30px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-    user-select: none;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    font-weight: 600;
-    font-size: 18px;
-    color: #dfe6e9;
-    backdrop-filter: blur(10px);
-  }
-  #difficultySelect label {
-    cursor: default;
-  }
-  #difficultySelect select {
-    background: #fff;
-    border-radius: 20px;
-    padding: 8px 14px;
-    font-size: 18px;
-    border: none;
-    outline: none;
-    box-shadow: 0 3px 10px rgba(255,255,255,0.4);
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  #difficultySelect select:hover {
-    background-color: #f1f1f1;
-  }
-
-  /* Счёт и сообщение */
-  #scoreboard {
-    font-size: 24px;
-    font-weight: 700;
-    margin-bottom: 20px;
-    letter-spacing: 0.06em;
-    text-shadow: 0 0 10px #a29bfe;
-    user-select: none;
-  }
-  #message {
-    margin-top: 24px;
-    font-size: 28px;
-    font-weight: 700;
-    color: #ffeaa7;
-    text-shadow: 0 0 8px #fab1a0;
-    min-height: 36px;
-    user-select: none;
-  }
-  #countdown {
-    margin-top: 6px;
-    font-size: 22px;
-    font-weight: 600;
-    color: #dfe6e9cc;
-    min-height: 28px;
-    user-select: none;
-  }
-
-  /* Игровое поле */
-  #board {
-    display: grid;
-    grid-template-columns: repeat(3, 110px);
-    grid-template-rows: repeat(3, 110px);
-    gap: 16px;
-    user-select: none;
-  }
-  @media (max-width: 400px) {
-    #board {
-      grid-template-columns: repeat(3, 80px);
-      grid-template-rows: repeat(3, 80px);
-      gap: 12px;
+  <meta charset="UTF-8" />
+  <title>Учёт расходов в поездке</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #e0f2ff, #cfd8dc);
+      color: #333;
+      margin: 0;
+      padding: 0;
     }
-  }
-  .cell {
-    background: linear-gradient(145deg, #7f8cfa, #5e66cc);
-    border-radius: 24px;
-    box-shadow:  7px 7px 15px #514c93,
-                -7px -7px 15px #a3a0f4;
-    font-size: 78px;
-    color: #dfe6e9;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    transition: 
-      background-color 0.3s ease,
-      transform 0.15s ease,
-      box-shadow 0.3s ease;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .cell:hover:not(.disabled) {
-    background: linear-gradient(145deg, #a29bfe, #6c5ce7);
-    box-shadow:
-      0 0 12px 3px #6c5ce7;
-    transform: scale(1.05);
-  }
-  .cell:active:not(.disabled) {
-    transform: scale(0.95);
-    box-shadow:
-      inset 2px 2px 10px #4a44aa,
-      inset -2px -2px 10px #8b81f7;
-  }
-  .cell.disabled {
-    cursor: default;
-    color: #b2bec3;
-    background: linear-gradient(145deg, #5a60a3, #474c8f);
-    box-shadow: inset 5px 5px 15px #3a3e7a,
-                inset -5px -5px 15px #6e73b9;
-  }
 
-  /* Кнопка сброса */
-  #resetButton {
-    margin-top: 30px;
-    padding: 12px 28px;
-    background: linear-gradient(145deg, #a29bfe, #6c5ce7);
-    color: white;
-    font-size: 20px;
-    font-weight: 700;
-    border: none;
-    border-radius: 30px;
-    cursor: pointer;
-    box-shadow:
-      0 8px 20px rgba(108,92,231,0.7);
-    transition: 
-      background-color 0.3s ease,
-      box-shadow 0.3s ease,
-      transform 0.15s ease;
-    user-select: none;
-  }
-  #resetButton:hover {
-    background: linear-gradient(145deg, #8178f7, #4b39d7);
-    box-shadow:
-      0 10px 30px rgba(75,57,215,0.9);
-    transform: scale(1.05);
-  }
-  #resetButton:active {
-    transform: scale(0.95);
-    box-shadow: 0 4px 15px rgba(75,57,215,0.6);
-  }
+    header {
+      background-color: #1565c0;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
 
-  /* Canvas для фейерверка */
-  #fireworksCanvas {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    pointer-events: none;
-    z-index: 100;
-  }
-</style>
+    .container {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      color: #1565c0;
+    }
+
+    label {
+      display: block;
+      margin-top: 1rem;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.25rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      margin-top: 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0d47a1;
+    }
+
+    .expense-list {
+      margin-top: 2rem;
+    }
+
+    .expense {
+      padding: 0.75rem;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .balance {
+      margin-top: 2rem;
+      padding: 1rem;
+      background-color: #e3f2fd;
+      border-radius: 6px;
+    }
+
+    .balance.positive {
+      color: green;
+    }
+
+    .balance.negative {
+      color: red;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        margin: 1rem;
+        padding: 1rem;
+      }
+    }
+  </style>
 </head>
 <body>
-<div id="loaderScreen" role="alert" aria-live="assertive">Игра загружается...<div class="spinner"></div></div>
 
-<div id="difficultySelect">
-  <label for="difficulty">Выберите уровень сложности:</label>
-  <select id="difficulty" aria-label="Уровень сложности">
-    <option value="medium" selected>Средний</option>
-    <option value="hard">Сильный</option>
-    <option value="boss">Босс</option>
-  </select>
+<header>
+  <h1>Учёт расходов в поездке</h1>
+</header>
+
+<div class="container">
+  <h2>Создать поездку</h2>
+  <label>Название поездки
+    <input type="text" id="tripName">
+  </label>
+  <label>Локация
+    <input type="text" id="tripLocation">
+  </label>
+  <label>Дата начала
+    <input type="date" id="startDate">
+  </label>
+  <label>Дата окончания
+    <input type="date" id="endDate">
+  </label>
+  <button onclick="createTrip()">Создать поездку</button>
+
+  <div id="tripSection" style="display:none;">
+    <h2>Добавить участника</h2>
+    <label>Имя
+      <input type="text" id="participantName">
+    </label>
+    <button onclick="addParticipant()">Добавить участника</button>
+
+    <h2>Добавить расход</h2>
+    <label>Описание
+      <input type="text" id="description">
+    </label>
+    <label>Сумма
+      <input type="number" id="amount" step="0.01">
+    </label>
+    <label>Плательщик
+      <select id="payerSelect"></select>
+    </label>
+    <label>Дата
+      <input type="date" id="expenseDate">
+    </label>
+    <button onclick="addExpense()">Добавить расход</button>
+
+    <div class="expense-list" id="expenses">
+      <h3>Последние расходы</h3>
+      <div id="expenseEntries"></div>
+    </div>
+
+    <div class="balance" id="balance"></div>
+  </div>
 </div>
 
-<div id="scoreboard" aria-live="polite" aria-atomic="true">Игрок ❌: 0  |  Бот ⭕: 0  |  Ничьи: 0</div>
+<script>
+  let trip = null;
+  let participants = [];
+  let expenses = [];
 
-<div id="board" role="grid" aria-label="Игровое поле крестики-нолики"></div>
+  function createTrip() {
+    const name = document.getElementById('tripName').value;
+    if (!name) {
+      alert("Введите название поездки");
+      return;
+    }
+    trip = {
+      name,
+      location: document.getElementById('tripLocation').value,
+      startDate: document.getElementById('startDate').value,
+      endDate: document.getElementById('endDate').value
+    };
+    document.getElementById('tripSection').style.display = 'block';
+  }
 
-<div id="message" aria-live="polite" aria-atomic="true">Ходит: ❌</div>
-<div id="countdown" aria-live="polite" aria-atomic="true"></div>
+  function addParticipant() {
+    const name = document.getElementById('participantName').value.trim();
+    if (!name) return;
+    if (participants.includes(name)) {
+      alert("Такой участник уже есть");
+      return;
+    }
+    participants.push(name);
+    const payerSelect = document.getElementById('payerSelect');
+    const option = document.createElement('option');
+    option.text = name;
+    payerSelect.add(option);
+    document.getElementById('participantName').value = '';
+  }
 
-<button id="resetButton" aria-label="Начать новую игру">Начать заново</button>
+  function addExpense() {
+    const desc = document.getElementById('description').value.trim();
+    const amount = parseFloat(document.getElementById('amount').value);
+    const payer = document.getElementById('payerSelect').value;
+    const date = document.getElementById('expenseDate').value;
 
-<canvas id="fireworksCanvas"></canvas>
+    if (!desc || isNaN(amount) || !payer) {
+      alert("Заполните все обязательные поля");
+      return;
+    }
 
-<script src="tic-tac-toe-bot.js"></script>
+    const expense = { desc, amount, payer, date };
+    expenses.push(expense);
+
+    document.getElementById('description').value = '';
+    document.getElementById('amount').value = '';
+    document.getElementById('expenseDate').value = date || new Date().toISOString().split('T')[0];
+
+    updateExpenses();
+    updateBalance();
+  }
+
+  function updateExpenses() {
+    const list = document.getElementById('expenseEntries');
+    list.innerHTML = '';
+    expenses.slice(-5).reverse().forEach(e => {
+      const div = document.createElement('div');
+      div.className = 'expense';
+      div.innerText = `${e.payer} потратил ${e.amount.toFixed(2)}₽: ${e.desc}`;
+      list.appendChild(div);
+    });
+  }
+
+  function updateBalance() {
+    const balances = {};
+    participants.forEach(p => balances[p] = 0);
+
+    expenses.forEach(e => {
+      const share = e.amount / participants.length;
+      participants.forEach(p => {
+        if (p === e.payer) {
+          balances[p] += e.amount - share;
+        } else {
+          balances[p] -= share;
+        }
+      });
+    });
+
+    const balanceDiv = document.getElementById('balance');
+    balanceDiv.innerHTML = "<strong>Баланс участников:</strong><br><br>";
+    for (const p in balances) {
+      const val = balances[p].toFixed(2);
+      const span = document.createElement('div');
+      span.className = "balance-entry";
+      span.style.color = balances[p] > 0 ? 'green' : (balances[p] < 0 ? 'red' : 'black');
+      span.textContent = `${p}: ${val} ₽`;
+      balanceDiv.appendChild(span);
+    }
+  }
+</script>
+
 </body>
 </html>
