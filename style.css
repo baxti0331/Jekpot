@@ -1,0 +1,179 @@
+/* Основные цвета и стили */
+
+:root {
+  --blue-light: #cce4f7;
+  --blue: #2a5d9f;
+  --blue-dark: #1e3b6e;
+  --gray-light: #f7f9fb;
+  --gray: #a3a9b2;
+  --gray-dark: #54585e;
+  --white: #fff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--gray-light);
+  color: var(--blue-dark);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header, footer {
+  background: var(--blue);
+  color: var(--white);
+  padding: 1rem;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+main {
+  flex: 1;
+  padding: 1rem;
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+h1, h2, h3 {
+  margin-top: 0;
+  color: var(--blue-dark);
+}
+
+form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+form input, form select, form button {
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid var(--gray);
+  border-radius: 4px;
+  transition: border-color 0.3s;
+}
+
+form input:focus, form select:focus {
+  border-color: var(--blue);
+  outline: none;
+}
+
+form button {
+  background: var(--blue);
+  color: var(--white);
+  border: none;
+  cursor: pointer;
+  flex-grow: 1;
+  min-width: 150px;
+  transition: background-color 0.3s;
+}
+
+form button:hover {
+  background: var(--blue-dark);
+}
+
+#products-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.product-card {
+  background: var(--white);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.product-card:hover {
+  background: var(--blue-light);
+}
+
+.product-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.product-info {
+  color: var(--gray-dark);
+  font-size: 0.9rem;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Таблица операций */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--white);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+thead {
+  background: var(--blue);
+  color: var(--white);
+}
+
+th, td {
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--gray-light);
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+tbody tr:hover {
+  background: var(--blue-light);
+  cursor: default;
+}
+
+/* Кнопка назад */
+#back-to-list-btn {
+  background: var(--gray);
+  color: var(--white);
+  border: none;
+  padding: 0.5rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#back-to-list-btn:hover {
+  background: var(--gray-dark);
+}
+
+/* Адаптивность */
+
+@media (max-width: 600px) {
+  form {
+    flex-direction: column;
+  }
+
+  form button {
+    flex-grow: 0;
+    width: 100%;
+  }
+
+  #products-list {
+    gap: 1rem;
+  }
+
+  th, td {
+    font-size: 0.8rem;
+    padding: 0.3rem;
+  }
+}
