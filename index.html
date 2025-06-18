@@ -3,209 +3,250 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Портфолио</title>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-
+<title>Портфолио — [Твоё имя]</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
 <style>
-  :root {
-    --bg: #f8f9fa;
-    --fg: #212529;
-    --accent: #007bff;
-    --modal-bg: rgba(0,0,0,0.5);
+  /* Reset */
+  * {
+    box-sizing: border-box;
+    margin: 0; padding: 0;
   }
-  [data-theme="dark"] {
-    --bg: #1e1e2f;
-    --fg: #eee;
-    --accent: #60a5fa;
-    --modal-bg: rgba(0,0,0,0.7);
-  }
-  * { margin:0; padding:0; box-sizing:border-box; }
+
   body {
     font-family: 'Montserrat', sans-serif;
-    background: var(--bg);
-    color: var(--fg);
-    transition: .4s;
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
-  }
-  header {
-    background: var(--accent);
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    min-height: 100vh;
     color: #fff;
-    padding:1.5rem;
-    display:flex;
-    justify-content: space-between;
-    align-items:center;
-  }
-  header h1 { font-size:2rem; }
-  .theme-toggle {
-    font-size:1.2rem;
-    background:none;
-    border:none;
-    color:#fff;
-    cursor:pointer;
-    transition:.2s;
-  }
-  .theme-toggle:hover { transform:scale(1.1) }
-  main { flex:1; padding:2rem 1rem; max-width:1000px; width:100%; margin:auto; }
-  section { margin-bottom:3rem; }
-  h2 { border-bottom:2px solid var(--accent); padding-bottom:.3rem; margin-bottom:1rem; }
-  .projects {
-    display:grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
-    gap:1.5rem;
-  }
-  .project {
-    background: var(--bg);
-    border-radius:12px;
-    box-shadow:0 4px 12px rgba(0,0,0,0.1);
-    padding:1rem;
-    transition:.3s;
-  }
-  .project:hover { transform: translateY(-6px); box-shadow:0 8px 20px rgba(0,0,0,0.15); }
-  .project h3 { margin-bottom:.5rem; }
-  .project a {
-    display:inline-block;
-    margin-top:1rem;
-    color:var(--accent);
-    text-decoration:none;
-    transition:.2s;
-  }
-  .project a:hover { text-decoration:underline; }
-  .btn-primary {
-    background:var(--accent);
-    color:#fff;
-    border:none;
-    padding:.7rem 1.2rem;
-    font-size:1rem;
-    border-radius:6px;
-    cursor:pointer;
-    transition:.3s;
-  }
-  .btn-primary:hover { background:darken(var(--accent),10%); opacity:.9; }
-  .contact {
-    max-width:400px;
-  }
-  .contact p { margin-bottom:.5rem; }
-  footer {
-    text-align:center;
-    padding:1rem;
-    font-size:.9rem;
-    color:var(--fg);
-    background:var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
-  /* Modal */
-  .modal {
-    position: fixed;
-    top:0; left:0; right:0; bottom:0;
-    background: var(--modal-bg);
-    display:none;
-    justify-content:center;
-    align-items:center;
-    z-index:10;
+  header {
+    width: 100%;
+    max-width: 900px;
+    padding: 40px 20px 20px;
+    text-align: center;
   }
-  .modal.open { display:flex; }
-  .modal-content {
-    background:var(--bg);
-    padding:2rem;
-    border-radius:12px;
-    width:90%;
-    max-width:400px;
-    box-shadow:0 8px 24px rgba(0,0,0,0.2);
-    position:relative;
+
+  header h1 {
+    font-weight: 700;
+    font-size: 3rem;
+    margin-bottom: 8px;
+    text-shadow: 0 0 10px rgba(0,0,0,0.3);
   }
-  .modal h3 { margin-bottom:1rem; }
-  .modal input, .modal textarea {
-    width:100%; padding:.7rem; margin-bottom:1rem;
-    border:1px solid #ccc; border-radius:6px;
-    background: var(--bg); color: var(--fg);
+
+  header p {
+    font-weight: 400;
+    font-size: 1.2rem;
+    color: #d6d6d6;
+    text-shadow: 0 0 6px rgba(0,0,0,0.15);
   }
-  .modal textarea { resize:vertical; height:120px; }
-  .modal .close {
-    position:absolute; top:8px; right:12px;
-    background:none; border:none; font-size:1.2rem;
-    cursor:pointer;
+
+  main {
+    flex-grow: 1;
+    width: 100%;
+    max-width: 900px;
+    padding: 0 20px 60px;
+  }
+
+  section {
+    margin-bottom: 60px;
+    backdrop-filter: blur(10px);
+    background: rgba(255 255 255 / 0.1);
+    border-radius: 20px;
+    padding: 30px 40px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+    transition: box-shadow 0.3s ease;
+  }
+  section:hover {
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  }
+
+  section h2 {
+    font-weight: 700;
+    font-size: 2rem;
+    margin-bottom: 20px;
+    border-left: 5px solid #fff;
+    padding-left: 12px;
+  }
+
+  /* About Me */
+  #about p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #e0e0e0;
+  }
+
+  /* Projects */
+  #projects {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+    gap: 24px;
+  }
+
+  .project-card {
+    background: rgba(255 255 255 / 0.15);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .project-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 12px 30px rgba(255,255,255,0.3);
+  }
+
+  .project-card h3 {
+    margin-bottom: 10px;
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+
+  .project-card p {
+    flex-grow: 1;
+    font-size: 1rem;
+    color: #ccc;
+    margin-bottom: 15px;
+  }
+
+  .project-card a {
+    text-decoration: none;
+    color: #ffd700;
+    font-weight: 700;
+    align-self: flex-start;
+    transition: color 0.3s ease;
+  }
+  .project-card a:hover {
+    color: #fff;
+  }
+
+  /* Contacts */
+  #contact form {
+    display: flex;
+    flex-direction: column;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  #contact label {
+    margin: 12px 0 6px;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  #contact input,
+  #contact textarea {
+    padding: 12px 15px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    resize: vertical;
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  #contact textarea {
+    min-height: 100px;
+  }
+
+  #contact button {
+    margin-top: 20px;
+    padding: 15px 25px;
+    border: none;
+    border-radius: 20px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    background: #ffd700;
+    color: #333;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.6);
+  }
+  #contact button:hover {
+    background: #fff066;
+  }
+
+  /* Footer */
+  footer {
+    width: 100%;
+    max-width: 900px;
+    padding: 20px 0;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #ddd;
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    header h1 {
+      font-size: 2.2rem;
+    }
+    section {
+      padding: 25px 20px;
+    }
+    #projects {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
 </head>
-<body data-theme="light">
+<body>
 
 <header>
-  <h1>Твоё Имя</h1>
-  <button class="theme-toggle" id="themeBtn">🌙</button>
+  <h1>Привет, я Иван Иванов</h1>
+  <p>Веб-разработчик и дизайнер интерфейсов</p>
 </header>
 
 <main>
-  <section data-aos="fade-up">
-    <h2>Привет, я...</h2>
-    <p>Фронтенд-разработчик, создаю современные веб-интерфейсы с плавной анимацией и вниманием к UX/UI.</p>
+  <section id="about" aria-label="Обо мне">
+    <h2>Обо мне</h2>
+    <p>Я увлечённый веб-разработчик с опытом создания современных и адаптивных сайтов и приложений. Люблю чистый код и креативные решения.</p>
   </section>
 
-  <section data-aos="fade-up" data-aos-delay="100">
+  <section id="projects" aria-label="Проекты">
     <h2>Проекты</h2>
-    <div class="projects">
-      <div class="project" data-aos="flip-left">
-        <h3>Калькулятор</h3>
-        <p>Умный калькулятор с тёмной темой, историей, тригонометрией.</p>
-        <a href="#" target="_blank">Посмотреть</a>
-      </div>
-      <div class="project" data-aos="flip-left" data-aos-delay="100">
-        <h3>Портфолио</h3>
-        <p>Этот сайт — пример минималистичного дизайна.</p>
-        <a href="#" target="_blank">Посмотреть</a>
-      </div>
-      <!-- добавь ещё проекты -->
+    <div class="project-card" tabindex="0" role="link" aria-label="Проект: Генератор случайных чисел">
+      <h3>Генератор случайных чисел</h3>
+      <p>Простой и стильный генератор случайных чисел с анимацией и плавным интерфейсом.</p>
+      <a href="#" target="_blank" rel="noopener">Посмотреть код</a>
+    </div>
+    <div class="project-card" tabindex="0" role="link" aria-label="Проект: Умный калькулятор">
+      <h3>Умный калькулятор</h3>
+      <p>Калькулятор с поддержкой тригонометрии, логарифмов и истории вычислений.</p>
+      <a href="#" target="_blank" rel="noopener">Посмотреть код</a>
+    </div>
+    <div class="project-card" tabindex="0" role="link" aria-label="Проект: Портфолио">
+      <h3>Портфолио</h3>
+      <p>Современный и адаптивный дизайн портфолио с плавной анимацией и UX улучшениями.</p>
+      <a href="#" target="_blank" rel="noopener">Посмотреть код</a>
     </div>
   </section>
 
-  <section data-aos="fade-up" data-aos-delay="200">
-    <h2>Контакты</h2>
-    <div class="contact">
-      <p>Email: you@example.com</p>
-      <p>GitHub: <a href="#" target="_blank">github.com/you</a></p>
-      <p>Telegram: <a href="#" target="_blank">@you</a></p>
-      <button class="btn-primary" id="openModalBtn">Написать мне</button>
-    </div>
+  <section id="contact" aria-label="Контакты">
+    <h2>Свяжитесь со мной</h2>
+    <form onsubmit="event.preventDefault(); alert('Спасибо за ваше сообщение!'); this.reset();">
+      <label for="name">Имя</label>
+      <input type="text" id="name" name="name" required placeholder="Ваше имя" />
+      
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required placeholder="example@mail.com" />
+      
+      <label for="message">Сообщение</label>
+      <textarea id="message" name="message" required placeholder="Ваше сообщение"></textarea>
+      
+      <button type="submit">Отправить</button>
+    </form>
   </section>
 </main>
 
-<footer>© 2025 Твоё Имя. Все права защищены.</footer>
+<footer>
+  © 2025 Иван Иванов — Все права защищены
+</footer>
 
-<!-- Modal -->
-<div class="modal" id="modal">
-  <div class="modal-content">
-    <button class="close" id="closeModal">✖</button>
-    <h3>Написать мне</h3>
-    <input type="email" placeholder="Твой Email" />
-    <textarea placeholder="Сообщение"></textarea>
-    <button class="btn-primary">Отправить</button>
-  </div>
-</div>
-
-<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-<script>
-  AOS.init({ once: true });
-
-  document.getElementById('themeBtn').onclick = () => {
-    const body = document.body;
-    const isLight = body.getAttribute('data-theme') === 'light';
-    body.setAttribute('data-theme', isLight ? 'dark' : 'light');
-    document.getElementById('themeBtn').textContent = isLight ? '☀️' : '🌙';
-  };
-
-  document.getElementById('openModalBtn').onclick = () => {
-    document.getElementById('modal').classList.add('open');
-  };
-  document.getElementById('closeModal').onclick = () => {
-    document.getElementById('modal').classList.remove('open');
-  };
-  document.getElementById('modal').onclick = e => {
-    if (e.target === e.currentTarget) {
-      document.getElementById('modal').classList.remove('open');
-    }
-  };
-</script>
 </body>
 </html>
