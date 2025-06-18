@@ -2,128 +2,87 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>Поездки — учёт расходов</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script defer src="script.js"></script>
-  <style>
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      background: linear-gradient(to right, #e0f0ff, #f8faff);
-      color: #333;
-    }
-    header {
-      background-color: #007acc;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-    }
-    h1 i { margin-right: 0.5em; }
-    main {
-      padding: 1em;
-      max-width: 800px;
-      margin: auto;
-    }
-    button {
-      padding: 0.5em 1em;
-      margin-top: 0.5em;
-      background: #007acc;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    input, select {
-      margin: 0.3em;
-      padding: 0.4em;
-      font-size: 1em;
-    }
-    .expense-form, .transfer-form, .trip-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5em;
-      align-items: center;
-    }
-    .trip-item {
-      padding: 0.5em;
-      background: #fff;
-      border: 1px solid #ccc;
-      margin: 0.3em 0;
-      cursor: pointer;
-    }
-    table {
-      width: 100%;
-      margin-top: 1em;
-      border-collapse: collapse;
-    }
-    table, th, td {
-      border: 1px solid #ccc;
-    }
-    th, td {
-      padding: 0.5em;
-      text-align: center;
-    }
-    @media (max-width: 600px) {
-      .expense-form, .transfer-form, .trip-meta {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Телефонный магазин — учёт товаров</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
-    <h1><i class="fa-solid fa-plane-departure"></i> Поездки</h1>
+    <h1>Телефонный магазин — учёт товаров</h1>
   </header>
 
   <main>
-    <section id="trip-list-section">
-      <h2>Мои поездки</h2>
-      <div id="trip-list"></div>
-      <button id="create-trip-btn">➕ Новая поездка</button>
+    <section id="add-product-section">
+      <h2>Добавить новый товар на склад</h2>
+      <form id="add-product-form">
+        <input type="text" id="product-name" placeholder="Название телефона (обязательное)" required />
+        <input type="text" id="product-model" placeholder="Модель (обязательное)" required />
+        <input type="number" id="product-quantity" placeholder="Начальное количество" min="0" value="0" />
+        <input type="number" id="product-cost-price" placeholder="Цена закупки (₽)" min="0" step="0.01" />
+        <input type="number" id="product-sale-price" placeholder="Цена продажи (₽)" min="0" step="0.01" />
+        <button type="submit">Добавить товар</button>
+      </form>
     </section>
 
-    <section id="trip-editor-section" style="display:none;">
-      <button id="back-to-trips">← Назад</button>
-      <h2 id="trip-title"></h2>
+    <section id="products-list-section">
+      <h2>Склад: список товаров</h2>
+      <div id="products-list"></div>
+    </section>
 
-      <div class="trip-meta">
-        <label>Локация: <input id="trip-location" /></label>
-        <label>Дата начала: <input type="date" id="trip-start" /></label>
-        <label>Дата окончания: <input type="date" id="trip-end" /></label>
+    <section id="product-details-section" class="hidden">
+      <button id="back-to-list-btn">← Вернуться к складу</button>
+      <h2 id="product-title"></h2>
+      <p><strong>Текущий остаток:</strong> <span id="current-stock"></span></p>
+
+      <div id="operations-section">
+        <h3>Добавить операцию</h3>
+        <form id="add-operation-form">
+          <select id="operation-type" required>
+            <option value="" disabled selected>Выберите тип операции</option>
+            <option value="sale">Продажа</option>
+            <option value="restock">Пополнение склада</option>
+            <option value="loan">Займ</option>
+          </select>
+
+          <input type="date" id="operation-date" required />
+          <input type="number" id="operation-quantity" placeholder="Количество" min="1" required />
+          <input type="number" id="operation-price" placeholder="Сумма (₽) — для продажи и пополнения" min="0" step="0.01" />
+          <input type="text" id="operation-loan-person" placeholder="Кому отдан в долг (для займа)" />
+
+          <button type="submit">Добавить операцию</button>
+        </form>
       </div>
 
-      <h3>Участники</h3>
-      <ul id="participant-list"></ul>
-      <input id="new-participant" placeholder="Имя участника" />
-      <button id="add-participant-btn">Добавить</button>
-
-      <h3>Расходы</h3>
-      <div class="expense-form">
-        <input id="expense-desc" placeholder="Описание" />
-        <input id="expense-amount" type="number" placeholder="Сумма" />
-        <input id="expense-date" type="date" />
-        <select id="expense-payer"></select>
-        <label><input type="checkbox" id="custom-split" /> Кастомное разделение</label>
-        <div id="custom-split-fields" style="display:none;"></div>
-        <button id="add-expense-btn">Добавить расход</button>
+      <div id="recent-operations-section">
+        <h3>Последние операции</h3>
+        <table id="operations-table">
+          <thead>
+            <tr>
+              <th>Дата</th>
+              <th>Тип</th>
+              <th>Количество</th>
+              <th>Сумма (₽)</th>
+              <th>Кому (для займа)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- операции будут здесь -->
+          </tbody>
+        </table>
       </div>
 
-      <h3>Переводы</h3>
-      <div class="transfer-form">
-        <select id="transfer-from"></select> →
-        <select id="transfer-to"></select>
-        <input id="transfer-amount" type="number" placeholder="Сумма" />
-        <button id="add-transfer-btn">Добавить перевод</button>
+      <div id="chart-section">
+        <h3>Динамика остатков</h3>
+        <canvas id="stock-chart" width="400" height="200"></canvas>
       </div>
-
-      <h3>Сводка</h3>
-      <canvas id="balance-chart" height="100"></canvas>
-      <div id="summary-table"></div>
-      <h4>Матрица долгов</h4>
-      <div id="debt-matrix"></div>
     </section>
   </main>
+
+  <footer>
+    <p>© 2025 Телефонный магазин</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
