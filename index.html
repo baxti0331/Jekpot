@@ -2,8 +2,8 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Умный калькулятор с подсказками</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Умный калькулятор с тригонометрией</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap');
   body {
@@ -20,7 +20,7 @@
     background: linear-gradient(145deg, #2e2e45, #1a1a2b);
     box-shadow: 0 10px 30px rgba(0,0,0,0.7);
     border-radius: 20px;
-    width: 360px;
+    width: 380px;
     padding: 25px;
     display: flex;
     flex-direction: column;
@@ -68,12 +68,12 @@
   .buttons {
     margin-top: 20px;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
   }
   button {
-    font-size: 1.5rem;
-    padding: 18px;
+    font-size: 1.4rem;
+    padding: 15px;
     border-radius: 12px;
     border: none;
     background: #3b3b56;
@@ -111,11 +111,17 @@
   button.clear:hover {
     background: #ff6f7a;
   }
+  .func {
+    background: #5a6cff;
+  }
+  .func:hover {
+    background: #7b8dff;
+  }
 </style>
 </head>
 <body>
 
-<div class="calculator" role="main" aria-label="Умный калькулятор">
+<div class="calculator" role="main" aria-label="Умный калькулятор с тригонометрией и функциями">
   <div class="display" id="display" aria-live="polite" aria-atomic="true">0</div>
   <div class="hint" id="hint" aria-live="assertive"></div>
   <div class="history" id="history" aria-label="История вычислений"></div>
@@ -124,21 +130,33 @@
     <button aria-label="Открывающая скобка">(</button>
     <button aria-label="Закрывающая скобка">)</button>
     <button class="operator" aria-label="Деление">÷</button>
+    <button class="operator" aria-label="Умножение">×</button>
+
+    <button class="func" aria-label="sin">sin</button>
+    <button class="func" aria-label="cos">cos</button>
+    <button class="func" aria-label="tan">tan</button>
+    <button class="func" aria-label="log">log</button>
+    <button class="func" aria-label="sqrt">√</button>
+
     <button aria-label="Семёрка">7</button>
     <button aria-label="Восьмёрка">8</button>
     <button aria-label="Девятка">9</button>
-    <button class="operator" aria-label="Умножение">×</button>
+    <button class="operator" aria-label="Вычитание">−</button>
+    <button class="func" aria-label="abs">abs</button>
+
     <button aria-label="Четвёрка">4</button>
     <button aria-label="Пятёрка">5</button>
     <button aria-label="Шестёрка">6</button>
-    <button class="operator" aria-label="Вычитание">−</button>
+    <button class="operator" aria-label="Сложение">+</button>
+    <button aria-label="Константа π">π</button>
+
     <button aria-label="Один">1</button>
     <button aria-label="Два">2</button>
     <button aria-label="Три">3</button>
-    <button class="operator" aria-label="Сложение">+</button>
     <button aria-label="Ноль">0</button>
     <button aria-label="Десятичная точка">.</button>
-    <button aria-label="Процент">%</button>
+
+    <button class="operator" aria-label="Процент">%</button>
     <button class="equals" aria-label="Равно">=</button>
   </div>
 </div>
@@ -152,15 +170,30 @@
   let currentExpression = '';
   let history = [];
 
+  // Функции, доступные в выражениях
+  const functions = {
+    sin: Math.sin,
+    cos: Math.cos,
+    tan: Math.tan,
+    log: Math.log10 || ((x) => Math.log(x)/Math.LN10),
+    sqrt: Math.sqrt,
+    abs: Math.abs,
+  };
+
+  // Константы
+  const constants = {
+    pi: Math.PI,
+    π: Math.PI,
+    e: Math.E,
+  };
+
   // Автоисправление и очистка выражения
   function autoCorrect(expr) {
-    // Замена символов
-    expr = expr.replace(/÷/g, '/').replace(/×/g, '*').replace(/−/g, '-');
+    expr = expr.replace(/÷/g, '/').replace(/×/g, '*').replace(/−/g, '-').replace(/√/g, 'sqrt');
+    expr = expr.replace(/π/g, 'pi');
 
-    // Удаление повторяющихся операторов кроме минуса (например ++ -> +)
+    // Удаление повторяющихся операторов кроме минуса
     expr = expr.replace(/([+\/*]){2,}/g, '$1');
-
-    // Удаляем пробелы
     expr = expr.replace(/\s+/g, '');
 
     return expr;
@@ -177,32 +210,43 @@
     return balance === 0;
   }
 
-  // Проверка на корректность выражения (простая)
+  // Проверка корректности выражения (простая)
   function validateExpression(expr) {
     if (!expr) return 'Введите выражение';
 
-    // Проверка символов — разрешаем цифры, +-*/%.() пробелы
-    if (/[^0-9+\-*/%.() ]/.test(expr)) return 'Недопустимые символы';
+    if (/[^0-9+\-*/%.()a-zA-Zπ]/.test(expr)) return 'Недопустимые символы';
 
-    // Проверка баланса скобок
     if (!checkBrackets(expr)) return 'Неверное количество скобок';
 
-    // Проверка на некорректные подряд идущие операторы (кроме минуса)
     if (/([+\/*]){2,}/.test(expr)) return 'Ошибка: несколько операторов подряд';
 
-    // Проверка на операторы в начале или конце (кроме минуса в начале)
     if (/^[+\/*]/.test(expr)) return 'Выражение не может начинаться с оператора';
     if (/[+\-*/]$/.test(expr)) return 'Выражение не может заканчиваться оператором';
 
     return null;
   }
 
-  // Безопасное вычисление
+  // Безопасное вычисление с поддержкой функций и констант
   function safeEval(expr) {
     expr = expr.replace(/%/g, '/100');
+
+    // Заменяем константы на числа
+    for (const key in constants) {
+      const re = new RegExp(`\\b${key}\\b`, 'g');
+      expr = expr.replace(re, constants[key]);
+    }
+
+    // Создаем функцию с локальными функциями
+    const funcNames = Object.keys(functions);
+    const funcArgs = funcNames.join(',');
+
+    const funcBody = `"use strict";return (${expr})`;
+
     try {
       // eslint-disable-next-line no-new-func
-      return Function(`"use strict";return (${expr})`)();
+      const f = new Function(funcArgs, funcBody);
+      const funcVals = funcNames.map(name => functions[name]);
+      return f(...funcVals);
     } catch {
       return null;
     }
@@ -243,7 +287,7 @@
 
   buttons.forEach(btn => {
     btn.addEventListener('click', () => {
-      const val = btn.textContent;
+      let val = btn.textContent;
 
       if (btn.classList.contains('clear')) {
         currentExpression = '';
@@ -271,7 +315,11 @@
         return;
       }
 
-      // Добавляем символ и делаем автоисправление
+      // Спецобработка функций для вставки с ()
+      if (btn.classList.contains('func')) {
+        val += '(';
+      }
+
       currentExpression += val;
       currentExpression = autoCorrect(currentExpression);
 
