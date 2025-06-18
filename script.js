@@ -1,25 +1,27 @@
 (() => {
-  // QR-код элементы
   const textInput = document.getElementById('textInput');
   const fgColor = document.getElementById('fgColor');
   const bgColor = document.getElementById('bgColor');
+  const generateBtn = document.getElementById('generateBtn');
+  const qrCodeContainer = document.getElementById('qrCode');
+  const downloadBtn = document.getElementById('downloadBtn');
   const sizeSelect = document.getElementById('sizeSelect');
   const logoFile = document.getElementById('logoFile');
-  const genBtn = document.getElementById('generateBtn');
-  const qrCodeContainer = document.getElementById('qrCode');
-  const dlBtn = document.getElementById('downloadBtn');
-  const prnBtn = document.getElementById('printBtn');
-  const openBarBtn = document.getElementById('openBarcodeBtn');
 
   let logoImage = null;
 
+  // Включаем кнопку генерации, если есть текст
   textInput.addEventListener('input', () => {
-    genBtn.disabled = !textInput.value.trim();
+    generateBtn.disabled = !textInput.value.trim();
   });
 
+  // Загружаем логотип из файла
   logoFile.addEventListener('change', () => {
     const file = logoFile.files[0];
-    if (!file) { logoImage = null; return; }
+    if (!file) {
+      logoImage = null;
+      return;
+    }
     if (!file.type.startsWith('image/')) {
       alert('Пожалуйста, выберите изображение.');
       logoFile.value = '';
@@ -30,128 +32,73 @@
     reader.onload = () => {
       logoImage = new Image();
       logoImage.src = reader.result;
+      // Подгружаем логотип, чтобы быть уверенным, что он готов для отрисовки
+      logoImage.onload = () => {};
     };
     reader.readAsDataURL(file);
   });
 
-  async function generateQR() {
-    const txt = textInput.value.trim();
-    if (!txt) return;
+  async function generateQRCode() {
+    const text = textInput.value.trim();
+    if (!text) return;
+
     qrCodeContainer.innerHTML = '';
-    dlBtn.style.display = prnBtn.style.display = 'none';
+    downloadBtn.style.display = 'none';
 
     try {
-      const size = parseInt(sizeSelect.value);
-      const opts = { color:{dark:fgColor.value, light:bgColor.value}, margin:2, width:size };
+      const size = parseInt(sizeSelect.value, 10) || 256;
+      const opts = {
+        color: {
+          dark: fgColor.value,
+          light: bgColor.value,
+        },
+        margin: 2,
+        width: size,
+      };
+
       const canvas = document.createElement('canvas');
-      await QRCode.toCanvas(canvas, txt, opts);
+      await QRCode.toCanvas(canvas, text, opts);
 
       if (logoImage) {
         const ctx = canvas.getContext('2d');
-        const ls = size * 0.2;
-        const x = (size - ls) / 2;
-        const y = x;
+        const logoSize = size * 0.2;
+        const x = (canvas.width - logoSize) / 2;
+        const y = (canvas.height - logoSize) / 2;
+
+        // Нарисовать белый круг под логотипом для контраста
         ctx.fillStyle = bgColor.value;
         ctx.beginPath();
-        ctx.arc(size/2, size/2, ls/1.8, 0, 2 * Math.PI);
+        ctx.arc(canvas.width / 2, canvas.height / 2, logoSize / 1.8, 0, 2 * Math.PI);
         ctx.fill();
-        ctx.drawImage(logoImage, x, y, ls, ls);
+
+        ctx.drawImage(logoImage, x, y, logoSize, logoSize);
       }
 
       qrCodeContainer.appendChild(canvas);
-      dlBtn.style.display = prnBtn.style.display = 'inline-block';
-    } catch (e) {
-      qrCodeContainer.textContent = 'Ошибка генерации QR-кода.';
-      dlBtn.style.display = prnBtn.style.display = 'none';
-      console.error(e);
+      downloadBtn.style.display = 'block';
+
+    } catch (err) {
+      qrCodeContainer.textContent = 'Ошибка при генерации QR-кода.';
+      console.error(err);
+      downloadBtn.style.display = 'none';
     }
   }
 
-  genBtn.addEventListener('click', generateQR);
+  generateBtn.addEventListener('click', generateQRCode);
 
-  dlBtn.addEventListener('click', () => {
+  downloadBtn.addEventListener('click', () => {
     const canvas = qrCodeContainer.querySelector('canvas');
     if (!canvas) return;
+
     canvas.toBlob(blob => {
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = 'qr-code.png';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'qr-code.png';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
       URL.revokeObjectURL(url);
     }, 'image/png');
-  });
-
-  prnBtn.addEventListener('click', () => {
-    const canvas = qrCodeContainer.querySelector('canvas');
-    if (!canvas) return;
-    const dataUrl = canvas.toDataURL('image/png');
-    const w = window.open('', '_blank');
-    w.document.write(`
-      <html><head><title>Печать QR</title>
-      <style>body{margin:0;display:flex;justify-content:center;align-items:center;height:100vh;}
-      img{max-width:90%;}</style></head><body>
-      <img src="${dataUrl}" onload="window.print();window.close();"/>
-      </body></html>`);
-    w.document.close();
-  });
-
-  // Штрихкод-панель элементы
-  const slide = document.getElementById('barcodeSlide');
-  const closeBtn = document.getElementById('closeBarcodeBtn');
-  const eanInput = document.getElementById('eanInput');
-  const genBarBtn = document.getElementById('genBarcodeBtn');
-  const bcContainer = document.getElementById('barcodeContainer');
-  const bcDl = document.getElementById('barcodeDownloadBtn');
-  const bcPrn = document.getElementById('barcodePrintBtn');
-
-  openBarBtn.addEventListener('click', () => slide.classList.add('open'));
-  closeBtn.addEventListener('click', () => slide.classList.remove('open'));
-
-  eanInput.addEventListener('input', () => {
-    genBarBtn.disabled = !/^\d{12}$/.test(eanInput.value);
-  });
-
-  genBarBtn.addEventListener('click', () => {
-    bcContainer.innerHTML = '';
-    bcDl.style.display = bcPrn.style.display = 'none';
-    try {
-      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      JsBarcode(svg, eanInput.value, { format: 'ean13', displayValue: true, width: 2, height: 100 });
-      bcContainer.appendChild(svg);
-      bcDl.style.display = bcPrn.style.display = 'inline-block';
-    } catch (e) {
-      bcContainer.textContent = 'Ошибка штрихкода';
-      console.error(e);
-    }
-  });
-
-  bcDl.addEventListener('click', () => {
-    const svg = bcContainer.querySelector('svg');
-    if (!svg) return;
-    const data = '<?xml version="1.0"?>' + new XMLSerializer().serializeToString(svg);
-    const blob = new Blob([data], { type: 'image/svg+xml' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'barcode.svg';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  });
-
-  bcPrn.addEventListener('click', () => {
-    const svg = bcContainer.querySelector('svg');
-    if (!svg) return;
-    const data = new XMLSerializer().serializeToString(svg);
-    const w = window.open('', '_blank');
-    w.document.write(`
-      <html><head><title>Печать штрихкода</title>
-      <style>body{margin:0;display:flex;justify-content:center;align-items:center;height:100vh;}
-      svg{max-width:90%;}</style></head><body>${data}
-      <script>window.onload=()=>{window.print();window.close();};</script>
-      </body></html>`);
-    w.document.close();
   });
 })();
