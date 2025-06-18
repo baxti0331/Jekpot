@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Умный калькулятор</title>
+<title>Умный калькулятор с подсказками</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap');
   body {
@@ -33,6 +33,16 @@
     min-height: 60px;
     word-wrap: break-word;
     box-shadow: inset 0 0 10px #444;
+    user-select: none;
+    white-space: pre-wrap;
+  }
+  .hint {
+    margin-top: 8px;
+    font-size: 0.95rem;
+    color: #ff6666;
+    min-height: 22px;
+    font-weight: 600;
+    font-style: italic;
     user-select: none;
   }
   .history {
@@ -107,6 +117,7 @@
 
 <div class="calculator" role="main" aria-label="Умный калькулятор">
   <div class="display" id="display" aria-live="polite" aria-atomic="true">0</div>
+  <div class="hint" id="hint" aria-live="assertive"></div>
   <div class="history" id="history" aria-label="История вычислений"></div>
   <div class="buttons" role="group" aria-label="Кнопки калькулятора">
     <button class="clear" aria-label="Очистить">C</button>
@@ -135,16 +146,60 @@
 <script>
   const display = document.getElementById('display');
   const historyEl = document.getElementById('history');
+  const hintEl = document.getElementById('hint');
   const buttons = document.querySelectorAll('.buttons button');
 
   let currentExpression = '';
   let history = [];
 
-  function safeEval(expr) {
-    // Заменяем символы на JS-операторы
+  // Автоисправление и очистка выражения
+  function autoCorrect(expr) {
+    // Замена символов
     expr = expr.replace(/÷/g, '/').replace(/×/g, '*').replace(/−/g, '-');
-    // Обработка процентов — заменяем 50% на 0.5
-    expr = expr.replace(/(\d+(\.\d+)?)%/g, '($1/100)');
+
+    // Удаление повторяющихся операторов кроме минуса (например ++ -> +)
+    expr = expr.replace(/([+\/*]){2,}/g, '$1');
+
+    // Удаляем пробелы
+    expr = expr.replace(/\s+/g, '');
+
+    return expr;
+  }
+
+  // Проверка баланса скобок
+  function checkBrackets(expr) {
+    let balance = 0;
+    for (const ch of expr) {
+      if (ch === '(') balance++;
+      else if (ch === ')') balance--;
+      if (balance < 0) return false;
+    }
+    return balance === 0;
+  }
+
+  // Проверка на корректность выражения (простая)
+  function validateExpression(expr) {
+    if (!expr) return 'Введите выражение';
+
+    // Проверка символов — разрешаем цифры, +-*/%.() пробелы
+    if (/[^0-9+\-*/%.() ]/.test(expr)) return 'Недопустимые символы';
+
+    // Проверка баланса скобок
+    if (!checkBrackets(expr)) return 'Неверное количество скобок';
+
+    // Проверка на некорректные подряд идущие операторы (кроме минуса)
+    if (/([+\/*]){2,}/.test(expr)) return 'Ошибка: несколько операторов подряд';
+
+    // Проверка на операторы в начале или конце (кроме минуса в начале)
+    if (/^[+\/*]/.test(expr)) return 'Выражение не может начинаться с оператора';
+    if (/[+\-*/]$/.test(expr)) return 'Выражение не может заканчиваться оператором';
+
+    return null;
+  }
+
+  // Безопасное вычисление
+  function safeEval(expr) {
+    expr = expr.replace(/%/g, '/100');
     try {
       // eslint-disable-next-line no-new-func
       return Function(`"use strict";return (${expr})`)();
@@ -159,7 +214,7 @@
 
   function addToHistory(expr, result) {
     history.push({ expr, result });
-    if (history.length > 10) history.shift(); // Храним не более 10 записей
+    if (history.length > 10) history.shift();
 
     historyEl.innerHTML = '';
     history.slice().reverse().forEach(item => {
@@ -172,12 +227,14 @@
       div.addEventListener('click', () => {
         currentExpression = item.expr;
         updateDisplay();
+        hintEl.textContent = '';
       });
       div.addEventListener('keydown', e => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           currentExpression = item.expr;
           updateDisplay();
+          hintEl.textContent = '';
         }
       });
       historyEl.appendChild(div);
@@ -190,28 +247,41 @@
 
       if (btn.classList.contains('clear')) {
         currentExpression = '';
+        hintEl.textContent = '';
         updateDisplay();
         return;
       }
 
       if (btn.classList.contains('equals')) {
-        if (!currentExpression.trim()) return;
-        const result = safeEval(currentExpression);
-        if (result === null || isNaN(result)) {
-          display.textContent = 'Ошибка';
-          currentExpression = '';
-        } else {
-          addToHistory(currentExpression, result);
-          currentExpression = result.toString();
-          display.textContent = currentExpression;
+        let corrected = autoCorrect(currentExpression);
+        let err = validateExpression(corrected);
+        if (err) {
+          hintEl.textContent = err;
+          return;
         }
+        const result = safeEval(corrected);
+        if (result === null || isNaN(result)) {
+          hintEl.textContent = 'Ошибка вычисления';
+          return;
+        }
+        addToHistory(currentExpression, result);
+        currentExpression = result.toString();
+        updateDisplay();
+        hintEl.textContent = '';
         return;
       }
 
-      // Ограничим ввод для корректности
-      // Можно добавлять логику проверки здесь
-
+      // Добавляем символ и делаем автоисправление
       currentExpression += val;
+      currentExpression = autoCorrect(currentExpression);
+
+      let err = validateExpression(currentExpression);
+      if (err) {
+        hintEl.textContent = err;
+      } else {
+        hintEl.textContent = '';
+      }
+
       updateDisplay();
     });
   });
