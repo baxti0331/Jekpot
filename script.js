@@ -8,6 +8,7 @@
   const printBtn = document.getElementById('printBtn');
   const sizeSelect = document.getElementById('sizeSelect');
 
+  // Включаем кнопку генерации, если есть текст
   textInput.addEventListener('input', () => {
     generateBtn.disabled = !textInput.value.trim();
   });
@@ -50,7 +51,7 @@
 
   let pressTimer = null;
 
-  // Обычный клик — скачать файл
+  // Обычный клик - скачать PNG
   downloadBtn.addEventListener('click', () => {
     const canvas = qrCodeContainer.querySelector('canvas');
     if (!canvas) return;
@@ -67,7 +68,7 @@
     }, 'image/png');
   });
 
-  // Удержание — открыть окно на весь экран с кнопками
+  // Удержание кнопки — открыть новое окно с QR-кодом на весь экран и кнопками "Скачать" и "Закрыть"
   downloadBtn.addEventListener('mousedown', () => {
     pressTimer = setTimeout(() => {
       const canvas = qrCodeContainer.querySelector('canvas');
@@ -140,7 +141,7 @@
         `);
         newTab.document.close();
       }
-    }, 700); // 700мс удержания
+    }, 700); // 700 мс удержания
   });
 
   downloadBtn.addEventListener('mouseup', () => {
