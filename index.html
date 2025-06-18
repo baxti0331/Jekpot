@@ -6,8 +6,15 @@
 <title>Генератор QR-кодов с логотипом</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
+
+  /* Сброс стилей и базовые настройки */
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
   body {
-    margin: 0; padding: 0;
+    margin: 0;
+    padding: 0;
     font-family: 'Inter', sans-serif;
     background: linear-gradient(135deg, #6a11cb, #2575fc);
     min-height: 100vh;
@@ -15,7 +22,9 @@
     justify-content: center;
     align-items: center;
     color: #fff;
+    user-select: none;
   }
+
   .container {
     background: rgba(255 255 255 / 0.1);
     backdrop-filter: blur(15px);
@@ -26,21 +35,22 @@
     box-shadow: 0 15px 40px rgba(0,0,0,0.3);
     text-align: center;
   }
+
   h1 {
     margin-bottom: 24px;
     font-weight: 700;
     font-size: 28px;
     letter-spacing: 0.04em;
-    user-select: none;
   }
+
   label {
     display: block;
     text-align: left;
     margin-bottom: 8px;
     font-weight: 600;
     font-size: 14px;
-    user-select: none;
   }
+
   input[type="text"], input[type="color"], select {
     width: 100%;
     padding: 12px 14px;
@@ -51,23 +61,27 @@
     box-sizing: border-box;
     margin-bottom: 20px;
     transition: box-shadow 0.3s ease;
-    user-select: text;
   }
+
   input[type="text"]:focus, select:focus, input[type="color"]:focus {
     box-shadow: 0 0 10px #2575fc;
   }
+
   .color-group, .size-logo-group {
     display: flex;
     gap: 16px;
     margin-bottom: 24px;
     justify-content: space-between;
   }
+
   .color-input, .size-input, .logo-input {
     flex: 1;
   }
+
   .color-input label, .size-input label, .logo-input label {
     margin-bottom: 6px;
   }
+
   button {
     background: #2575fc;
     border: none;
@@ -79,30 +93,33 @@
     cursor: pointer;
     width: 100%;
     transition: background-color 0.3s ease;
-    user-select: none;
   }
+
   button:disabled {
     background: #7a96e0;
     cursor: not-allowed;
   }
+
   button:hover:not(:disabled) {
     background: #1b56d9;
   }
+
   #qrCode {
     margin-top: 30px;
-    user-select: none;
     position: relative;
   }
+
   canvas {
     border-radius: 16px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.25);
   }
+
   footer {
     margin-top: 28px;
     font-size: 13px;
     color: rgba(255 255 255 / 0.5);
-    user-select: none;
   }
+
   input[type="file"] {
     background: #ffffff33;
     border-radius: 10px;
@@ -110,6 +127,7 @@
     color: #fff;
     cursor: pointer;
   }
+
   input[type="file"]::-webkit-file-upload-button {
     background: #2575fc;
     border: none;
@@ -119,6 +137,7 @@
     font-weight: 600;
     cursor: pointer;
   }
+
   input[type="file"]::-webkit-file-upload-button:hover {
     background: #1b56d9;
   }
@@ -130,7 +149,13 @@
   <h1>Генератор QR-кодов</h1>
 
   <label for="textInput">Введите текст или ссылку</label>
-  <input type="text" id="textInput" placeholder="https://example.com" aria-required="true" />
+  <input
+    type="text"
+    id="textInput"
+    placeholder="https://example.com"
+    aria-required="true"
+    autocomplete="off"
+  />
 
   <div class="color-group" role="group" aria-label="Настройки цвета">
     <div class="color-input">
@@ -171,107 +196,116 @@
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 <script>
-  const textInput = document.getElementById('textInput');
-  const fgColor = document.getElementById('fgColor');
-  const bgColor = document.getElementById('bgColor');
-  const generateBtn = document.getElementById('generateBtn');
-  const qrCodeContainer = document.getElementById('qrCode');
-  const downloadBtn = document.getElementById('downloadBtn');
-  const sizeSelect = document.getElementById('sizeSelect');
-  const logoFile = document.getElementById('logoFile');
+  (function () {
+    const textInput = document.getElementById('textInput');
+    const fgColor = document.getElementById('fgColor');
+    const bgColor = document.getElementById('bgColor');
+    const generateBtn = document.getElementById('generateBtn');
+    const qrCodeContainer = document.getElementById('qrCode');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const sizeSelect = document.getElementById('sizeSelect');
+    const logoFile = document.getElementById('logoFile');
 
-  let logoImage = null;
+    let logoImage = null;
 
-  // Активируем кнопку только если есть текст
-  textInput.addEventListener('input', () => {
-    generateBtn.disabled = !textInput.value.trim();
-  });
+    // Активируем кнопку генерации при наличии текста
+    textInput.addEventListener('input', () => {
+      generateBtn.disabled = !textInput.value.trim();
+    });
 
-  logoFile.addEventListener('change', () => {
-    const file = logoFile.files[0];
-    if (!file) {
-      logoImage = null;
-      return;
-    }
-    if (!file.type.startsWith('image/')) {
-      alert('Пожалуйста, загрузите изображение.');
-      logoFile.value = '';
-      logoImage = null;
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      logoImage = new Image();
-      logoImage.src = reader.result;
-    };
-    reader.readAsDataURL(file);
-  });
-
-  async function generateQRCode() {
-    const text = textInput.value.trim();
-    if (!text) return;
-
-    qrCodeContainer.innerHTML = '';
-    downloadBtn.style.display = 'none';
-
-    try {
-      const size = parseInt(sizeSelect.value, 10) || 256;
-      const opts = {
-        color: {
-          dark: fgColor.value,
-          light: bgColor.value,
-        },
-        margin: 2,
-        width: size,
-      };
-
-      // Создаем canvas с QR-кодом
-      const canvas = document.createElement('canvas');
-      await QRCode.toCanvas(canvas, text, opts);
-
-      if (logoImage) {
-        // Рисуем логотип в центре
-        const ctx = canvas.getContext('2d');
-        const logoSize = size * 0.2; // 20% размера QR
-        const x = (canvas.width - logoSize) / 2;
-        const y = (canvas.height - logoSize) / 2;
-
-        // Рисуем белый круг под логотипом для лучшей видимости
-        ctx.fillStyle = bgColor.value;
-        ctx.beginPath();
-        ctx.arc(canvas.width / 2, canvas.height / 2, logoSize / 1.8, 0, 2 * Math.PI);
-        ctx.fill();
-
-        ctx.drawImage(logoImage, x, y, logoSize, logoSize);
+    // Обработка загрузки логотипа
+    logoFile.addEventListener('change', () => {
+      const file = logoFile.files[0];
+      if (!file) {
+        logoImage = null;
+        return;
       }
+      if (!file.type.startsWith('image/')) {
+        alert('Пожалуйста, загрузите изображение.');
+        logoFile.value = '';
+        logoImage = null;
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        logoImage = new Image();
+        logoImage.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
 
-      qrCodeContainer.appendChild(canvas);
-      downloadBtn.style.display = 'inline-block';
+    // Функция генерации QR-кода с логотипом (если есть)
+    async function generateQRCode() {
+      const text = textInput.value.trim();
+      if (!text) return;
 
-    } catch (err) {
-      qrCodeContainer.textContent = 'Ошибка генерации QR-кода.';
-      console.error(err);
+      qrCodeContainer.innerHTML = '';
       downloadBtn.style.display = 'none';
+
+      try {
+        const size = parseInt(sizeSelect.value, 10) || 256;
+        const opts = {
+          color: {
+            dark: fgColor.value,
+            light: bgColor.value,
+          },
+          margin: 2,
+          width: size,
+        };
+
+        // Создаём canvas с QR-кодом
+        const canvas = document.createElement('canvas');
+        await QRCode.toCanvas(canvas, text, opts);
+
+        if (logoImage) {
+          const ctx = canvas.getContext('2d');
+          const logoSize = size * 0.2; // 20% размера QR
+          const x = (canvas.width - logoSize) / 2;
+          const y = (canvas.height - logoSize) / 2;
+
+          // Рисуем белый круг под логотипом для контраста
+          ctx.fillStyle = bgColor.value;
+          ctx.beginPath();
+          ctx.arc(canvas.width / 2, canvas.height / 2, logoSize / 1.8, 0, 2 * Math.PI);
+          ctx.fill();
+
+          ctx.drawImage(logoImage, x, y, logoSize, logoSize);
+        }
+
+        qrCodeContainer.appendChild(canvas);
+        downloadBtn.style.display = 'inline-block';
+      } catch (err) {
+        qrCodeContainer.textContent = 'Ошибка генерации QR-кода.';
+        console.error(err);
+        downloadBtn.style.display = 'none';
+      }
     }
-  }
 
-  generateBtn.addEventListener('click', generateQRCode);
+    generateBtn.addEventListener('click', generateQRCode);
 
-  downloadBtn.addEventListener('click', () => {
-    const canvas = qrCodeContainer.querySelector('canvas');
-    if (!canvas) return;
-    const link = document.createElement('a');
-    link.download = 'qr-code.png';
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-  });
+    // Надёжная функция скачивания PNG из canvas
+    downloadBtn.addEventListener('click', () => {
+      const canvas = qrCodeContainer.querySelector('canvas');
+      if (!canvas) return;
 
-  textInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !generateBtn.disabled) {
-      e.preventDefault();
-      generateQRCode();
-    }
-  });
+      canvas.toBlob(blob => {
+        if (!blob) {
+          alert('Ошибка при создании файла для скачивания.');
+          return;
+        }
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'qr-code.png';
+
+        // Добавляем в DOM, кликаем и удаляем ссылку
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 'image/png');
+    });
+  })();
 </script>
 
 </body>
