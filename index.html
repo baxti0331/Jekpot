@@ -1,20 +1,18 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Ввод пользователя</title>
+    <title>Моя первая страница</title>
   </head>
   <body>
-    <h1 id="greeting">Привет!</h1>
-    <button onclick="askName()">Сказать привет</button>
+    <h1>Привет, мир!</h1>
+    <p>Это моя первая веб-страница.</p>
+
+    <button onclick="sayHello()">Нажми меня</button>
 
     <script>
-      function askName() {
-        const name = prompt("Как тебя зовут?");
-        if (name) {
-          document.getElementById("greeting").innerText = "Привет, " + name + "!";
-        } else {
-          alert("Ты не ввёл имя.");
-        }
+      function sayHello() {
+        console.log("Кнопка нажата!"); // сообщение в консоль
+        alert("Привет! Ты нажал кнопку.");
       }
     </script>
   </body>
