@@ -2,251 +2,56 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Портфолио — [Твоё имя]</title>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
+<title>Генератор красивых ссылок</title>
 <style>
-  /* Reset */
-  * {
-    box-sizing: border-box;
-    margin: 0; padding: 0;
-  }
-
-  body {
-    font-family: 'Montserrat', sans-serif;
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
-    min-height: 100vh;
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  header {
-    width: 100%;
-    max-width: 900px;
-    padding: 40px 20px 20px;
-    text-align: center;
-  }
-
-  header h1 {
-    font-weight: 700;
-    font-size: 3rem;
-    margin-bottom: 8px;
-    text-shadow: 0 0 10px rgba(0,0,0,0.3);
-  }
-
-  header p {
-    font-weight: 400;
-    font-size: 1.2rem;
-    color: #d6d6d6;
-    text-shadow: 0 0 6px rgba(0,0,0,0.15);
-  }
-
-  main {
-    flex-grow: 1;
-    width: 100%;
-    max-width: 900px;
-    padding: 0 20px 60px;
-  }
-
-  section {
-    margin-bottom: 60px;
-    backdrop-filter: blur(10px);
-    background: rgba(255 255 255 / 0.1);
-    border-radius: 20px;
-    padding: 30px 40px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-    transition: box-shadow 0.3s ease;
-  }
-  section:hover {
-    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
-  }
-
-  section h2 {
-    font-weight: 700;
-    font-size: 2rem;
-    margin-bottom: 20px;
-    border-left: 5px solid #fff;
-    padding-left: 12px;
-  }
-
-  /* About Me */
-  #about p {
-    font-size: 1.1rem;
-    line-height: 1.6;
-    color: #e0e0e0;
-  }
-
-  /* Projects */
-  #projects {
-    display: grid;
-    grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
-    gap: 24px;
-  }
-
-  .project-card {
-    background: rgba(255 255 255 / 0.15);
-    border-radius: 15px;
-    padding: 20px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.25);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-  .project-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 12px 30px rgba(255,255,255,0.3);
-  }
-
-  .project-card h3 {
-    margin-bottom: 10px;
-    font-size: 1.4rem;
-    font-weight: 700;
-  }
-
-  .project-card p {
-    flex-grow: 1;
-    font-size: 1rem;
-    color: #ccc;
-    margin-bottom: 15px;
-  }
-
-  .project-card a {
-    text-decoration: none;
-    color: #ffd700;
-    font-weight: 700;
-    align-self: flex-start;
-    transition: color 0.3s ease;
-  }
-  .project-card a:hover {
-    color: #fff;
-  }
-
-  /* Contacts */
-  #contact form {
-    display: flex;
-    flex-direction: column;
-    max-width: 500px;
-    margin: 0 auto;
-  }
-
-  #contact label {
-    margin: 12px 0 6px;
-    font-weight: 600;
-    font-size: 1rem;
-  }
-
-  #contact input,
-  #contact textarea {
-    padding: 12px 15px;
-    border-radius: 10px;
-    border: none;
-    outline: none;
-    font-size: 1rem;
-    resize: vertical;
-    font-family: 'Montserrat', sans-serif;
-  }
-
-  #contact textarea {
-    min-height: 100px;
-  }
-
-  #contact button {
-    margin-top: 20px;
-    padding: 15px 25px;
-    border: none;
-    border-radius: 20px;
-    font-size: 1.1rem;
-    font-weight: 700;
-    background: #ffd700;
-    color: #333;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.6);
-  }
-  #contact button:hover {
-    background: #fff066;
-  }
-
-  /* Footer */
-  footer {
-    width: 100%;
-    max-width: 900px;
-    padding: 20px 0;
-    text-align: center;
-    font-size: 0.9rem;
-    color: #ddd;
-  }
-
-  /* Responsive */
-  @media (max-width: 600px) {
-    header h1 {
-      font-size: 2.2rem;
-    }
-    section {
-      padding: 25px 20px;
-    }
-    #projects {
-      grid-template-columns: 1fr;
-    }
-  }
+  body { font-family: Arial, sans-serif; margin: 20px; }
+  input, button { padding: 8px; font-size: 16px; margin: 5px 0; width: 300px; }
+  #result a { font-size: 18px; color: blue; text-decoration: underline; }
 </style>
 </head>
 <body>
 
-<header>
-  <h1>Привет, я Иван Иванов</h1>
-  <p>Веб-разработчик и дизайнер интерфейсов</p>
-</header>
+<h2>Генератор красивых ссылок</h2>
 
-<main>
-  <section id="about" aria-label="Обо мне">
-    <h2>Обо мне</h2>
-    <p>Я увлечённый веб-разработчик с опытом создания современных и адаптивных сайтов и приложений. Люблю чистый код и креативные решения.</p>
-  </section>
+<form id="linkForm">
+  <label>Введите URL:<br>
+    <input type="url" id="urlInput" placeholder="https://example.com" required>
+  </label><br>
+  
+  <label>Введите текст ссылки:<br>
+    <input type="text" id="textInput" placeholder="Название ссылки" required>
+  </label><br>
+  
+  <button type="submit">Сгенерировать ссылку</button>
+</form>
 
-  <section id="projects" aria-label="Проекты">
-    <h2>Проекты</h2>
-    <div class="project-card" tabindex="0" role="link" aria-label="Проект: Генератор случайных чисел">
-      <h3>Генератор случайных чисел</h3>
-      <p>Простой и стильный генератор случайных чисел с анимацией и плавным интерфейсом.</p>
-      <a href="#" target="_blank" rel="noopener">Посмотреть код</a>
-    </div>
-    <div class="project-card" tabindex="0" role="link" aria-label="Проект: Умный калькулятор">
-      <h3>Умный калькулятор</h3>
-      <p>Калькулятор с поддержкой тригонометрии, логарифмов и истории вычислений.</p>
-      <a href="#" target="_blank" rel="noopener">Посмотреть код</a>
-    </div>
-    <div class="project-card" tabindex="0" role="link" aria-label="Проект: Портфолио">
-      <h3>Портфолио</h3>
-      <p>Современный и адаптивный дизайн портфолио с плавной анимацией и UX улучшениями.</p>
-      <a href="#" target="_blank" rel="noopener">Посмотреть код</a>
-    </div>
-  </section>
+<h3>Результат:</h3>
+<div id="result"></div>
 
-  <section id="contact" aria-label="Контакты">
-    <h2>Свяжитесь со мной</h2>
-    <form onsubmit="event.preventDefault(); alert('Спасибо за ваше сообщение!'); this.reset();">
-      <label for="name">Имя</label>
-      <input type="text" id="name" name="name" required placeholder="Ваше имя" />
-      
-      <label for="email">Email</label>
-      <input type="email" id="email" name="email" required placeholder="example@mail.com" />
-      
-      <label for="message">Сообщение</label>
-      <textarea id="message" name="message" required placeholder="Ваше сообщение"></textarea>
-      
-      <button type="submit">Отправить</button>
-    </form>
-  </section>
-</main>
-
-<footer>
-  © 2025 Иван Иванов — Все права защищены
-</footer>
+<script>
+document.getElementById('linkForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  
+  const url = document.getElementById('urlInput').value.trim();
+  const text = document.getElementById('textInput').value.trim();
+  
+  if (!url || !text) {
+    alert('Пожалуйста, заполните оба поля.');
+    return;
+  }
+  
+  const resultDiv = document.getElementById('result');
+  resultDiv.innerHTML = ''; // очистить предыдущий результат
+  
+  const link = document.createElement('a');
+  link.href = url;
+  link.textContent = text;
+  link.target = '_blank'; // чтобы ссылка открывалась в новой вкладке
+  link.rel = 'noopener noreferrer'; // безопасность
+  
+  resultDiv.appendChild(link);
+});
+</script>
 
 </body>
 </html>
