@@ -148,13 +148,6 @@
       margin-top: 28px;
     }
 
-    .button-group button {
-      font-size: 16px;
-      padding: 14px 0;
-      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.3);
-      border-radius: 14px;
-    }
-
     footer {
       margin-top: 36px;
       font-size: 13px;
@@ -163,17 +156,49 @@
       font-weight: 500;
     }
 
-    @media (max-width: 520px) {
-      .container {
-        padding: 30px 25px;
-        max-width: 100vw;
-        border-radius: 0;
-        box-shadow: none;
-      }
+    /* Модальное окно */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
 
-      .color-group, .size-group {
-        flex-direction: column;
-      }
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 16px;
+      padding: 30px 40px;
+      box-shadow: 0 12px 35px rgba(0,0,0,0.25);
+      max-width: 320px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .modal h2 {
+      margin-top: 0;
+      margin-bottom: 24px;
+      font-weight: 700;
+      font-size: 22px;
+      color: #334e68;
+    }
+
+    .modal button {
+      margin-top: 12px;
+      padding: 14px 0;
+      font-size: 18px;
+      border-radius: 14px;
+      width: 100%;
+    }
+
+    .modal button + button {
+      margin-top: 14px;
     }
   </style>
 </head>
@@ -213,14 +238,24 @@
   <div id="qrCode" aria-live="polite" aria-label="Результат генерации QR-кода"></div>
 
   <div class="button-group">
-    <button id="downloadBtn" style="display:none;">Скачать PNG</button>
-    <button id="printBtn" style="display:none;">Распечатать QR-код</button>
+    <button id="downloadBtn" style="display:none;">Скачать</button>
   </div>
 
   <footer>© 2025 Генератор QR-кодов</footer>
 </div>
 
+<!-- Модальное окно выбора -->
+<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalDesc">
+  <div class="modal">
+    <h2 id="modalTitle">Выберите формат скачивания</h2>
+    <button id="downloadPngBtn">Скачать как PNG</button>
+    <button id="downloadPdfBtn">Скачать как PDF</button>
+    <button id="closeModalBtn" style="margin-top: 18px; background:#ccc; color:#222; font-weight:600;">Отмена</button>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
   (function () {
     const textInput = document.getElementById('textInput');
@@ -229,9 +264,16 @@
     const generateBtn = document.getElementById('generateBtn');
     const qrCodeContainer = document.getElementById('qrCode');
     const downloadBtn = document.getElementById('downloadBtn');
-    const printBtn = document.getElementById('printBtn');
+
+    // Модальное окно
+    const modalOverlay = document.getElementById('modalOverlay');
+    const downloadPngBtn = document.getElementById('downloadPngBtn');
+    const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+
     const sizeSelect = document.getElementById('sizeSelect');
 
+    // Обновление кнопки генерации
     textInput.addEventListener('input', () => {
       const hasText = textInput.value.trim().length > 0;
       generateBtn.disabled = !hasText;
@@ -244,7 +286,6 @@
 
       qrCodeContainer.innerHTML = '';
       downloadBtn.style.display = 'none';
-      printBtn.style.display = 'none';
 
       try {
         const size = parseInt(sizeSelect.value, 10) || 256;
@@ -262,19 +303,31 @@
 
         qrCodeContainer.appendChild(canvas);
         downloadBtn.style.display = 'inline-block';
-        printBtn.style.display = 'inline-block';
 
       } catch (err) {
         qrCodeContainer.textContent = 'Ошибка генерации QR-кода.';
         console.error(err);
         downloadBtn.style.display = 'none';
-        printBtn.style.display = 'none';
       }
     }
 
     generateBtn.addEventListener('click', generateQRCode);
 
+    // Открыть модальное окно при клике на скачать
     downloadBtn.addEventListener('click', () => {
+      modalOverlay.classList.add('active');
+      downloadPngBtn.focus();
+    });
+
+    // Закрыть модальное окно
+    function closeModal() {
+      modalOverlay.classList.remove('active');
+      downloadBtn.focus();
+    }
+    closeModalBtn.addEventListener('click', closeModal);
+
+    // Скачать PNG
+    downloadPngBtn.addEventListener('click', () => {
       const canvas = qrCodeContainer.querySelector('canvas');
       if (!canvas) return;
 
@@ -289,53 +342,38 @@
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
       }, 'image/png');
+      closeModal();
     });
 
-    printBtn.addEventListener('click', () => {
+    // Скачать PDF
+    downloadPdfBtn.addEventListener('click', async () => {
       const canvas = qrCodeContainer.querySelector('canvas');
       if (!canvas) return;
 
-      const dataUrl = canvas.toDataURL('image/png');
-      const printWindow = window.open('', '_blank', 'width=600,height=600');
-      if (!printWindow) {
-        alert('Блокировщик всплывающих окон мешает печати.');
-        return;
-      }
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({
+        unit: 'px',
+        format: [canvas.width, canvas.height]
+      });
 
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Печать QR-кода</title>
-            <style>
-              body {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 100vh;
-                margin: 0;
-                background: #f0f4f8;
-              }
-              img {
-                max-width: 90%;
-                max-height: 90%;
-                border-radius: 16px;
-                box-shadow: 0 12px 24px rgba(0,0,0,0.2);
-              }
-            </style>
-          </head>
-          <body>
-            <img src="${dataUrl}" />
-            <script>
-              window.onload = function() {
-                window.focus();
-                window.print();
-                window.close();
-              };
-            <\/script>
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
+      // Добавим изображение из канваса в pdf
+      const dataUrl = canvas.toDataURL('image/png');
+      pdf.addImage(dataUrl, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.save('qr-code.pdf');
+
+      closeModal();
+    });
+
+    // Закрыть модал кликом вне окна
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) closeModal();
+    });
+
+    // Закрыть модал по ESC
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modalOverlay.classList.contains('active')) {
+        closeModal();
+      }
     });
   })();
 </script>
