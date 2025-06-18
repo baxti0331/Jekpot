@@ -1,18 +1,14 @@
 // tic-tac-toe-bot.js
 
-document.addEventListener('DOMContentLoaded', () => {
-  setTimeout(() => {
-    document.getElementById('loaderScreen').style.display = 'none';
-    createBoard();
-    messageElement.textContent = `Ход: ${currentPlayer}`;
-  }, 2000);
-});
-
+const loaderScreen = document.getElementById('loaderScreen');
+const gameContainer = document.getElementById('gameContainer');
 const boardElement = document.getElementById('board');
 const messageElement = document.getElementById('message');
 const countdownElement = document.getElementById('countdown');
 const scoreboard = document.getElementById('scoreboard');
 const difficultySelect = document.getElementById('difficulty');
+const canvas = document.getElementById('fireworksCanvas');
+const ctx = canvas.getContext('2d');
 
 let board = ['', '', '', '', '', '', '', '', ''];
 let currentPlayer = '❌';
@@ -57,9 +53,6 @@ class FireworkParticle {
     ctx.restore();
   }
 }
-
-const canvas = document.getElementById('fireworksCanvas');
-const ctx = canvas.getContext('2d');
 
 function resizeCanvas() {
   canvas.width = window.innerWidth;
@@ -210,7 +203,6 @@ function restartGame() {
   cancelAnimationFrame(animationId);
 }
 
-// Уровни сложности
 function botMove() {
   if (!gameActive) return;
 
@@ -236,7 +228,6 @@ function randomBotMove() {
 }
 
 function mediumBotMove() {
-  // Минимакс с 50% вероятностью идеальный ход, иначе случайный
   if (Math.random() < 0.5) {
     minimaxBotMove();
   } else {
@@ -245,7 +236,6 @@ function mediumBotMove() {
 }
 
 function hardBotMove() {
-  // Минимакс с 80% вероятностью идеальный ход
   if (Math.random() < 0.8) {
     minimaxBotMove();
   } else {
@@ -254,7 +244,6 @@ function hardBotMove() {
 }
 
 function bossBotMove() {
-  // Минимакс всегда идеальный ход
   minimaxBotMove();
 }
 
@@ -319,3 +308,14 @@ function checkWinner(bd) {
   if (!bd.includes('')) return 'tie';
   return null;
 }
+
+// Запуск после 2 секунд загрузки
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    loaderScreen.style.display = 'none';
+    gameContainer.style.display = 'block';
+    createBoard();
+    messageElement.textContent = `Ход: ${currentPlayer}`;
+    updateScoreboard();
+  }, 2000);
+});
