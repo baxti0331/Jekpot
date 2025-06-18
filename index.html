@@ -279,6 +279,7 @@
       if (!canvas) return;
 
       canvas.toBlob(blob => {
+        if (!blob) return;
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
@@ -295,7 +296,12 @@
       if (!canvas) return;
 
       const dataUrl = canvas.toDataURL('image/png');
-      const printWindow = window.open('', '_blank');
+      const printWindow = window.open('', '_blank', 'width=600,height=600');
+      if (!printWindow) {
+        alert('Блокировщик всплывающих окон мешает печати.');
+        return;
+      }
+
       printWindow.document.write(`
         <html>
           <head>
@@ -318,7 +324,14 @@
             </style>
           </head>
           <body>
-            <img src="${dataUrl}" onload="window.print(); window.close();" />
+            <img src="${dataUrl}" />
+            <script>
+              window.onload = function() {
+                window.focus();
+                window.print();
+                window.close();
+              };
+            <\/script>
           </body>
         </html>
       `);
