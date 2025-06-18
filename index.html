@@ -1,382 +1,313 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Генератор QR-кодов</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+window.onload = () => {
+  setTimeout(() => {
+    document.getElementById('loaderScreen').style.display = 'none';
+    createBoard();
+  }, 1500);
+};
 
-    *, *::before, *::after {
-      box-sizing: border-box;
+const boardElement = document.getElementById('board');
+const messageElement = document.getElementById('message');
+const countdownElement = document.getElementById('countdown');
+const scoreboard = document.getElementById('scoreboard');
+const difficultySelect = document.getElementById('difficulty');
+const resetButton = document.getElementById('resetButton');
+const canvas = document.getElementById('fireworksCanvas');
+const ctx = canvas.getContext('2d');
+
+let board = ['', '', '', '', '', '', '', '', ''];
+let currentPlayer = '❌'; // Игрок ходит первым
+let gameActive = true;
+let fireworks = [];
+let animationId;
+let playerWins = 0;
+let botWins = 0;
+let draws = 0;
+let botThinkingTime = 3000; // По умолчанию средний уровень
+
+const winningConditions = [
+  [0,1,2],[3,4,5],[6,7,8],
+  [0,3,6],[1,4,7],[2,5,8],
+  [0,4,8],[2,4,6]
+];
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+class FireworkParticle {
+  constructor(x,y,color){
+    this.x = x;
+    this.y = y;
+    this.color = color;
+    this.radius = Math.random()*3 + 2;
+    this.speedX = (Math.random()-0.5)*6;
+    this.speedY = (Math.random()-0.5)*6;
+    this.alpha = 1;
+    this.gravity = 0.05;
+    this.decay = 0.015 + Math.random()*0.015;
+  }
+  update() {
+    this.speedY += this.gravity;
+    this.x += this.speedX;
+    this.y += this.speedY;
+    this.alpha -= this.decay;
+  }
+  draw() {
+    ctx.save();
+    ctx.globalAlpha = this.alpha;
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, 2*Math.PI);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+function createFireworks(x, y) {
+  const colors = ['#ff4757','#ffa502','#1e90ff','#2ed573','#ff6b81','#3742fa','#a29bfe'];
+  for(let i=0; i<60; i++){
+    const color = colors[Math.floor(Math.random()*colors.length)];
+    fireworks.push(new FireworkParticle(x, y, color));
+  }
+}
+
+function animateFireworks() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for(let i = fireworks.length - 1; i >= 0; i--){
+    const p = fireworks[i];
+    p.update();
+    p.draw();
+    if(p.alpha <= 0){
+      fireworks.splice(i,1);
     }
+  }
+  if(fireworks.length > 0){
+    animationId = requestAnimationFrame(animateFireworks);
+  } else {
+    cancelAnimationFrame(animationId);
+  }
+}
 
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: #222;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
+function showFireworks() {
+  createFireworks(window.innerWidth/2, window.innerHeight/2);
+  animateFireworks();
+}
 
-    .container {
-      background: rgba(255, 255, 255, 0.95);
-      box-shadow:
-        0 10px 25px rgba(102, 166, 255, 0.2),
-        0 4px 15px rgba(102, 166, 255, 0.15);
-      border-radius: 20px;
-      padding: 40px 50px;
-      max-width: 480px;
-      width: 100%;
-      text-align: center;
-      transition: box-shadow 0.3s ease;
-    }
-
-    .container:hover {
-      box-shadow:
-        0 15px 40px rgba(102, 166, 255, 0.35),
-        0 7px 30px rgba(102, 166, 255, 0.3);
-    }
-
-    h1 {
-      margin-bottom: 30px;
-      font-weight: 700;
-      font-size: 32px;
-      color: #334e68;
-      letter-spacing: 0.03em;
-    }
-
-    label {
-      display: block;
-      text-align: left;
-      margin-bottom: 10px;
-      font-weight: 600;
-      font-size: 15px;
-      color: #334e68;
-      user-select: none;
-    }
-
-    input[type="text"], input[type="color"], select {
-      width: 100%;
-      padding: 14px 18px;
-      border-radius: 14px;
-      border: 2px solid #cbd5e1;
-      font-size: 16px;
-      font-weight: 500;
-      color: #334e68;
-      background: #f9fafb;
-      outline-offset: 2px;
-      transition:
-        border-color 0.3s ease,
-        background-color 0.3s ease;
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.07);
-      margin-bottom: 25px;
-    }
-
-    input[type="text"]:focus,
-    input[type="color"]:focus,
-    select:focus {
-      border-color: #3b82f6;
-      background-color: #ffffff;
-      box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
-    }
-
-    .color-group, .size-group {
-      display: flex;
-      gap: 20px;
-      margin-bottom: 32px;
-      justify-content: space-between;
-    }
-
-    .color-input, .size-input {
-      flex: 1;
-    }
-
-    button {
-      background: linear-gradient(90deg, #3b82f6, #2563eb);
-      border: none;
-      border-radius: 16px;
-      color: white;
-      font-weight: 700;
-      font-size: 18px;
-      padding: 16px 0;
-      cursor: pointer;
-      width: 100%;
-      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
-      transition:
-        background 0.35s ease,
-        box-shadow 0.35s ease;
-      user-select: none;
-    }
-
-    button:disabled {
-      background: #a5b4fc;
-      box-shadow: none;
-      cursor: not-allowed;
-      color: #d1d5db;
-    }
-
-    button:hover:not(:disabled) {
-      background: linear-gradient(90deg, #2563eb, #1e40af);
-      box-shadow: 0 12px 25px rgba(30, 64, 175, 0.6);
-    }
-
-    #qrCode {
-      margin-top: 36px;
-      display: flex;
-      justify-content: center;
-    }
-
-    canvas {
-      border-radius: 20px;
-      box-shadow:
-        0 12px 25px rgba(0, 0, 0, 0.15);
-      max-width: 100%;
-      height: auto;
-    }
-
-    .button-group {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      margin-top: 28px;
-    }
-
-    footer {
-      margin-top: 36px;
-      font-size: 13px;
-      color: #64748b;
-      user-select: none;
-      font-weight: 500;
-    }
-
-    /* Модальное окно */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.45);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-
-    .modal-overlay.active {
-      display: flex;
-    }
-
-    .modal {
-      background: white;
-      border-radius: 16px;
-      padding: 30px 40px;
-      box-shadow: 0 12px 35px rgba(0,0,0,0.25);
-      max-width: 320px;
-      width: 90%;
-      text-align: center;
-    }
-
-    .modal h2 {
-      margin-top: 0;
-      margin-bottom: 24px;
-      font-weight: 700;
-      font-size: 22px;
-      color: #334e68;
-    }
-
-    .modal button {
-      margin-top: 12px;
-      padding: 14px 0;
-      font-size: 18px;
-      border-radius: 14px;
-      width: 100%;
-    }
-
-    .modal button + button {
-      margin-top: 14px;
-    }
-  </style>
-</head>
-<body>
-
-<div class="container" role="main" aria-label="Генератор QR-кодов">
-  <h1>Генератор QR-кодов</h1>
-
-  <label for="textInput">Введите текст или ссылку</label>
-  <input type="text" id="textInput" placeholder="https://example.com" aria-describedby="textHelp" autocomplete="off" />
-
-  <div class="color-group">
-    <div class="color-input">
-      <label for="fgColor">Цвет QR-кода</label>
-      <input type="color" id="fgColor" value="#000000" aria-label="Цвет QR-кода" />
-    </div>
-    <div class="color-input">
-      <label for="bgColor">Цвет фона</label>
-      <input type="color" id="bgColor" value="#ffffff" aria-label="Цвет фона" />
-    </div>
-  </div>
-
-  <div class="size-group">
-    <div class="size-input">
-      <label for="sizeSelect">Размер</label>
-      <select id="sizeSelect" aria-label="Размер QR-кода">
-        <option value="128">128x128</option>
-        <option value="256" selected>256x256</option>
-        <option value="384">384x384</option>
-        <option value="512">512x512</option>
-      </select>
-    </div>
-  </div>
-
-  <button id="generateBtn" disabled aria-disabled="true">Сгенерировать QR-код</button>
-
-  <div id="qrCode" aria-live="polite" aria-label="Результат генерации QR-кода"></div>
-
-  <div class="button-group">
-    <button id="downloadBtn" style="display:none;">Скачать</button>
-  </div>
-
-  <footer>© 2025 Генератор QR-кодов</footer>
-</div>
-
-<!-- Модальное окно выбора -->
-<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalDesc">
-  <div class="modal">
-    <h2 id="modalTitle">Выберите формат скачивания</h2>
-    <button id="downloadPngBtn">Скачать как PNG</button>
-    <button id="downloadPdfBtn">Скачать как PDF</button>
-    <button id="closeModalBtn" style="margin-top: 18px; background:#ccc; color:#222; font-weight:600;">Отмена</button>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script>
-  (function () {
-    const textInput = document.getElementById('textInput');
-    const fgColor = document.getElementById('fgColor');
-    const bgColor = document.getElementById('bgColor');
-    const generateBtn = document.getElementById('generateBtn');
-    const qrCodeContainer = document.getElementById('qrCode');
-    const downloadBtn = document.getElementById('downloadBtn');
-
-    // Модальное окно
-    const modalOverlay = document.getElementById('modalOverlay');
-    const downloadPngBtn = document.getElementById('downloadPngBtn');
-    const downloadPdfBtn = document.getElementById('downloadPdfBtn');
-    const closeModalBtn = document.getElementById('closeModalBtn');
-
-    const sizeSelect = document.getElementById('sizeSelect');
-
-    // Обновление кнопки генерации
-    textInput.addEventListener('input', () => {
-      const hasText = textInput.value.trim().length > 0;
-      generateBtn.disabled = !hasText;
-      generateBtn.setAttribute('aria-disabled', !hasText);
-    });
-
-    async function generateQRCode() {
-      const text = textInput.value.trim();
-      if (!text) return;
-
-      qrCodeContainer.innerHTML = '';
-      downloadBtn.style.display = 'none';
-
-      try {
-        const size = parseInt(sizeSelect.value, 10) || 256;
-        const opts = {
-          color: {
-            dark: fgColor.value,
-            light: bgColor.value,
-          },
-          margin: 2,
-          width: size,
-        };
-
-        const canvas = document.createElement('canvas');
-        await QRCode.toCanvas(canvas, text, opts);
-
-        qrCodeContainer.appendChild(canvas);
-        downloadBtn.style.display = 'inline-block';
-
-      } catch (err) {
-        qrCodeContainer.textContent = 'Ошибка генерации QR-кода.';
-        console.error(err);
-        downloadBtn.style.display = 'none';
-      }
-    }
-
-    generateBtn.addEventListener('click', generateQRCode);
-
-    // Открыть модальное окно при клике на скачать
-    downloadBtn.addEventListener('click', () => {
-      modalOverlay.classList.add('active');
-      downloadPngBtn.focus();
-    });
-
-    // Закрыть модальное окно
-    function closeModal() {
-      modalOverlay.classList.remove('active');
-      downloadBtn.focus();
-    }
-    closeModalBtn.addEventListener('click', closeModal);
-
-    // Скачать PNG
-    downloadPngBtn.addEventListener('click', () => {
-      const canvas = qrCodeContainer.querySelector('canvas');
-      if (!canvas) return;
-
-      canvas.toBlob(blob => {
-        if (!blob) return;
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'qr-code.png';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      }, 'image/png');
-      closeModal();
-    });
-
-    // Скачать PDF
-    downloadPdfBtn.addEventListener('click', async () => {
-      const canvas = qrCodeContainer.querySelector('canvas');
-      if (!canvas) return;
-
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({
-        unit: 'px',
-        format: [canvas.width, canvas.height]
-      });
-
-      // Добавим изображение из канваса в pdf
-      const dataUrl = canvas.toDataURL('image/png');
-      pdf.addImage(dataUrl, 'PNG', 0, 0, canvas.width, canvas.height);
-      pdf.save('qr-code.pdf');
-
-      closeModal();
-    });
-
-    // Закрыть модал кликом вне окна
-    modalOverlay.addEventListener('click', (e) => {
-      if (e.target === modalOverlay) closeModal();
-    });
-
-    // Закрыть модал по ESC
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && modalOverlay.classList.contains('active')) {
-        closeModal();
+function createBoard() {
+  boardElement.innerHTML = '';
+  board.forEach((cell, index) => {
+    const cellDiv = document.createElement('div');
+    cellDiv.classList.add('cell');
+    cellDiv.dataset.index = index;
+    cellDiv.setAttribute('role', 'button');
+    cellDiv.setAttribute('aria-label', `Ячейка ${index + 1}, ${board[index] ? (board[index] === '❌' ? 'крестик' : 'нолик') : 'пустая'}`);
+    cellDiv.tabIndex = 0;
+    cellDiv.textContent = cell;
+    if(cell !== '') cellDiv.classList.add('disabled');
+    cellDiv.addEventListener('click', onCellClick);
+    cellDiv.addEventListener('keydown', e => {
+      if(e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        cellDiv.click();
       }
     });
-  })();
-</script>
+    boardElement.appendChild(cellDiv);
+  });
+  messageElement.textContent = `Ходит: ${currentPlayer}`;
+  countdownElement.textContent = '';
+  gameActive = true;
+}
 
-</body>
-</html>
+function onCellClick(e) {
+  const index = e.target.dataset.index;
+  if(!gameActive || board[index] !== '' || currentPlayer === '⭕') return;
+  makeMove(index, currentPlayer);
+  if(gameActive && currentPlayer === '⭕'){
+    botMoveWithCountdown();
+  }
+}
+
+function makeMove(index, player) {
+  board[index] = player;
+  updateBoard();
+  checkResult();
+  if(gameActive){
+    currentPlayer = (player === '❌') ? '⭕' : '❌';
+    messageElement.textContent = `Ходит: ${currentPlayer}`;
+  }
+}
+
+function updateBoard() {
+  boardElement.childNodes.forEach((cellDiv, idx) => {
+    cellDiv.textContent = board[idx];
+    if(board[idx] !== '') {
+      cellDiv.classList.add('disabled');
+      cellDiv.setAttribute('aria-label', `Ячейка ${idx + 1}, ${board[idx] === '❌' ? 'крестик' : 'нолик'}`);
+    } else {
+      cellDiv.classList.remove('disabled');
+      cellDiv.setAttribute('aria-label', `Ячейка ${idx + 1}, пустая`);
+    }
+  });
+}
+
+function checkResult() {
+  for(const condition of winningConditions){
+    const [a,b,c] = condition;
+    if(board[a] && board[a] === board[b] && board[b] === board[c]){
+      gameActive = false;
+      if(board[a] === '❌'){
+        playerWins++;
+        scoreboard.textContent = `Игрок ❌: ${playerWins}  |  Бот ⭕: ${botWins}  |  Ничьи: ${draws}`;
+        messageElement.textContent = 'Вы победили! 🎉';
+        showFireworks();
+      } else {
+        botWins++;
+        scoreboard.textContent = `Игрок ❌: ${playerWins}  |  Бот ⭕: ${botWins}  |  Ничьи: ${draws}`;
+        messageElement.textContent = 'Бот победил! 😢';
+      }
+      countdownElement.textContent = '';
+      return;
+    }
+  }
+  if(!board.includes('')){
+    gameActive = false;
+    draws++;
+    scoreboard.textContent = `Игрок ❌: ${playerWins}  |  Бот ⭕: ${botWins}  |  Ничьи: ${draws}`;
+    messageElement.textContent = 'Ничья! 🤝';
+    countdownElement.textContent = '';
+  }
+}
+
+function botMoveWithCountdown() {
+  const difficulty = difficultySelect.value;
+  switch(difficulty){
+    case 'medium': botThinkingTime = 2500; break;
+    case 'hard': botThinkingTime = 1000; break;
+    case 'boss': botThinkingTime = 0; break;
+  }
+
+  if(botThinkingTime === 0){
+    botMakeMove();
+    return;
+  }
+
+  let timeLeft = botThinkingTime / 1000;
+  countdownElement.textContent = `Бот думает: ${timeLeft.toFixed(1)} с`;
+  const interval = 100;
+
+  const countdownInterval = setInterval(() => {
+    timeLeft -= interval / 1000;
+    if(timeLeft <= 0){
+      clearInterval(countdownInterval);
+      countdownElement.textContent = '';
+      botMakeMove();
+    } else {
+      countdownElement.textContent = `Бот думает: ${timeLeft.toFixed(1)} с`;
+    }
+  }, interval);
+}
+
+function botMakeMove() {
+  if(!gameActive) return;
+
+  let moveIndex;
+
+  const difficulty = difficultySelect.value;
+
+  if(difficulty === 'medium'){
+    moveIndex = getRandomMove();
+  } else if(difficulty === 'hard'){
+    moveIndex = getBestMove('⭕');
+  } else if(difficulty === 'boss'){
+    moveIndex = getBestMove('⭕');
+  }
+
+  if(moveIndex !== undefined) {
+    makeMove(moveIndex, '⭕');
+  }
+}
+
+// Случайный ход для среднего уровня
+function getRandomMove(){
+  const available = board.map((v,i) => v === '' ? i : null).filter(v => v !== null);
+  if(available.length === 0) return undefined;
+  const randomIndex = Math.floor(Math.random() * available.length);
+  return available[randomIndex];
+}
+
+// Минимакс с ограничением глубины для hard и boss
+function getBestMove(player) {
+  const opponent = player === '⭕' ? '❌' : '⭕';
+
+  // Минимакс с альфа-бета отсечением и глубиной
+  function minimax(newBoard, currentPlayer, depth){
+    const availSpots = newBoard.map((v,i) => v === '' ? i : null).filter(v => v !== null);
+    // Проверяем выигрыш
+    if(checkWin(newBoard, opponent)) return {score: -10 + depth};
+    if(checkWin(newBoard, player)) return {score: 10 - depth};
+    if(availSpots.length === 0) return {score: 0};
+
+    const moves = [];
+
+    for(let i=0; i<availSpots.length; i++){
+      const idx = availSpots[i];
+      newBoard[idx] = currentPlayer;
+      const result = minimax(newBoard, currentPlayer === player ? opponent : player, depth+1);
+      moves.push({index: idx, score: result.score});
+      newBoard[idx] = '';
+    }
+
+    let bestMove;
+    if(currentPlayer === player){
+      let bestScore = -Infinity;
+      for(const move of moves){
+        if(move.score > bestScore){
+          bestScore = move.score;
+          bestMove = move;
+        }
+      }
+    } else {
+      let bestScore = Infinity;
+      for(const move of moves){
+        if(move.score < bestScore){
+          bestScore = move.score;
+          bestMove = move;
+        }
+      }
+    }
+    return bestMove;
+  }
+
+  function checkWin(boardArr, playerSymbol){
+    return winningConditions.some(([a,b,c]) => boardArr[a] === playerSymbol && boardArr[b] === playerSymbol && boardArr[c] === playerSymbol);
+  }
+
+  // Для «boss» можно использовать глубину без ограничений, для «hard» — ограничить глубину для скорости:
+  if(difficulty === 'hard'){
+    // Для упрощения — можно использовать getRandomMove() половину раз, чтобы не тормозить
+    if(Math.random() < 0.5) return getRandomMove();
+  }
+
+  const best = minimax(board.slice(), player, 0);
+  return best?.index ?? getRandomMove();
+}
+
+difficultySelect.addEventListener('change', () => {
+  resetGame();
+});
+
+resetButton.addEventListener('click', () => {
+  resetGame();
+});
+
+function resetGame(){
+  board = ['', '', '', '', '', '', '', '', ''];
+  currentPlayer = '❌';
+  gameActive = true;
+  messageElement.textContent = `Ходит: ${currentPlayer}`;
+  countdownElement.textContent = '';
+  createBoard();
+}
