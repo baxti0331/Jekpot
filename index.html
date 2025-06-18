@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Генератор QR + Штрихкодов</title>
+  <title>QR-код Генератор</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
-    *, *::before, *::after { box-sizing: border-box; }
 
     body {
       margin: 0; padding: 0;
@@ -22,79 +21,79 @@
       backdrop-filter: blur(15px);
       border-radius: 16px;
       padding: 30px 40px;
-      max-width: 460px; width: 100%;
+      max-width: 440px; width: 100%;
       box-shadow: 0 15px 40px rgba(0,0,0,0.3);
       text-align: center;
     }
 
-    h1 { margin-bottom: 20px; font-size: 28px; font-weight:700 }
+    .logo {
+      max-width: 180px;
+      margin: 0 auto 10px;
+      display: block;
+    }
 
-    label { display:block; text-align:left; margin-bottom:6px; font-weight:600 }
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin: 0 0 24px;
+      color: #fff;
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      text-align: left;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
 
     input, select, button {
       width: 100%; padding: 12px;
       margin-bottom: 16px;
       border-radius: 10px; border: none;
       font-size: 16px;
+      outline: none;
     }
 
     button {
-      background:#2575fc; color:#fff;
-      font-weight:700; cursor:pointer;
-      transition:0.3s;
+      background: #2575fc; color: #fff;
+      font-weight: bold; cursor: pointer;
+      transition: 0.3s;
     }
 
-    button:disabled { background:#7a96e0; cursor:not-allowed; }
-    button:hover:not(:disabled) { background:#1b56d9; }
+    button:disabled { background: #7a96e0; cursor: not-allowed; }
+    button:hover:not(:disabled) { background: #1b56d9; }
 
-    #qrCode, #barcodeContainer {
-      margin-top:20px; display:flex;
-      justify-content:center;
+    #qrCode {
+      margin-top: 20px;
     }
 
-    canvas, svg {
-      border-radius:16px;
-      box-shadow:0 10px 30px rgba(0,0,0,0.25);
+    canvas {
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
     }
-
-    .button-group {
-      display:flex; gap:12px;
-      flex-direction:column; margin-top:16px;
-    }
-
-    /* Слайд-панель */
-    .slide-panel {
-      position: fixed; top:0; right:-100%;
-      width:100%; height:100%;
-      background:rgba(0,0,0,0.8);
-      display:flex; justify-content:center; align-items:center;
-      transition:right 0.4s ease; z-index:1000;
-    }
-    .slide-panel.open { right:0; }
-
-    .panel-content {
-      background:#fff; color:#222;
-      padding:30px; border-radius:12px;
-      width:90%; max-width:400px;
-      text-align:center;
-    }
-    .panel-content button { margin-top:12px; }
 
     footer {
-      margin-top:20px; font-size:13px;
-      color:rgba(255,255,255,0.6);
+      margin-top: 20px; font-size: 13px;
+      color: rgba(255,255,255,0.6);
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Генератор QR + Штрихкодов</h1>
+    <img src="logo.png" alt="Логотип компании" class="logo" />
+    <h1>Генератор QR-кодов</h1>
 
-    <label>Текст или URL для QR:</label>
-    <input type="text" id="textInput" placeholder="https://example.com">
-    <label>Цвет QR:</label><input type="color" id="fgColor" value="#000000">
-    <label>Фон QR:</label><input type="color" id="bgColor" value="#ffffff">
-    <label>Размер QR:</label>
+    <label>Текст или URL:</label>
+    <input type="text" id="textInput" placeholder="https://example.com" />
+
+    <label>Цвет кода:</label>
+    <input type="color" id="fgColor" value="#000000" />
+
+    <label>Фон:</label>
+    <input type="color" id="bgColor" value="#ffffff" />
+
+    <label>Размер:</label>
     <select id="sizeSelect">
       <option value="128">128×128</option>
       <option value="256" selected>256×256</option>
@@ -102,35 +101,19 @@
       <option value="512">512×512</option>
     </select>
 
-    <label>Логотип (опц.):</label><input type="file" id="logoFile" accept="image/*">
-    <button id="generateBtn" disabled>Сгенерировать QR-код</button>
+    <label>Логотип (необязательно):</label>
+    <input type="file" id="logoFile" accept="image/*" />
+
+    <button id="generateBtn" disabled>Создать QR-код</button>
 
     <div id="qrCode"></div>
-    <div class="button-group">
-      <button id="downloadBtn" style="display:none;">Скачать PNG</button>
-      <button id="printBtn" style="display:none;">Распечатать QR-код</button>
-      <button id="openBarcodeBtn">Генератор штрихкодов</button>
-    </div>
-    <footer>© 2025 Генератор QR/Barcode</footer>
-  </div>
 
-  <div class="slide-panel" id="barcodeSlide">
-    <div class="panel-content">
-      <h2>Генератор EAN‑13</h2>
-      <label>12 цифр:</label>
-      <input type="text" id="eanInput" placeholder="123456789012" maxlength="12">
-      <button id="genBarcodeBtn" disabled>Сгенерировать</button>
-      <div id="barcodeContainer"></div>
-      <div class="button-group">
-        <button id="barcodeDownloadBtn" style="display:none;">Скачать SVG</button>
-        <button id="barcodePrintBtn" style="display:none;">Распечатать</button>
-        <button id="closeBarcodeBtn">Закрыть</button>
-      </div>
-    </div>
+    <button id="downloadBtn" style="display:none;">Скачать PNG</button>
+
+    <footer>© 2025 QR Generator</footer>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
