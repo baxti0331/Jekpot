@@ -3,172 +3,408 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Погода с анимацией облаков</title>
+<title>Онлайн Генератор Резюме</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
-
+  @import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
   body {
-    margin: 0; padding: 0; font-family: 'Roboto', sans-serif;
-    background: linear-gradient(to bottom, #87ceeb, #f0f8ff);
-    color: #333;
+    margin: 0; padding: 0;
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #6b73ff 0%, #000dff 100%);
     min-height: 100vh;
-    overflow-x: hidden;
+    color: #222;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
   }
-
-  .container {
-    max-width: 500px;
-    margin: 40px auto;
-    background: rgba(255,255,255,0.8);
-    padding: 20px 30px;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-
   h1 {
-    margin-bottom: 10px;
-  }
-
-  input[type="text"] {
-    width: 80%;
-    padding: 10px;
-    font-size: 16px;
-    border: 2px solid #87ceeb;
-    border-radius: 8px;
-    margin-bottom: 10px;
-  }
-
-  button {
-    padding: 10px 15px;
-    font-size: 16px;
-    border: none;
-    background-color: #3399ff;
     color: white;
+    margin-bottom: 15px;
+  }
+  .container {
+    background: white;
+    border-radius: 12px;
+    padding: 25px 30px;
+    max-width: 900px;
+    width: 100%;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
+  }
+  form {
+    flex: 1 1 350px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  label {
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  input[type=text], input[type=email], textarea {
+    padding: 10px 12px;
+    border: 2px solid #ddd;
     border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin: 0 5px;
+    font-size: 15px;
+    resize: vertical;
   }
-
-  button:hover {
-    background-color: #2a7bd1;
+  textarea {
+    min-height: 60px;
   }
-
-  #weather, #forecast {
+  .small-input {
+    width: 48%;
+  }
+  .row {
+    display: flex;
+    gap: 4%;
+    flex-wrap: wrap;
+  }
+  button {
     margin-top: 20px;
-  }
-
-  .weather-main {
-    font-size: 24px;
-    font-weight: 700;
-  }
-
-  .weather-desc {
-    font-size: 18px;
-    font-style: italic;
-    margin: 5px 0 10px 0;
-  }
-
-  .temp {
-    font-size: 48px;
-    font-weight: 900;
-    margin: 10px 0;
-  }
-
-  .icon {
-    width: 100px;
-    height: 100px;
-  }
-
-  .forecast-day {
-    display: inline-block;
-    width: 120px;
-    margin: 10px 5px;
-    background: rgba(255,255,255,0.6);
+    padding: 14px 20px;
+    background: #000dff;
+    color: white;
+    border: none;
     border-radius: 10px;
-    padding: 10px;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
   }
-
-  .forecast-day h4 {
-    margin: 5px 0;
+  button:hover {
+    background: #3f48cc;
   }
-
-  /* Облака анимация */
-  .cloud {
-    position: absolute;
-    background: #fff;
-    background: linear-gradient(to bottom, #fff 5%, #f1f1f1 100%);
-    border-radius: 50px;
-    width: 120px;
-    height: 60px;
-    opacity: 0.8;
-    filter: drop-shadow(0 5px 3px rgba(0,0,0,0.1));
-    animation: moveClouds linear infinite;
+  .resume-preview {
+    flex: 1 1 450px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    padding: 25px 30px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    max-height: 85vh;
+    overflow-y: auto;
   }
-  .cloud::before, .cloud::after {
-    content: '';
-    position: absolute;
-    background: #fff;
-    width: 100px;
-    height: 80px;
-    top: -30px;
-    left: 10px;
-    border-radius: 50px;
+  .resume-preview h2 {
+    margin-top: 0;
+    border-bottom: 2px solid #000dff;
+    padding-bottom: 6px;
+    color: #000dff;
   }
-  .cloud::after {
-    width: 120px;
-    height: 120px;
-    top: -55px;
-    right: 15px;
-    left: auto;
+  .section {
+    margin-bottom: 20px;
   }
-  /* разные скорости */
-  .cloud1 {
-    top: 20px;
-    left: -150px;
-    animation-duration: 60s;
+  .section-title {
+    font-weight: 700;
+    margin-bottom: 8px;
+    font-size: 18px;
+    color: #222;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 4px;
   }
-  .cloud2 {
-    top: 80px;
-    left: -200px;
-    animation-duration: 90s;
-    opacity: 0.5;
-    transform: scale(0.8);
+  .item {
+    margin-bottom: 8px;
   }
-  .cloud3 {
-    top: 140px;
-    left: -100px;
-    animation-duration: 75s;
-    opacity: 0.7;
-    transform: scale(1.2);
+  .item-title {
+    font-weight: 600;
   }
-
-  @keyframes moveClouds {
-    0% { left: -150px; }
-    100% { left: 110%; }
+  .item-subtitle {
+    font-style: italic;
+    color: #555;
+    font-size: 14px;
+  }
+  .item-desc {
+    margin-top: 4px;
+    font-size: 14px;
+    line-height: 1.3;
+  }
+  /* Scrollbar for preview */
+  .resume-preview::-webkit-scrollbar {
+    width: 8px;
+  }
+  .resume-preview::-webkit-scrollbar-track {
+    background: #f0f0f0;
+  }
+  .resume-preview::-webkit-scrollbar-thumb {
+    background: #000dff;
+    border-radius: 4px;
+  }
+  /* Responsive */
+  @media (max-width: 760px) {
+    .container {
+      flex-direction: column;
+    }
+    .resume-preview, form {
+      flex: 1 1 100%;
+      max-height: none;
+    }
   }
 </style>
 </head>
 <body>
 
+<h1>Онлайн Генератор Резюме</h1>
+
 <div class="container">
-  <h1>Погода с анимацией облаков ☁️</h1>
-  
-  <input id="cityInput" type="text" placeholder="Введите город (например, Москва)" />
-  <button id="searchBtn">Искать погоду</button>
-  <button id="geoBtn">Погода по геолокации</button>
 
-  <div id="weather"></div>
-  <div id="forecast"></div>
+  <form id="resumeForm" autocomplete="off">
+    <label for="fullName">ФИО *</label>
+    <input type="text" id="fullName" placeholder="Иван Иванов" required />
 
-  <div class="cloud cloud1"></div>
-  <div class="cloud cloud2"></div>
-  <div class="cloud cloud3"></div>
+    <label for="email">Email *</label>
+    <input type="email" id="email" placeholder="ivan@mail.com" required />
+
+    <label for="phone">Телефон</label>
+    <input type="text" id="phone" placeholder="+7 (999) 999-99-99" />
+
+    <label for="objective">Цель / Краткое описание</label>
+    <textarea id="objective" placeholder="Опишите свои цели или кратко о себе"></textarea>
+
+    <div id="educationContainer">
+      <label>Образование</label>
+      <div class="edu-item">
+        <input type="text" class="edu-school" placeholder="Учебное заведение" />
+        <input type="text" class="edu-degree" placeholder="Специальность" />
+        <input type="text" class="edu-year" placeholder="Годы обучения (напр. 2015-2019)" />
+      </div>
+    </div>
+    <button type="button" id="addEduBtn" style="background:#3399ff; margin-bottom: 15px;">+ Добавить образование</button>
+
+    <div id="experienceContainer">
+      <label>Опыт работы</label>
+      <div class="exp-item">
+        <input type="text" class="exp-company" placeholder="Компания" />
+        <input type="text" class="exp-position" placeholder="Должность" />
+        <input type="text" class="exp-period" placeholder="Период (напр. 2020-2023)" />
+        <textarea class="exp-desc" placeholder="Краткое описание обязанностей и достижений"></textarea>
+      </div>
+    </div>
+    <button type="button" id="addExpBtn" style="background:#3399ff; margin-bottom: 15px;">+ Добавить опыт работы</button>
+
+    <label for="skills">Навыки (через запятую)</label>
+    <input type="text" id="skills" placeholder="JavaScript, React, CSS" />
+
+    <button type="submit">Сгенерировать резюме</button>
+  </form>
+
+  <div class="resume-preview" id="resumePreview">
+    <h2>Ваше резюме появится здесь</h2>
+    <p>Заполните форму слева и нажмите "Сгенерировать резюме".</p>
+  </div>
 </div>
 
-<script src="weather.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+  const form = document.getElementById('resumeForm');
+  const resumePreview = document.getElementById('resumePreview');
+  const addEduBtn = document.getElementById('addEduBtn');
+  const educationContainer = document.getElementById('educationContainer');
+  const addExpBtn = document.getElementById('addExpBtn');
+  const experienceContainer = document.getElementById('experienceContainer');
+
+  // Добавление блока образования
+  addEduBtn.addEventListener('click', () => {
+    const div = document.createElement('div');
+    div.classList.add('edu-item');
+    div.style.marginTop = '10px';
+    div.innerHTML = `
+      <input type="text" class="edu-school" placeholder="Учебное заведение" />
+      <input type="text" class="edu-degree" placeholder="Специальность" />
+      <input type="text" class="edu-year" placeholder="Годы обучения (напр. 2015-2019)" />
+    `;
+    educationContainer.appendChild(div);
+  });
+
+  // Добавление блока опыта работы
+  addExpBtn.addEventListener('click', () => {
+    const div = document.createElement('div');
+    div.classList.add('exp-item');
+    div.style.marginTop = '10px';
+    div.innerHTML = `
+      <input type="text" class="exp-company" placeholder="Компания" />
+      <input type="text" class="exp-position" placeholder="Должность" />
+      <input type="text" class="exp-period" placeholder="Период (напр. 2020-2023)" />
+      <textarea class="exp-desc" placeholder="Краткое описание обязанностей и достижений"></textarea>
+    `;
+    experienceContainer.appendChild(div);
+  });
+
+  function escapeHtml(text) {
+    return text.replace(/&/g, "&amp;")
+               .replace(/</g, "&lt;")
+               .replace(/>/g, "&gt;")
+               .replace(/"/g, "&quot;")
+               .replace(/'/g, "&#039;");
+  }
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+
+    const fullName = form.fullName.value.trim();
+    const email = form.email.value.trim();
+    const phone = form.phone.value.trim();
+    const objective = form.objective.value.trim();
+
+    if (!fullName || !email) {
+      alert('Пожалуйста, заполните обязательные поля: ФИО и Email');
+      return;
+    }
+
+    // Сбор образования
+    const eduItems = Array.from(document.querySelectorAll('.edu-item'));
+    const educations = eduItems.map(div => ({
+      school: div.querySelector('.edu-school').value.trim(),
+      degree: div.querySelector('.edu-degree').value.trim(),
+      year: div.querySelector('.edu-year').value.trim(),
+    })).filter(e => e.school || e.degree || e.year);
+
+    // Сбор опыта
+    const expItems = Array.from(document.querySelectorAll('.exp-item'));
+    const experiences = expItems.map(div => ({
+      company: div.querySelector('.exp-company').value.trim(),
+      position: div.querySelector('.exp-position').value.trim(),
+      period: div.querySelector('.exp-period').value.trim(),
+      desc: div.querySelector('.exp-desc').value.trim(),
+    })).filter(e => e.company || e.position || e.period || e.desc);
+
+    // Навыки
+    const skillsRaw = form.skills.value.trim();
+    const skills = skillsRaw ? skillsRaw.split(',').map(s => s.trim()).filter(s => s) : [];
+
+    // Формируем HTML резюме
+    const html = `
+      <h2>${escapeHtml(fullName)}</h2>
+      <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+      ${phone ? `<p><strong>Телефон:</strong> ${escapeHtml(phone)}</p>` : ''}
+      ${objective ? `<div class="section"><div class="section-title">Цель</div><p>${escapeHtml(objective)}</p></div>` : ''}
+
+      ${educations.length ? `
+      <div class="section">
+        <div class="section-title">Образование</div>
+        ${educations.map(ed => `
+          <div class="item">
+            <div class="item-title">${escapeHtml(ed.school)}</div>
+            <div class="item-subtitle">${escapeHtml(ed.degree)} ${ed.year ? ', ' + escapeHtml(ed.year) : ''}</div>
+          </div>
+        `).join('')}
+      </div>
+      ` : ''}
+
+      ${experiences.length ? `
+      <div class="section">
+        <div class="section-title">Опыт работы</div>
+        ${experiences.map(ex => `
+          <div class="item">
+            <div class="item-title">${escapeHtml(ex.position)} — ${escapeHtml(ex.company)}</div>
+            <div class="item-subtitle">${escapeHtml(ex.period)}</div>
+            ${ex.desc ? `<div class="item-desc">${escapeHtml(ex.desc)}</div>` : ''}
+          </div>
+        `).join('')}
+      </div>
+      ` : ''}
+
+      ${skills.length ? `
+      <div class="section">
+        <div class="section-title">Навыки</div>
+        <p>${skills.map(s => escapeHtml(s)).join(', ')}</p>
+      </div>
+      ` : ''}
+    `;
+
+    resumePreview.innerHTML = html;
+    addDownloadButton();
+  });
+
+  // Добавляем кнопку скачивания PDF после генерации
+  function addDownloadButton() {
+    let existingBtn = document.getElementById('downloadPdfBtn');
+    if (existingBtn) return;
+
+    const btn = document.createElement('button');
+    btn.id = 'downloadPdfBtn';
+    btn.textContent = 'Скачать PDF';
+    btn.style.marginTop = '10px';
+    resumePreview.appendChild(btn);
+
+    btn.addEventListener('click', () => {
+      generatePDF();
+    });
+  }
+
+  function generatePDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({
+      unit: 'pt',
+      format: 'a4'
+    });
+
+    // Получаем HTML резюме
+    const content = resumePreview.innerHTML;
+
+    // Создадим временный div для форматирования текста
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = content;
+    tempDiv.style.width = '500px'; // ширина для текста в PDF
+
+    // Функция для добавления текста в PDF с переносами строк
+    let y = 40;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(22);
+
+    // Добавляем имя
+    const nameEl = tempDiv.querySelector('h2');
+    if (nameEl) {
+      doc.text(nameEl.textContent, 40, y);
+      y += 30;
+    }
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(12);
+
+    // Добавляем остальные секции
+    const paragraphs = tempDiv.querySelectorAll('p, .section-title, .item-title, .item-subtitle, .item-desc');
+
+    paragraphs.forEach(p => {
+      if (y > 750) {
+        doc.addPage();
+        y = 40;
+      }
+
+      if (p.classList.contains('section-title')) {
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(16);
+        doc.text(p.textContent, 40, y);
+        y += 22;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(12);
+      } else if (p.classList.contains('item-title')) {
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(13);
+        doc.text(p.textContent, 50, y);
+        y += 18;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(12);
+      } else if (p.classList.contains('item-subtitle')) {
+        doc.setTextColor(100);
+        doc.setFont('helvetica', 'italic');
+        doc.text(p.textContent, 55, y);
+        y += 16;
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0);
+      } else if (p.classList.contains('item-desc')) {
+        let textLines = doc.splitTextToSize(p.textContent, 450);
+        doc.text(textLines, 60, y);
+        y += textLines.length * 14;
+      } else {
+        // простой параграф
+        let textLines = doc.splitTextToSize(p.textContent, 500);
+        doc.text(textLines, 40, y);
+        y += textLines.length * 14;
+      }
+    });
+
+    doc.save('resume.pdf');
+  }
+</script>
 
 </body>
 </html>
