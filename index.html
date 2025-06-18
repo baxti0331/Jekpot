@@ -2,56 +2,173 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8" />
-<title>Генератор красивых ссылок</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Погода с анимацией облаков</title>
 <style>
-  body { font-family: Arial, sans-serif; margin: 20px; }
-  input, button { padding: 8px; font-size: 16px; margin: 5px 0; width: 300px; }
-  #result a { font-size: 18px; color: blue; text-decoration: underline; }
+  @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
+  body {
+    margin: 0; padding: 0; font-family: 'Roboto', sans-serif;
+    background: linear-gradient(to bottom, #87ceeb, #f0f8ff);
+    color: #333;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .container {
+    max-width: 500px;
+    margin: 40px auto;
+    background: rgba(255,255,255,0.8);
+    padding: 20px 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  h1 {
+    margin-bottom: 10px;
+  }
+
+  input[type="text"] {
+    width: 80%;
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #87ceeb;
+    border-radius: 8px;
+    margin-bottom: 10px;
+  }
+
+  button {
+    padding: 10px 15px;
+    font-size: 16px;
+    border: none;
+    background-color: #3399ff;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin: 0 5px;
+  }
+
+  button:hover {
+    background-color: #2a7bd1;
+  }
+
+  #weather, #forecast {
+    margin-top: 20px;
+  }
+
+  .weather-main {
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .weather-desc {
+    font-size: 18px;
+    font-style: italic;
+    margin: 5px 0 10px 0;
+  }
+
+  .temp {
+    font-size: 48px;
+    font-weight: 900;
+    margin: 10px 0;
+  }
+
+  .icon {
+    width: 100px;
+    height: 100px;
+  }
+
+  .forecast-day {
+    display: inline-block;
+    width: 120px;
+    margin: 10px 5px;
+    background: rgba(255,255,255,0.6);
+    border-radius: 10px;
+    padding: 10px;
+  }
+
+  .forecast-day h4 {
+    margin: 5px 0;
+  }
+
+  /* Облака анимация */
+  .cloud {
+    position: absolute;
+    background: #fff;
+    background: linear-gradient(to bottom, #fff 5%, #f1f1f1 100%);
+    border-radius: 50px;
+    width: 120px;
+    height: 60px;
+    opacity: 0.8;
+    filter: drop-shadow(0 5px 3px rgba(0,0,0,0.1));
+    animation: moveClouds linear infinite;
+  }
+  .cloud::before, .cloud::after {
+    content: '';
+    position: absolute;
+    background: #fff;
+    width: 100px;
+    height: 80px;
+    top: -30px;
+    left: 10px;
+    border-radius: 50px;
+  }
+  .cloud::after {
+    width: 120px;
+    height: 120px;
+    top: -55px;
+    right: 15px;
+    left: auto;
+  }
+  /* разные скорости */
+  .cloud1 {
+    top: 20px;
+    left: -150px;
+    animation-duration: 60s;
+  }
+  .cloud2 {
+    top: 80px;
+    left: -200px;
+    animation-duration: 90s;
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
+  .cloud3 {
+    top: 140px;
+    left: -100px;
+    animation-duration: 75s;
+    opacity: 0.7;
+    transform: scale(1.2);
+  }
+
+  @keyframes moveClouds {
+    0% { left: -150px; }
+    100% { left: 110%; }
+  }
 </style>
 </head>
 <body>
 
-<h2>Генератор красивых ссылок</h2>
+<div class="container">
+  <h1>Погода с анимацией облаков ☁️</h1>
+  
+  <input id="cityInput" type="text" placeholder="Введите город (например, Москва)" />
+  <button id="searchBtn">Искать погоду</button>
+  <button id="geoBtn">Погода по геолокации</button>
 
-<form id="linkForm">
-  <label>Введите URL:<br>
-    <input type="url" id="urlInput" placeholder="https://example.com" required>
-  </label><br>
-  
-  <label>Введите текст ссылки:<br>
-    <input type="text" id="textInput" placeholder="Название ссылки" required>
-  </label><br>
-  
-  <button type="submit">Сгенерировать ссылку</button>
-</form>
+  <div id="weather"></div>
+  <div id="forecast"></div>
 
-<h3>Результат:</h3>
-<div id="result"></div>
+  <div class="cloud cloud1"></div>
+  <div class="cloud cloud2"></div>
+  <div class="cloud cloud3"></div>
+</div>
 
-<script>
-document.getElementById('linkForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-  
-  const url = document.getElementById('urlInput').value.trim();
-  const text = document.getElementById('textInput').value.trim();
-  
-  if (!url || !text) {
-    alert('Пожалуйста, заполните оба поля.');
-    return;
-  }
-  
-  const resultDiv = document.getElementById('result');
-  resultDiv.innerHTML = ''; // очистить предыдущий результат
-  
-  const link = document.createElement('a');
-  link.href = url;
-  link.textContent = text;
-  link.target = '_blank'; // чтобы ссылка открывалась в новой вкладке
-  link.rel = 'noopener noreferrer'; // безопасность
-  
-  resultDiv.appendChild(link);
-});
-</script>
+<script src="weather.js"></script>
 
 </body>
 </html>
