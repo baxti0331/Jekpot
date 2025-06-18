@@ -133,7 +133,7 @@
       justify-content: center;
     }
 
-    canvas {
+    #qrCode img {
       border-radius: 20px;
       box-shadow:
         0 12px 25px rgba(0, 0, 0, 0.15);
@@ -265,7 +265,6 @@
     const qrCodeContainer = document.getElementById('qrCode');
     const downloadBtn = document.getElementById('downloadBtn');
 
-    // Модальное окно
     const modalOverlay = document.getElementById('modalOverlay');
     const downloadPngBtn = document.getElementById('downloadPngBtn');
     const downloadPdfBtn = document.getElementById('downloadPdfBtn');
@@ -273,7 +272,6 @@
 
     const sizeSelect = document.getElementById('sizeSelect');
 
-    // Обновление кнопки генерации
     textInput.addEventListener('input', () => {
       const hasText = textInput.value.trim().length > 0;
       generateBtn.disabled = !hasText;
@@ -298,10 +296,17 @@
           width: size,
         };
 
-        const canvas = document.createElement('canvas');
-        await QRCode.toCanvas(canvas, text, opts);
+        // Генерируем QR-код в DataURL (image/png)
+        const dataUrl = await QRCode.toDataURL(text, opts);
 
-        qrCodeContainer.appendChild(canvas);
+        // Создаём <img> и вставляем в контейнер
+        const img = document.createElement('img');
+        img.src = dataUrl;
+        img.alt = 'QR-код';
+        img.width = size;
+        img.height = size;
+
+        qrCodeContainer.appendChild(img);
         downloadBtn.style.display = 'inline-block';
 
       } catch (err) {
@@ -313,13 +318,11 @@
 
     generateBtn.addEventListener('click', generateQRCode);
 
-    // Открыть модальное окно при клике на скачать
     downloadBtn.addEventListener('click', () => {
       modalOverlay.classList.add('active');
       downloadPngBtn.focus();
     });
 
-    // Закрыть модальное окно
     function closeModal() {
       modalOverlay.classList.remove('active');
       downloadBtn.focus();
@@ -328,48 +331,41 @@
 
     // Скачать PNG
     downloadPngBtn.addEventListener('click', () => {
-      const canvas = qrCodeContainer.querySelector('canvas');
-      if (!canvas) return;
+      const img = qrCodeContainer.querySelector('img');
+      if (!img) return;
 
-      canvas.toBlob(blob => {
-        if (!blob) return;
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'qr-code.png';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      }, 'image/png');
+      // Создаем ссылку для скачивания PNG
+      const link = document.createElement('a');
+      link.href = img.src;
+      link.download = 'qr-code.png';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
       closeModal();
     });
 
     // Скачать PDF
-    downloadPdfBtn.addEventListener('click', async () => {
-      const canvas = qrCodeContainer.querySelector('canvas');
-      if (!canvas) return;
+    downloadPdfBtn.addEventListener('click', () => {
+      const img = qrCodeContainer.querySelector('img');
+      if (!img) return;
 
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF({
         unit: 'px',
-        format: [canvas.width, canvas.height]
+        format: [img.width, img.height]
       });
 
-      // Добавим изображение из канваса в pdf
-      const dataUrl = canvas.toDataURL('image/png');
-      pdf.addImage(dataUrl, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.addImage(img.src, 'PNG', 0, 0, img.width, img.height);
       pdf.save('qr-code.pdf');
 
       closeModal();
     });
 
-    // Закрыть модал кликом вне окна
     modalOverlay.addEventListener('click', (e) => {
       if (e.target === modalOverlay) closeModal();
     });
 
-    // Закрыть модал по ESC
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && modalOverlay.classList.contains('active')) {
         closeModal();
