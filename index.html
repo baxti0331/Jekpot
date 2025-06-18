@@ -1,52 +1,113 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Меню ресторана</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Меню ресторана — Чистое и стильное</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: #1e1e2f;
+      color: #f0f0f5;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding-top: 60px;
+    }
+    .navbar {
+      background: #27293d !important;
+    }
+    .carousel-item {
+      padding-bottom: 40px;
+    }
+    .card {
+      background: linear-gradient(135deg, #5a4d7d, #2e2a47);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      cursor: pointer;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      min-height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      font-weight: 600;
+      text-align: center;
+      padding: 20px;
+      box-shadow: 0 4px 15px rgba(90, 77, 125, 0.5);
+    }
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 10px 30px rgba(90, 77, 125, 0.8);
+    }
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+      filter: invert(1);
+    }
+  </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav class="navbar fixed-top navbar-expand-lg navbar-dark">
   <div class="container">
     <a class="navbar-brand" href="#">Вкус жизни</a>
-    <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
-    <div class="collapse navbar-collapse" id="nav">
-      <ul class="navbar-nav me-auto">
-        <li class="nav-item"><a class="nav-link active" href="#">Меню</a></li>
-      </ul>
-      <button class="btn btn-outline-light position-relative" id="cartBtn">
-        🛒 Корзина <span id="cartCount" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
-      </button>
-    </div>
   </div>
 </nav>
 
-<div id="menuCarousel" class="carousel slide py-4" data-bs-ride="carousel">
+<div id="menuCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
   <div class="carousel-inner">
 
-    <!-- Слайд: Закуски -->
+    <!-- Закуски -->
     <div class="carousel-item active">
       <div class="container">
-        <h2 class="mb-3">Закуски</h2>
+        <h2 class="mb-4">Закуски</h2>
         <div class="row g-4">
-          <!-- Карточка блюда -->
-          <div class="col-md-6 col-lg-4">
-            <div class="card h-100" onclick="openModal('Брускетта с томатами','290 ₽','Свежие тосты с томатами и базиликом.')" >
-              <img src="https://via.placeholder.com/300x160" class="card-img-top">
-              <div class="card-body">
-                <h5 class="card-title">Брускетта с томатами</h5>
-                <p class="card-text">290 ₽</p>
-                <button class="btn btn-sm btn-primary" onclick="addToCart(event,'Брускетта',290)">Добавить в корзину</button>
-              </div>
-            </div>
+          <div class="col-md-4">
+            <div class="card" onclick="alert('Брускетта с томатами')">Брускетта с томатами</div>
           </div>
-          <!-- Повтор для других блюд -->
+          <div class="col-md-4">
+            <div class="card" onclick="alert('Оливье классический')">Оливье классический</div>
+          </div>
+          <div class="col-md-4">
+            <div class="card" onclick="alert('Мини-кростини с грибами')">Мини-кростини с грибами</div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Повторить carousel-item для других категорий -->
+    <!-- Супы -->
+    <div class="carousel-item">
+      <div class="container">
+        <h2 class="mb-4">Супы</h2>
+        <div class="row g-4">
+          <div class="col-md-4">
+            <div class="card" onclick="alert('Том Ям')">Том Ям</div>
+          </div>
+          <div class="col-md-4">
+            <div class="card" onclick="alert('Борщ')">Борщ</div>
+          </div>
+          <div class="col-md-4">
+            <div class="card" onclick="alert('Крем-суп из шампиньонов')">Крем-суп из шампиньонов</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Основные блюда -->
+    <div class="carousel-item">
+      <div class="container">
+        <h2 class="mb-4">Основные блюда</h2>
+        <div class="row g-4">
+          <div class="col-md-4">
+            <div class="card" onclick="alert('Стейк из говядины')">Стейк из говядины</div>
+          </div>
+          <div class="col-md-4">
+            <div class="card" onclick="alert('Паста Карбонара')">Паста Карбонара</div>
+          </div>
+          <div class="col-md-4">
+            <div class="card" onclick="alert('Курица терияки')">Курица терияки</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
   </div>
 
@@ -58,39 +119,6 @@
   </button>
 </div>
 
-<!-- Модальное окно -->
-<div class="modal fade" id="dishModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="dishModalLabel"></h5>
-        <button class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <p id="dishModalPrice" class="fw-bold"></p>
-        <p id="dishModalDesc"></p>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-let cartCount = 0;
-
-function openModal(name, price, desc) {
-  document.getElementById('dishModalLabel').innerText = name;
-  document.getElementById('dishModalPrice').innerText = price;
-  document.getElementById('dishModalDesc').innerText = desc;
-  new bootstrap.Modal(document.getElementById('dishModal')).show();
-}
-
-function addToCart(event, name, price) {
-  event.stopPropagation();
-  cartCount++;
-  document.getElementById('cartCount').innerText = cartCount;
-  // здесь можно добавить логику хранения корзины
-}
-</script>
 </body>
 </html>
