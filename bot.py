@@ -136,7 +136,7 @@ async def scheduler(app):
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         await update.message.reply_animation(
-            animation="https://system365.pro/wp-content/uploads/2020/11/funkygoose-13.gif",
+            animation="https://i.pinimg.com/originals/bd/44/d9/bd44d9671403e0a74a16db7cc4f58f34.gif",
             caption="🔒 Нет доступа. Пиши @baxti_pm если нужен доступ."
         )
         return ConversationHandler.END
