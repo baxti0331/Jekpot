@@ -1,0 +1,5 @@
+python-telegram-bot[webhooks]==20.3
+aioschedule
+aiosqlite
+python-dotenv
+pytz
