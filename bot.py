@@ -32,7 +32,9 @@ async def init_db():
                 type TEXT NOT NULL,
                 content TEXT,
                 file_id TEXT,
-                caption TEXT
+                caption TEXT,
+                original_chat_id INTEGER,
+                original_message_id INTEGER
             );
         """)
         await db.execute("""
@@ -50,12 +52,13 @@ async def init_db():
         await db.commit()
 
 # РАБОТА С БД
-async def add_post(post_type, content=None, file_id=None, caption=None):
+async def add_post(post_type, content=None, file_id=None, caption=None,
+                   original_chat_id=None, original_message_id=None):
     async with aiosqlite.connect(DB_FILE) as db:
         await db.execute("""
-            INSERT INTO posts (type, content, file_id, caption)
-            VALUES (?, ?, ?, ?)
-        """, (post_type, content, file_id, caption))
+            INSERT INTO posts (type, content, file_id, caption, original_chat_id, original_message_id)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (post_type, content, file_id, caption, original_chat_id, original_message_id))
         await db.commit()
 
 async def get_posts():
@@ -110,16 +113,29 @@ async def send_next_post(app):
         return
 
     for post in posts:
+        post_type = post[1]
+        content = post[2]
+        file_id = post[3]
+        caption = post[4]
+        orig_chat_id = post[5]
+        orig_message_id = post[6]
+
         for chat_id in targets:
             try:
-                if post[1] == "text":
-                    await app.bot.send_message(chat_id, post[2])
-                elif post[1] == "photo":
-                    await app.bot.send_photo(chat_id, post[3], caption=post[4])
-                elif post[1] == "video":
-                    await app.bot.send_video(chat_id, post[3], caption=post[4])
-                elif post[1] == "document":
-                    await app.bot.send_document(chat_id, post[3], caption=post[4])
+                if post_type == "forward":
+                    await app.bot.forward_message(
+                        chat_id=chat_id,
+                        from_chat_id=orig_chat_id,
+                        message_id=orig_message_id
+                    )
+                elif post_type == "text":
+                    await app.bot.send_message(chat_id, content)
+                elif post_type == "photo":
+                    await app.bot.send_photo(chat_id, file_id, caption=caption)
+                elif post_type == "video":
+                    await app.bot.send_video(chat_id, file_id, caption=caption)
+                elif post_type == "document":
+                    await app.bot.send_document(chat_id, file_id, caption=caption)
             except Exception as e:
                 print(f"[ERROR] Не удалось отправить в {chat_id}: {e}")
 
@@ -167,7 +183,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
 
     if query.data == "add_post":
-        await query.message.reply_text("Отправьте пост:")
+        await query.message.reply_text("Отправьте сообщение, которое будет переслано:")
         return WAITING_POST
 
     elif query.data == "show_queue":
@@ -178,12 +194,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return ConversationHandler.END
         text = "Очередь постов:\n"
         for idx, post in enumerate(posts):
-            text += f"{idx+1}. {post[1]}"
-            if post[1] == "text":
-                text += f": {post[2][:30]}"
-            if post[4]:
-                text += f" ({post[4][:30]})"
-            text += "\n"
+            text += f"{idx+1}. {post[1]}\n"
         await query.message.edit_text(text)
         await show_main_menu(query.message)
         return ConversationHandler.END
@@ -238,24 +249,18 @@ async def post_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         return ConversationHandler.END
 
-    if update.message.text:
-        await add_post("text", content=update.message.text)
-    elif update.message.photo:
-        file_id = update.message.photo[-1].file_id
-        await add_post("photo", file_id=file_id, caption=update.message.caption or "")
-    elif update.message.video:
-        file_id = update.message.video.file_id
-        await add_post("video", file_id=file_id, caption=update.message.caption or "")
-    elif update.message.document:
-        file_id = update.message.document.file_id
-        await add_post("document", file_id=file_id, caption=update.message.caption or "")
-    else:
-        await update.message.reply_text("❗ Неподдерживаемый тип.")
-        await show_main_menu(update.message)
-        return ConversationHandler.END
+    message = update.message
+    chat_id = message.chat_id
+    message_id = message.message_id
 
-    await update.message.reply_text("Пост добавлен.")
-    await show_main_menu(update.message)
+    await add_post(
+        post_type="forward",
+        original_chat_id=chat_id,
+        original_message_id=message_id
+    )
+
+    await message.reply_text("Пост добавлен для пересылки.")
+    await show_main_menu(message)
     return ConversationHandler.END
 
 async def target_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
