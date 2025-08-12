@@ -190,7 +190,7 @@ class GiftClient:
 gift_client = GiftClient()
 
 async def send_gift(user_id: int):
-    gift_option = "default_gift"  # Замени на ID или название своего подарка
+    gift_option = "5170233102089322756"  # Замени на ID или название своего подарка
     try:
         await gift_client.sendStarGift(peerId=user_id, gift=gift_option, anonymous=True)
         logging.info(f"Подарок успешно отправлен пользователю {user_id}")
