@@ -1,5 +1,407 @@
-python-telegram-bot[webhooks]==20.3
-aioschedule
-aiosqlite
-python-dotenv
-pytz
+import sqlite3
+import asyncio
+import logging
+import os 
+
+from aiogram import Bot, Dispatcher, executor, types
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, LabeledPrice, ContentType
+from aiogram.contrib.middlewares.logging import LoggingMiddleware
+
+from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.dispatcher import FSMContext
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
+
+logging.basicConfig(level=logging.INFO)
+
+API_TOKEN = os.getenv("BOT_TOKEN")
+PROVIDER_TOKEN = os.getenv("PROVIDER_TOKEN")
+ADMIN_ID = int(os.getenv("ADMIN_ID", "0"))
+
+bot = Bot(token=API_TOKEN)
+storage = MemoryStorage()
+dp = Dispatcher(bot, storage=storage)
+dp.middleware.setup(LoggingMiddleware())
+
+COSTS = {
+    1: 1,
+    2: 4,
+    1: 9,
+}
+
+def init_db():
+    with sqlite3.connect("football_bot.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS users (
+                user_id INTEGER PRIMARY KEY,
+                stars INTEGER DEFAULT 20
+            )
+        ''')
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS referrals (
+                user_id INTEGER PRIMARY KEY,
+                referrer_id INTEGER
+            )
+        ''')
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS payments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                amount INTEGER
+            )
+        ''')
+        conn.commit()
+
+def get_user_stars(user_id):
+    with sqlite3.connect("football_bot.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT stars FROM users WHERE user_id = ?", (user_id,))
+        row = cursor.fetchone()
+        if row:
+            return row[0]
+        else:
+            cursor.execute("INSERT INTO users (user_id, stars) VALUES (?, ?)", (user_id, 0))
+            conn.commit()
+            return 0
+
+def set_user_stars(user_id, stars):
+    with sqlite3.connect("football_bot.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE users SET stars = ? WHERE user_id = ?", (stars, user_id))
+        conn.commit()
+
+def set_referrer_if_not_exists(user_id, referrer_id):
+    if user_id == referrer_id:
+        return
+    with sqlite3.connect("football_bot.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT referrer_id FROM referrals WHERE user_id=?", (user_id,))
+        row = cursor.fetchone()
+        if row is None:
+            cursor.execute("INSERT INTO referrals (user_id, referrer_id) VALUES (?, ?)", (user_id, referrer_id))
+            cursor.execute("UPDATE users SET stars = stars + 3 WHERE user_id=?", (referrer_id,))
+            conn.commit()
+
+def throw_keyboard(user_id):
+    kb = InlineKeyboardMarkup(row_width=2)
+    for count in sorted(COSTS.keys(), reverse=True):
+        if count == 1:
+            suffix = "zarba"
+        elif 2 <= count <= 4:
+            suffix = "zarba"
+        else:
+            suffix = "zarba"
+        kb.insert(InlineKeyboardButton(
+            text=f"⚽️ {count} {suffix} • {COSTS[count]}⭐️",
+            callback_data=f"throw_{count}"
+        ))
+    kb.add(InlineKeyboardButton("+ 3 ⭐️ do‘st uchun", callback_data=f"referral_{user_id}"))
+    kb.add(InlineKeyboardButton("⚽️ sovg‘alar uchun 🎁", url="https://t.me/bankstars_support_bot"))
+    return kb
+
+@dp.callback_query_handler(lambda c: c.data and c.data.startswith("referral_"))
+async def process_referral(callback_query: types.CallbackQuery):
+    inviter_id = int(callback_query.data.split("_")[1])
+    bot_info = await bot.get_me()
+    url = f"https://t.me/{bot_info.username}?start={inviter_id}"
+
+    text = (
+        "⚽️ Futbol o‘yinida omadga chaqiruv tashla!\n"
+        "🎁 Har bir gol uchun zo‘r sovg‘a yutib ol! 🎁\n\n"
+        "👫 Do‘stlaringni chaqir:\n"
+        "— Har bir do‘st uchun +3 ⭐️\n\n"
+        "🔥 Imkoniyatni qo‘ldan boy bermang!\n"
+        "O‘yna va sovg‘alarni birinchi bo‘lib ol:\n"
+        f"{url}"
+    )
+
+    kb = InlineKeyboardMarkup()
+    kb.add(InlineKeyboardButton("📤 Ulashish", switch_inline_query=text))
+    kb.add(InlineKeyboardButton("⬅️ Orqaga", callback_data="back_to_menu"))
+
+    await bot.send_message(callback_query.from_user.id, text, reply_markup=kb)
+    await callback_query.answer()
+
+@dp.callback_query_handler(lambda c: c.data == "back_to_menu")
+async def back_to_menu(callback_query: types.CallbackQuery):
+    user_id = callback_query.from_user.id
+    stars = get_user_stars(user_id)
+    await bot.send_message(
+        user_id,
+        f"💰 Balans: {stars} ⭐️",
+        reply_markup=throw_keyboard(user_id)
+    )
+    await callback_query.answer()
+
+@dp.message_handler(commands=['start'])
+async def start_handler_with_referral(message: types.Message):
+    args = message.get_args()
+    user_id = message.from_user.id
+    if args.isdigit():
+        ref_id = int(args)
+        set_referrer_if_not_exists(user_id, ref_id)
+
+    stars = get_user_stars(user_id)
+    kb_throw = throw_keyboard(user_id)
+
+    await message.answer(
+        "⚽️ Sovg‘alar uchun futbol\n\n"
+        "Har bir gol uchun sovg‘a yutib ol! 🎁\n\n"
+        f"💰 Balans: {stars} ⭐️",
+        reply_markup=kb_throw
+    )
+
+    if user_id == ADMIN_ID and ADMIN_ID != 0:
+        await message.answer("⚙️ Admin panel:", reply_markup=admin_panel_keyboard())
+
+@dp.callback_query_handler(lambda c: c.data and c.data.startswith("throw_"))
+async def process_throw(callback_query: types.CallbackQuery):
+    user_id = callback_query.from_user.id
+    count = int(callback_query.data.split("_")[1])
+    price_stars = COSTS.get(count)
+    if price_stars is None:
+        await callback_query.answer("⛔ Noto‘g‘ri paket zarbalar")
+        return
+
+    await bot.send_invoice(
+        chat_id=user_id,
+        title=f"{count} zarba",
+        description=f"🏆 Gol uchun sovg‘a - paket: {count} zarba",
+        payload=f"football_{count}",
+        provider_token=PROVIDER_TOKEN,
+        currency="XTR",
+        prices=[LabeledPrice(label=f"{count} zarba", amount=price_stars)],
+        start_parameter=f"football_{count}"
+    )
+    await callback_query.answer()
+
+@dp.pre_checkout_query_handler(lambda q: True)
+async def checkout(pre_q: types.PreCheckoutQuery):
+    await bot.answer_pre_checkout_query(pre_q.id, ok=True)
+
+# --- Новый класс и клиент для отправки подарков ---
+class GiftClient:
+    async def sendStarGift(self, peerId: int, gift: str, anonymous: bool = True):
+        # TODO: Здесь подставь свой реальный API-запрос на отправку подарка
+        logging.info(f"Отправка подарка '{gift}' пользователю {peerId} (анонимно={anonymous})")
+        await asyncio.sleep(1)  # имитация задержки
+        # Здесь возвращаем True, если успешно
+        return True
+
+gift_client = GiftClient()
+
+async def send_gift(user_id: int):
+    gift_option = "default_gift"  # Замени на ID или название своего подарка
+    try:
+        await gift_client.sendStarGift(peerId=user_id, gift=gift_option, anonymous=True)
+        logging.info(f"Подарок успешно отправлен пользователю {user_id}")
+    except Exception as e:
+        logging.error(f"Ошибка отправки подарка пользователю {user_id}: {e}")
+
+@dp.message_handler(content_types=ContentType.SUCCESSFUL_PAYMENT)
+async def successful_payment(msg: types.Message):
+    user_id = msg.from_user.id
+    payload = msg.successful_payment.invoice_payload
+
+    if payload.startswith("football_"):
+        count = int(payload.split("_")[1])
+        results = []
+        hits = 0
+
+        for i in range(count):
+            dice = await bot.send_dice(user_id, emoji="⚽️")
+            await asyncio.sleep(2)
+            if dice.dice.value >= 4:
+                results.append((i + 1, "gol ✅"))
+                hits += 1
+            else:
+                results.append((i + 1, "o‘tmadi ❌"))
+
+        throws_text = "\n".join([f"Zarba #{i} – {res}" for i, res in results])
+        quote_msg = f"O‘yin natijalari ⚽️ {count} zarba\n\n{throws_text}"
+        await bot.send_message(user_id, f"```{quote_msg}```", parse_mode="Markdown")
+
+        if hits == count:
+            await asyncio.sleep(0.5)
+            await bot.send_message(user_id, "🎉 Tabriklaymiz! Barcha zarbalar gol bo‘ldi!")
+            await asyncio.sleep(0.5)
+            await bot.send_message(user_id, "🎁 Sovg‘angiz tayyorlanmoqda...")
+            await asyncio.sleep(0.5)
+
+            # Отправляем подарок через API
+            await send_gift(user_id)
+
+            await bot.send_message(user_id, "🎁 Sovg‘ani olish uchun @baxti_pm ga yozing")
+
+            username = msg.from_user.username or msg.from_user.full_name
+            try:
+                await bot.send_message(
+                    ADMIN_ID,
+                    f"📢 Пользователь @{username} выиграл подарок 🎁"
+                )
+            except Exception as e:
+                logging.error(f"Ошибка отправки уведомления админу: {e}")
+        else:
+            await bot.send_message(user_id, "Bu safar omad kelmadi. Yana urinib ko‘ramizmi?")
+
+        stars = get_user_stars(user_id)
+        await bot.send_message(user_id, f"💰 Balans: {stars} ⭐️", reply_markup=throw_keyboard(user_id))
+
+# --- Админка и статистика ---
+def get_stats():
+    with sqlite3.connect("football_bot.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM users")
+        users_count = cursor.fetchone()[0]
+        cursor.execute("SELECT IFNULL(SUM(amount),0) FROM payments")
+        income = cursor.fetchone()[0] or 0
+        expense = users_count * 15
+        return users_count, income, expense
+
+def add_payment(amount):
+    with sqlite3.connect("football_bot.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO payments (amount) VALUES (?)", (amount,))
+        conn.commit()
+
+def admin_panel_keyboard():
+    kb = InlineKeyboardMarkup(row_width=2)
+    kb.add(
+        InlineKeyboardButton("📊 Statistika", callback_data="admin_stats"),
+        InlineKeyboardButton("📢 Xabar yuborish", callback_data="admin_broadcast")
+    )
+    return kb
+
+class BroadcastStates(StatesGroup):
+    waiting_media = State()
+    waiting_content = State()
+    waiting_button_text = State()
+    waiting_button_url = State()
+
+@dp.callback_query_handler(lambda c: c.data in ["admin_stats", "admin_broadcast"])
+async def admin_panel_handlers(call: types.CallbackQuery):
+    if call.from_user.id != ADMIN_ID or ADMIN_ID == 0:
+        await call.answer("🚫 Ruxsat yo‘q", show_alert=True)
+        return
+
+    if call.data == "admin_stats":
+        users, income, expense = get_stats()
+        text = (
+            f"📊 Statistika bot:\n\n"
+            f"👥 Foydalanuvchilar: {users}\n"
+            f"💰 Daromad (yulduzlar): {income}\n"
+            f"💸 Xarajat (taxminan): {expense}\n"
+        )
+        await call.message.answer(text)
+
+    elif call.data == "admin_broadcast":
+        await call.message.answer(
+            "Yuborish uchun media fayl jo‘nating (foto, video, gif, stiker) yoki 'yo‘q' deb yozing:"
+        )
+        await BroadcastStates.waiting_media.set()
+
+@dp.message_handler(state=BroadcastStates.waiting_media, content_types=ContentType.ANY)
+async def broadcast_media_received(message: types.Message, state: FSMContext):
+    if message.text and message.text.lower() == 'yo‘q':
+        await state.update_data(media_type=None, media_id=None)
+        await message.answer("Yuboriladigan matnni kiriting:")
+        await BroadcastStates.waiting_content.set()
+        return
+
+    media_type = None
+    media_id = None
+
+    if message.photo:
+        media_type = 'photo'
+        media_id = message.photo[-1].file_id
+    elif message.video:
+        media_type = 'video'
+        media_id = message.video.file_id
+    elif message.animation:
+        media_type = 'animation'
+        media_id = message.animation.file_id
+    elif message.sticker:
+        media_type = 'sticker'
+        media_id = message.sticker.file_id
+    else:
+        await message.answer("Iltimos, foto, video, gif, stiker yuboring yoki 'yo‘q' deb yozing.")
+        return
+
+    await state.update_data(media_type=media_type, media_id=media_id)
+    await message.answer("Yuboriladigan matnni kiriting:")
+    await BroadcastStates.waiting_content.set()
+
+@dp.message_handler(state=BroadcastStates.waiting_content, content_types=ContentType.TEXT)
+async def broadcast_text_received(message: types.Message, state: FSMContext):
+    await state.update_data(text=message.text)
+    await message.answer("Button matnini kiriting (agar kerak bo‘lmasa 'yo‘q' deb yozing):")
+    await BroadcastStates.waiting_button_text.set()
+
+@dp.message_handler(state=BroadcastStates.waiting_button_text, content_types=ContentType.TEXT)
+async def broadcast_button_text_received(message: types.Message, state: FSMContext):
+    btn_text = message.text
+    if btn_text.lower() == 'yo‘q':
+        await state.update_data(button_text=None, button_url=None)
+        await send_broadcast(state, message)
+        await state.finish()
+        return
+
+    await state.update_data(button_text=btn_text)
+    await message.answer("Button uchun URL kiriting:")
+    await BroadcastStates.waiting_button_url.set()
+
+@dp.message_handler(state=BroadcastStates.waiting_button_url, content_types=ContentType.TEXT)
+async def broadcast_button_url_received(message: types.Message, state: FSMContext):
+    url = message.text
+    data = await state.get_data()
+    if not (url.startswith("http://") or url.startswith("https://")):
+        await message.answer("URL http:// yoki https:// bilan boshlanishi kerak. Qayta kiriting:")
+        return
+    await state.update_data(button_url=url)
+    await send_broadcast(state, message)
+    await state.finish()
+
+async def send_broadcast(state: FSMContext, message: types.Message):
+    data = await state.get_data()
+    media_type = data.get("media_type")
+    media_id = data.get("media_id")
+    text = data.get("text")
+    button_text = data.get("button_text")
+    button_url = data.get("button_url")
+
+    kb = None
+    if button_text and button_url:
+        kb = InlineKeyboardMarkup()
+        kb.add(InlineKeyboardButton(button_text, url=button_url))
+
+    with sqlite3.connect("football_bot.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT user_id FROM users")
+        users = cursor.fetchall()
+
+    success = 0
+    fail = 0
+    for (user_id,) in users:
+        try:
+            if media_type == 'photo':
+                await bot.send_photo(user_id, media_id, caption=text, reply_markup=kb)
+            elif media_type == 'video':
+                await bot.send_video(user_id, media_id, caption=text, reply_markup=kb)
+            elif media_type == 'animation':
+                await bot.send_animation(user_id, media_id, caption=text, reply_markup=kb)
+            elif media_type == 'sticker':
+                await bot.send_sticker(user_id, media_id)
+                if text:
+                    await bot.send_message(user_id, text, reply_markup=kb)
+            else:
+                await bot.send_message(user_id, text, reply_markup=kb)
+            success += 1
+        except Exception as e:
+            logging.error(f"Xabar yuborishda xatolik: {e}")
+            fail += 1
+        await asyncio.sleep(0.05)
+
+    await message.answer(f"Xabarlar yuborildi!\nMuvaffaqiyat: {success}\nXatolar: {fail}")
+
+if __name__ == "__main__":
+    init_db()
+    executor.start_polling(dp, skip_updates=True)
